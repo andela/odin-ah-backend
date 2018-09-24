@@ -1,16 +1,14 @@
-const fs = require("fs"),
-    http = require("http"),
-    path = require("path"),
-    methods = require("methods"),
-    express = require("express"),
-    bodyParser = require("body-parser"),
-    session = require("express-session"),
-    cors = require("cors"),
-    passport = require("passport"),
-    errorhandler = require("errorhandler"),
-    mongoose = require("mongoose");
+import express from 'express';
+import bodyParser from 'body-parser';
+import session from 'express-session';
+import cors from 'cors';
+import errorhandler from 'errorhandler';
+import morgan from 'morgan';
+import method_override from 'method-override';
 
-const isProduction = process.env.NODE_ENV === "production";
+import routes from './routes';
+
+const isProduction = process.env.NODE_ENV === 'production';
 
 // Create global app object
 const app = express();
@@ -18,16 +16,16 @@ const app = express();
 app.use(cors());
 
 // Normal express config defaults
-app.use(require("morgan")("dev"));
+app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.use(require("method-override")());
-app.use(express.static(__dirname + "/public"));
+app.use(method_override());
+app.use(express.static(`${__dirname}/public`));
 
 app.use(
     session({
-        secret: "authorshaven",
+        secret: 'authorshaven',
         cookie: { maxAge: 60000 },
         resave: false,
         saveUninitialized: false
@@ -38,26 +36,16 @@ if (!isProduction) {
     app.use(errorhandler());
 }
 
-if (isProduction) {
-    mongoose.connect(process.env.MONGODB_URI);
-} else {
-    mongoose.connect("mongodb://localhost/conduit");
-    mongoose.set("debug", true);
-}
-
-require("./models/User");
-
-app.use(require("./routes"));
+app.use(routes);
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
-    const err = new Error("Not Found");
+    const err = new Error('Not Found');
     err.status = 404;
     next(err);
 });
 
 /// error handlers
-
 // development error handler
 // will print stacktrace
 if (!isProduction) {
@@ -88,6 +76,6 @@ app.use(function(err, req, res, next) {
 });
 
 // finally, let's start our server...
-const server = app.listen(process.env.PORT || 3000, function() {
-    console.log("Listening on port " + server.address().port);
+const server = app.listen(process.env.PORT || 3000, function () {
+    console.log(`Listening on port ${server.address().port}`);
 });
