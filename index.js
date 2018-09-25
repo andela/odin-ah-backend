@@ -6,6 +6,9 @@ import errorhandler from 'errorhandler';
 import morgan from 'morgan';
 import methodOverride from 'method-override';
 
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger.json');
+
 import routes from './routes';
 
 const isProduction = process.env.NODE_ENV === 'production';
@@ -14,6 +17,9 @@ const isProduction = process.env.NODE_ENV === 'production';
 const app = express();
 
 app.use(cors());
+
+//Swagger api documentaion
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Normal express config defaults
 app.use(morgan('dev'));
