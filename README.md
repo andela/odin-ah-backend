@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/andela/odin-ah-backend.svg?branch=master)](https://travis-ci.org/andela/odin-ah-backend)
 [![protected_by hound](https://img.shields.io/badge/protected%20by-Hound-brightgreen.svg)](https://houndci.com/repos)
 
 # Authors Haven - A Social platform for the creative at heart.
