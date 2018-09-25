@@ -37,6 +37,7 @@ node_modules
 # private files
 .env
 dist/
+package-lock.json
 
 # Intellij
 .idea/
