@@ -10,9 +10,12 @@
     "dev": "nodemon ./index.js --exec babel-node",
     "migration": "sequelize db:migrate",
     "migration:test": " cross-env NODE_ENV=test sequelize db:migrate",
-    "test": "npm run lint && npm run undo && npm run migration:test && cross-env NODE_ENV=test nyc mocha tests/**/*.js --timeout 10000 --exit",
+    "pretest": "npm run lint && npm run undo && npm run migration:test",
+    "test": "cross-env NODE_ENV=test nyc mocha --compilers js:babel-core/register --timeout 10000 tests/**/*.js --exit",
     "lint": "eslint . --fix",
-    "undo": "cross-env NODE_ENV=test sequelize db:migrate:undo:all"
+    "undo": "cross-env NODE_ENV=test sequelize db:migrate:undo:all",
+    "coverage:dev": "npm run test && nyc report --reporter=text-lcov | coveralls",
+    "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "author": "Andela Simulations Programme",
   "license": "MIT",
@@ -52,11 +55,14 @@
     "chai": "^4.1.2",
     "chai-http": "^4.2.0",
     "cross-env": "^5.2.0",
+    "coveralls": "^3.0.2",
     "eslint": "^5.6.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-plugin-import": "^2.14.0",
     "mocha": "^5.2.0",
-    "nodemon": "^1.18.4"
+    "mocha-lcov-reporter": "^1.3.0",
+    "nodemon": "^1.18.4",
+    "nyc": "^13.0.1"
   },
   "nyc": {
     "require": [
