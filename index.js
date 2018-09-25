@@ -1,3 +1,5 @@
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger.json');
 const fs = require('fs'),
   http = require('http'),
   path = require('path'),
@@ -16,6 +18,9 @@ const isProduction = process.env.NODE_ENV === 'production';
 const app = express();
 
 app.use(cors());
+
+//Swagger api documentaion
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Normal express config defaults
 app.use(require('morgan')('dev'));

@@ -1,0 +1,67 @@
+{
+  "swagger": "2.0",
+  "info": {
+		"title": "Odin-ah-backend",
+    "description": " A Social platform for the creative at heart.",
+    "version": "v1"
+	},
+	
+  "host": "localhost",
+  "basePath": "/api/v1",
+  "produces": ["application/json"],
+  "schemes": [
+    "https"
+	],
+	"paths": {
+		"/api/users": {
+      "post": {
+        "summary": "Add new user", 
+        "consumes": [
+          "application/json"
+        ], 
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "firstName",
+            "type": "string",
+            "description": "user first name",
+            "required": true
+            
+          },
+          {
+            "in": "body",
+            "name": "lastName",
+            "type": "string",
+            "description": "user lastname",
+            "required": true
+          },
+          {
+            "in": "body",
+            "name": "email",
+            "type": "string",
+            "description": "user email",
+            "required": true
+          },
+          {
+            "in": "body",
+            "name": "password",
+            "type": "string",
+            "description": " userpassword",
+            "required": true
+            
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "successfully added new"
+          }
+        }
+			}
+		
+		}
+		
+	}
+}

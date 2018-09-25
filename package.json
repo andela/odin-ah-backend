@@ -5,6 +5,7 @@
     "main": "index.js",
     "scripts": {
         "test": "mocha --compilers js:babel-core/register tests",
+        "start": "node index.js",
         "lint": "eslint .**/*.js  --fix"
     },
     "author": "Andela Simulations Programme",
@@ -34,6 +35,7 @@
         "passport-local": "^1.0.0",
         "request": "^2.87.0",
         "slug": "^0.9.1",
+        "swagger-ui-express": "^4.0.1",
         "underscore": "^1.9.1"
     },
     "devDependencies": {
