@@ -34,3 +34,21 @@ node_modules
 # Optional REPL history
 .node_repl_history
 
+
+# private files
+.env
+dist/
+package-lock.json
+yarn.lock
+
+# Intellij
+.idea/
+*.iml
+*.iws
+*.ipr
+*.ids
+*.orig
+classes/
+
+
+
