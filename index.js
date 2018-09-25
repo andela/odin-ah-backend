@@ -1,5 +1,5 @@
-const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./swagger.json');
+import  swaggerUi from 'swagger-ui-express';
+import swaggerDocument from './swagger.json';
 const fs = require('fs'),
   http = require('http'),
   path = require('path'),
