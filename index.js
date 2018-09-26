@@ -1,15 +1,15 @@
-import  swaggerUi from 'swagger-ui-express';
-import swaggerDocument from './swagger.json';
+import express from 'express';
+import bodyParser from 'body-parser';
+import YAML from 'yamljs';
 import session from 'express-session';
 import cors from 'cors';
 import errorhandler from 'errorhandler';
 import morgan from 'morgan';
 import methodOverride from 'method-override';
-
-const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./swagger.json');
-
 import routes from './routes';
+
+const swaggerDocument = YAML.load('./swagger.yaml');
+const swaggerUi = require('swagger-ui-express');
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -18,7 +18,7 @@ const app = express();
 
 app.use(cors());
 
-//Swagger api documentaion
+// Swagger api documentaion
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Normal express config defaults
