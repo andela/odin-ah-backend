@@ -1,5 +1,6 @@
 import  swaggerUi from 'swagger-ui-express';
-import swaggerDocument from './swagger.json';
+import YAML from 'yamljs'
+const swaggerDocument = YAML.load('./swagger.yaml');
 const fs = require('fs'),
   http = require('http'),
   path = require('path'),

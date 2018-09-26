@@ -36,7 +36,8 @@
         "request": "^2.87.0",
         "slug": "^0.9.1",
         "swagger-ui-express": "^4.0.1",
-        "underscore": "^1.9.1"
+        "underscore": "^1.9.1",
+        "yamljs": "^0.3.0"
     },
     "devDependencies": {
         "babel-eslint": "^9.0.0",
