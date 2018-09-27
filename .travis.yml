@@ -1,11 +1,19 @@
 language: node_js
 node_js:
-   - "8.11.4"
+  - "8.11.4"
 services:
   - postgresql
 before_script:
-    - npm install
+  - psql -c 'create database ah_test_db;' -U postgres
+env:
+  - TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/ah_test_db
 script: npm run test
+deploy:
+  provider: heroku
+  api_key:
+    secure: Ap6b1VQj/7rQDgWyzkh/v4/B4lqK+i0jxk6jnjpJeAqxkUL1CKKaj4QxJpR7qHXIc7AaYg+WWE+DjJSJbqd7qZjV3K4oKezXFT17AX8JKIVX3LgypaCjVdoPy2p6d6nU3c7OIJI+FtHHdzx3wzPRtF/BItwGHls1SKQQul8nVeX4C7oPT1qU1+1FCLnle9SXHOzujJ2525e5NenKJdSVkfwOgeg8iRwUiVFD7Rd26PExPUqLo+r5+al5PtzCyMO8xVCFwwLJAUeHqxrItOlmmBTNVqYV5CCErFW2RwZeX/rlsosTGYOfxmEtj9q7MF4eC90nJJfey0q774GVRbqUGaBYtlLGu9A9Q0d+WI5DUTRRdxiWIa3FdO+vRo95ZcPquZaM0Wzb7RldaK+3JllT3nGlhdp0jyDU8S2vhhZALZg6QjfxdjOrxiMh45c19n+K4I4GDFEIBrd7LUI0h6DSldeJWOu1EJfEf1Ubml2k3UkFoir54Hotpimw4Matf2VuSbYWuS02skRet7CDJOC5lzRfbVd4HtmalvDTn4XoctWHLk0sDpPT+mkd9JgaQQoyNXyqjIw2k/FKL9Yr4mzpbk7Rg3gGCrCO1Tf9oWdM8JVkYSs5PTbF+2dRw2WX9ND/NGaux4zQ845QbkEAfXncODuvqLmRpw9m8ejxx6X2mgM=
+  app: odin-ah-backend-staging
+  on: staging
 after_success:
   - npm run coverage
 cache:
