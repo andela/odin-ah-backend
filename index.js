@@ -3,15 +3,12 @@ import bodyParser from 'body-parser';
 import YAML from 'yamljs';
 import session from 'express-session';
 import cors from 'cors';
-import errorhandler from 'errorhandler';
 import morgan from 'morgan';
 import methodOverride from 'method-override';
+import swaggerUi from 'swagger-ui-express';
 import routes from './routes';
 
 const swaggerDocument = YAML.load('./swagger.yaml');
-const swaggerUi = require('swagger-ui-express');
-
-const isProduction = process.env.NODE_ENV === 'production';
 
 // Create global app object
 const app = express();
@@ -38,10 +35,6 @@ app.use(
   })
 );
 
-if (!isProduction) {
-  app.use(errorhandler());
-}
-
 app.use(routes);
 
 // / catch 404 and forward to error handler
@@ -51,27 +44,10 @@ app.use((req, res, next) => {
   next(err);
 });
 
-// / error handlers
-// development error handler
-// will print stacktrace
-if (!isProduction) {
-  app.use((err, req, res) => {
-    console.log(err.stack);
-
-    res.status(err.status || 500);
-
-    res.json({
-      errors: {
-        message: err.message,
-        error: err
-      }
-    });
-  });
-}
-
 // production error handler
 // no stacktraces leaked to user
-app.use((err, req, res) => {
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
   res.status(err.status || 500);
   res.json({
     errors: {

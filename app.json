@@ -1,0 +1,27 @@
+{
+  "name": "odin-ah-backend",
+  "description": "This file contains the deployment configuration for review apps that Heroku uses when they are created. Most of the configuration variables and values are inherited from the staging environment.",
+  "scripts": {},
+  "env": {
+    "DATABASE_URL": {
+      "required": true
+    },
+    "NODE_ENV": {
+      "required": true
+    },
+    "SECRET": {
+      "generator": "secret"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1
+    }
+  },
+  "addons": ["heroku-postgresql"],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ]
+}
