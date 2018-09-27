@@ -16,14 +16,12 @@ describe('Dummy test', () => {
 describe('Create Account ', () => {
   it('should allow user create an new account', (done) => {
     chai.request(server)
-      .post('/api/users')
-      .send(
-        {
-          email: 'tmorolari@gmail.com',
-          username: 'macphilips',
-          password: 'password'
-        }
-      )
+      .post('/api/v1/users')
+      .send({
+        email: 'tmorolari@gmail.com',
+        username: 'macphilips',
+        password: 'password'
+      })
       .end((error, response) => {
         expect(response.status).to.eql(200);
         expect(response.body).to.be.a('object');
@@ -38,7 +36,7 @@ describe('Create Account ', () => {
 describe('Edit User ', () => {
   it('should not allow user edit if not registered', (done) => {
     chai.request(server)
-      .put('/api/user')
+      .put('/api/v1/users')
       .send({
         username: 'tommy',
         id: 1000
@@ -50,7 +48,7 @@ describe('Edit User ', () => {
   });
   it('should return edited email', (done) => {
     chai.request(server)
-      .put('/api/user')
+      .put('/api/v1/users')
       .send({
         id: 1,
         email: 'testemail@mail.com'
@@ -65,7 +63,7 @@ describe('Edit User ', () => {
   });
   it('should return edited username', (done) => {
     chai.request(server)
-      .put('/api/user')
+      .put('/api/v1/users')
       .send({
         username: 'testUser11',
         id: 1
@@ -80,7 +78,7 @@ describe('Edit User ', () => {
   });
   it('should return updated Bio', (done) => {
     chai.request(server)
-      .put('/api/user')
+      .put('/api/v1/users')
       .send({
         id: 1,
         username: 'testUser11',
@@ -95,7 +93,7 @@ describe('Edit User ', () => {
   });
   it('should return updated Image', (done) => {
     chai.request(server)
-      .put('/api/user')
+      .put('/api/v1/users')
       .send({
         id: 1,
         username: 'testUser11',
@@ -111,7 +109,7 @@ describe('Edit User ', () => {
   });
   it('should return updated Password', (done) => {
     chai.request(server)
-      .put('/api/user')
+      .put('/api/v1/users')
       .send({
         id: 1,
         username: 'testUser11',

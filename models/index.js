@@ -3,28 +3,20 @@ import fs from 'fs';
 import path from 'path';
 import config from '../config/config';
 
-
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
 const configEnv = config[env];
 
 const db = {};
 
-let sequelize;
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[configEnv.use_env_variable], config);
-} else {
-  sequelize = new Sequelize(configEnv.database, configEnv.username, configEnv.password, configEnv);
-}
+const sequelize = new Sequelize(configEnv.url, { dialect: 'postgres' });
 
-fs
-  .readdirSync(__dirname)
-  .filter(file => (file.indexOf('.') !== 0) && (file !== basename) && (file.slice(-3) === '.js'))
+fs.readdirSync(__dirname)
+  .filter(file => file.indexOf('.') !== 0 && file !== basename && file.slice(-3) === '.js')
   .forEach((file) => {
     const model = sequelize.import(path.join(__dirname, file));
     db[model.name] = model;
   });
-
 
 Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {
@@ -32,6 +24,10 @@ Object.keys(db).forEach((modelName) => {
   }
 });
 
+// const db = {
+//     sequelize,
+//     Sequelize
+// };
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
