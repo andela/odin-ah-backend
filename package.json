@@ -1,5 +1,4 @@
 {
-
     "name": "express-authorshaven",
     "version": "1.0.0",
     "description": "A Social platform for the creative at heart",
@@ -12,7 +11,7 @@
         "migration": "sequelize db:migrate",
         "migration:test": " cross-env NODE_ENV=test sequelize db:migrate",
         "pretest": "npm run lint && npm run undo && npm run migration:test",
-        "test": "cross-env NODE_ENV=test nyc mocha --compilers js:babel-core/register --timeout 10000 tests/**/*.js --exit",
+        "test": "cross-env NODE_ENV=test nyc mocha --compilers js:babel-core/register --timeout 10000 \"tests/**/*.js\" --exit",
         "test:dev": "npm run undo && npm run migration:test && cross-env NODE_ENV=test nyc mocha \"tests/**/*.js\" --timeout 10000 --exit",
         "lint": "eslint . --fix",
         "undo": "cross-env NODE_ENV=test sequelize db:migrate:undo:all",
@@ -75,5 +74,4 @@
             "dotenv/config"
         ]
     }
-
 }

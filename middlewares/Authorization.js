@@ -62,7 +62,7 @@ class Authorization {
     return jwt.sign({
       userId
     },
-    process.env.jwtSecret, {
+    process.env.JWTSECRET, {
       expiresIn: '24h',
     });
   }

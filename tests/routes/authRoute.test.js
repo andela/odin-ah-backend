@@ -29,7 +29,8 @@ describe('Login User', () => {
     const response = await chai.request(server)
       .post('/api/v1/users/login')
       .send(realUser);
-    expect(response.body.user).to.have.property('token').that.is.not.empty;
+    expect(response.body.user).to.have.property('token');
+    //  expect(response.body.user.token).that.is.not.empty
   });
 
   it('should return the user detail on successfull login', async () => {
