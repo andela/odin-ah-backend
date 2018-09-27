@@ -25,7 +25,7 @@ export default (sequelize, Sequelize) => {
     timestamps: true,
   });
 
-  User.hook('beforeCreate', (user) => {
+  User.hook('beforeCreate', (user, options) => {
     user.email = user.email.toLowerCase();
     user.password = bcrypt.hashSync(user.password, 10);
   });

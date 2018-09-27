@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import ValidatorHelper from '../helpers/ValidatorHelper';
+import config from '../config/config';
 /**
  * @exports
  * @class Authorization
@@ -14,12 +14,13 @@ class Authorization {
      */
   static getToken(req) {
     const bearerHeader = req.headers.authorization;
-    if (!ValidatorHelper.isEmpty(bearerHeader)) {
+    if (typeof bearerHeader !== 'undefined') {
       const bearer = bearerHeader.split(' ');
+
       const bearerToken = bearer[1];
       return bearerToken;
     }
-    return null;
+    return 'error';
   }
 
   /**
@@ -31,18 +32,24 @@ class Authorization {
      * @static
      */
   static verifyToken(req, res, next) {
-    try {
-      const token = Authorization.getToken(req);
-      const authData = jwt.verify(token, process.env.JWTSECRET);
-      req.authData = authData;
+    const token = Authorization.getToken(req);
 
-      return next();
-    } catch (err) {
+    if (!token || token === 'error' || typeof token === 'undefined') {
       return res.status(401).json({
         status: 'error',
-        message: 'Invalid user token'
+        message: ' Unauthorized User can not access this page, please login or signup',
       });
     }
+    jwt.verify(token, config.jwtSecret, (err, authData) => {
+      if (err) {
+        return res.status(403).json({
+          status: 'error',
+          message: ' Access forbidden, Invalid user token',
+        });
+      }
+      req.authData = authData;
+    });
+    return next();
   }
 
   /**
