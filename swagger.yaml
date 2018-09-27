@@ -1,0 +1,60 @@
+swagger: '2.0'
+info:
+  title: Odin-ah-backend
+  description: " A Social platform for the creative at heart."
+  version: v1
+host: 127.0.0.1:3000
+produces:
+- application/json
+schemes:
+- http
+- https
+paths:
+  "/api/users":
+    post:
+      summary: Add new user
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: user
+    
+        description: user username
+        schema:
+          $ref: '#/definitions/UserRequest'
+    
+      responses:
+        "201":
+          description: Expected response to a valid request
+          schema:
+            $ref: '#/definitions/UserResult'
+
+
+definitions:
+  UserRequest:
+    required:
+      - email
+      - username
+      - password
+    properties:
+      username:
+        type: string
+        example: hammed
+      email:
+        type: string
+        example: hammed@local.host
+      password:
+        type: string
+        example: password
+  
+  UserResult:
+  
+    properties:
+      username:
+        type: string
+        example: hammed
+      email:
+        type: string
+        example: hammed@local.host
