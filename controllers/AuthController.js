@@ -8,7 +8,6 @@ const { User } = db;
  * @class AuthController
  * @description Handles the user registartion and Sigin
  * */
-
 class AuthController {
   /**
      * Authenticate and Login the User to the application
@@ -51,7 +50,7 @@ class AuthController {
         });
       });
     } catch (error) {
-
+      next(error);
     }
   }
 }
