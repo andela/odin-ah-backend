@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import bcrypt from 'bcrypt';
 
 export default (sequelize, Sequelize) => {
   const User = sequelize.define('User', {
@@ -20,22 +20,16 @@ export default (sequelize, Sequelize) => {
     },
     bio: Sequelize.STRING,
     image: Sequelize.STRING,
-    hash: {
-      type: Sequelize.TEXT,
-      set(val) {
-        const salt = crypto.randomBytes(16).toString('hex');
-        const hash = crypto
-          .pbkdf2Sync(val, salt, 10000, 512, 'sha512')
-          .toString('hex');
-        this.setDataValue('salt', salt);
-        this.setDataValue('hash', hash);
-      }
-    },
-    salt: Sequelize.STRING
-
+    password: Sequelize.STRING,
   }, {
     timestamps: true,
   });
+
+  User.hook('beforeCreate', (user, options) => {
+    user.email = user.email.toLowerCase();
+    user.password = bcrypt.hashSync(user.password, 10);
+  });
+
   User.associate = () => {
     // associations can be defined here
   };

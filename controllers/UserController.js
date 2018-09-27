@@ -51,7 +51,7 @@ export default class UserController {
      */
   static createUser(req, res, next) {
     const { username, email, password } = req.body;
-    User.create({ username, email, hash: password })
+    User.create({ username, email, password })
       .then(user => res.json({ user: UserController.toJSON(user.dataValues) }))
       .catch(err => next(err));
   }
