@@ -1,9 +1,9 @@
 /**
- * @exports Validator
- * @class Validator
+ * @exports ValidatorHelper
+ * @class ValidatorHelper
  * @description  Contains simple validation Methods
  *  */
-export default class Validator {
+export default class ValidatorHelper {
   /**
      * @param{String} email - the email be verified
      * @return {Boolean} Returns boolean
@@ -17,14 +17,14 @@ export default class Validator {
      * @returns  {Boolean} Returns boolean
      */
   static isEmpty(value) {
-    return (typeof value === 'undefined' || value.trim === '' || value.length === 0);
+    return (!value || typeof value === 'undefined' || value.trim === '' || value.length === 0);
   }
 
   /**
      * @param  {String} data - the value to verify the length is up to 5
      * @returns  {Boolean} Returns boolean
      */
-  static isMaxLen(data) {
+  static isMinLen(data) {
     return data.length >= 8;
   }
 }

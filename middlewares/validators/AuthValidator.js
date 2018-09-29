@@ -1,4 +1,4 @@
-import Validator from './Validator';
+import ValidatorHelper from '../../helpers/ValidatorHelper';
 /**
  * @exports AuthValidator
  * @class AuthValidator
@@ -25,7 +25,7 @@ class AuthValidator {
         message: 'Email can not be empty',
       });
     }
-    if (!Validator.isEmail(email)) {
+    if (!ValidatorHelper.isEmail(email)) {
       return res.status(400).json({
         status: 'error',
         message: 'It seems your email is not valid, or is incorrect',
@@ -38,7 +38,7 @@ class AuthValidator {
         message: 'Password can not be empty',
       });
     }
-    if (!Validator.isMaxLen(password)) {
+    if (!ValidatorHelper.isMinLen(password)) {
       return res.status(400).json({
         status: 'error',
         message: 'Password must be greater than eight characters',
