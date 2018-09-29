@@ -6,7 +6,7 @@ import morgan from 'morgan';
 import methodOverride from 'method-override';
 import swaggerUi from 'swagger-ui-express';
 import logger from './helpers/logger';
-import routes from './routes';
+import routes from './routes/api';
 
 const swaggerDocument = YAML.load('./swagger.yaml');
 
