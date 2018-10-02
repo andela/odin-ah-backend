@@ -1,7 +1,7 @@
 import chai, {
   expect
 } from 'chai';
-import server from '../../../index';
+import server from '../../index';
 import {
   realUser,
   wrongEmail,
@@ -9,7 +9,7 @@ import {
   wrongLength,
   noPass,
   badEmail
-} from '../../testHelpers/testLoginData';
+} from '../testHelpers/testLoginData';
 
 
 describe('POST /auth/Login', () => {

@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import auth from './auth/index';
-import users from './users/index';
-import errorhandler from '../middlewares/errorHandler';
+import auth from './auth';
+import users from './users';
+import errorhandler from '../helpers/exceptionHandler/errorHandler';
 
 
 const router = Router();

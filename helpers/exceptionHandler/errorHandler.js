@@ -6,10 +6,7 @@
  * @return {json} res.json
  */
 
-const errorHandler = (error, req, res) => {
-  // production error handler
-  // no stacktraces leaked to user
-  // eslint-disable-next-line no-unused-vars
+const errorHandler = (error, req, res, next) => { // eslint-disable-line no-unused-vars
   res.status(error.status || 500).json({
     errors: {
       message: error.message,
