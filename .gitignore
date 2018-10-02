@@ -43,6 +43,7 @@ package-lock.json
 yarn.lock
 .nyc_output/
 yarn-error.log
+.vscode
 
 # Intellij
 .idea/

@@ -18,6 +18,11 @@ export default (sequelize, Sequelize) => {
         isEmail: true
       }
     },
+    isVerified: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false,
+    },
+    token: Sequelize.STRING,
     bio: Sequelize.STRING,
     image: Sequelize.STRING,
     password: Sequelize.STRING,

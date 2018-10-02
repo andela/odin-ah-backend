@@ -1,6 +1,6 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
-import server from '../index';
+import server from '..';
 
 chai.use(chaiHttp);
 chai.should();
