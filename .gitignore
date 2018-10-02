@@ -42,6 +42,7 @@ dist/
 package-lock.json
 yarn.lock
 .nyc_output/
+yarn-error.log
 
 # Intellij
 .idea/

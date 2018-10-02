@@ -24,6 +24,10 @@ Object.keys(db).forEach((modelName) => {
   }
 });
 
+// const db = {
+//     sequelize,
+//     Sequelize
+// };
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
