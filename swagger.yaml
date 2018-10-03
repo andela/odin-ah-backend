@@ -15,7 +15,7 @@ schemes:
   - http
   - https
 paths:
-  /users:
+  "/api/vi/auth":
     post:
       summary: Add new user
       consumes:
@@ -23,11 +23,13 @@ paths:
       produces:
         - application/json
       parameters:
-        - in: body
-          name: user
-          description: Author's Username
-          schema:
-            $ref: '#/definitions/UserRequest'
+
+      - in: body
+        name: user information
+        description: user username
+        schema:
+          $ref: '#/definitions/UserRequest'
+     
       responses:
         '201':
           description: Expected response to a valid request
@@ -241,16 +243,16 @@ definitions:
         example: hammed
       email:
         type: string
-        example: hammed@local.host
+        example: hnobi08@yahoo.com
       password:
         type: string
         example: password
   UserResult:
     properties:
-      username:
+      status:
         type: string
-        example: hammed
-      email:
+        example: success
+      message:
         type: string
         example: hammed@local.host
   LoginRequest:

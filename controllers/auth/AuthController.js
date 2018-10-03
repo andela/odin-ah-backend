@@ -1,7 +1,11 @@
 import bcrypt from 'bcrypt';
 import Authorization from '../../middlewares/Authorization';
 import UserHelper from '../../helpers/UserHelper';
+import verificationToken from '../../helpers/verificationToken';
+import db from '../../models/index';
 
+
+const { User } = db;
 
 /**
  * @exports AuthController
@@ -45,6 +49,73 @@ class AuthController {
       status: 'error',
       message: 'Invalid user credentials'
     });
+  }
+
+  /**
+   * Create user account and call the next function for email verification
+   * @static
+   * @param {object} req
+   * @param {object} res
+   * @param {function} next
+   * @return {json} Returns json object
+   * @memberof AuthController
+   */
+  static signUp(req, res, next) {
+    const { username, email, password } = req.body;
+    User.findOne({
+      where: {
+        email: {
+          $iLike: email
+        }
+      }
+    })
+      .then((user) => {
+        if (user) {
+          return res.status(400).json({
+            status: 'error',
+            message: `user with email ${email} already have Authors haven account`,
+          });
+        }
+      });
+
+    const token = verificationToken();
+    User.create({
+      username,
+      email,
+      password,
+      token
+    }).then((user) => {
+      if (user) {
+        req.message = 'Please check your Email for account confirmation';
+        req.user = user;
+      }
+      return next();
+    }).catch(err => next(err));
+  }
+
+  /**
+   *
+   * @static
+   * @param {object} req
+   * @param {object} res
+   *  @param {function} next
+   * @memberof AuthController
+   * @return {json} Returns json object
+   */
+  static verifyUser(req, res, next) {
+    User.findOne({
+      where: { token: req.params.token }
+    }).then((tokenFound) => {
+      if (!tokenFound) {
+        return res.status(400).send({
+          status: 'error',
+          message: 'invalid verification link'
+        });
+      }
+      return tokenFound.update({ isVerified: true, token: null });
+    })
+      .then(() => res.status(200).send({ message: 'User verified' }))
+      .catch(err => next(err));
   }
 }
 
