@@ -5,7 +5,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import methodOverride from 'method-override';
 import swaggerUi from 'swagger-ui-express';
-import logger from './helpers/logger';
+import Authorization from './middlewares/Authorization';
 import routes from './routes';
 
 const swaggerDocument = YAML.load('./swagger.yaml');
@@ -26,11 +26,7 @@ app.use(bodyParser.json());
 app.use(methodOverride());
 app.use(express.static(`${__dirname}/public`));
 
-
+app.use('/api/v1', Authorization.secureRoutes);
 app.use(routes);
 
-// finally, let's start our server...
-const server = app.listen(process.env.PORT || 3000, () => {
-  logger.info(`Listening on port ${server.address().port}`);
-});
-export default server;
+export default app;

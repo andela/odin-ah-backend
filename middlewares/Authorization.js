@@ -1,5 +1,6 @@
-import jwt from 'jsonwebtoken';
+import jwt, { TokenExpiredError } from 'jsonwebtoken';
 import ValidatorHelper from '../helpers/ValidatorHelper';
+
 /**
  * @exports
  * @class Authorization
@@ -16,8 +17,7 @@ class Authorization {
     const bearerHeader = req.headers.authorization;
     if (!ValidatorHelper.isEmpty(bearerHeader)) {
       const bearer = bearerHeader.split(' ');
-      const bearerToken = bearer[1];
-      return bearerToken;
+      return bearer[1];
     }
     return null;
   }
@@ -31,18 +31,40 @@ class Authorization {
      * @static
      */
   static verifyToken(req, res, next) {
+    const token = Authorization.getToken(req);
+    let error = null;
     try {
-      const token = Authorization.getToken(req);
-      const authData = jwt.verify(token, process.env.JWTSECRET);
-      req.authData = authData;
-
-      return next();
+      if (token) {
+        req.authData = jwt.verify(token, process.env.JWTSECRET);
+      } else {
+        error = {
+          status: 'error',
+          message: 'Token not provided',
+        };
+      }
     } catch (err) {
-      return res.status(401).json({
-        status: 'error',
-        message: 'Invalid user token'
-      });
+      error = Authorization.getError(err);
     }
+    if (!error) {
+      return next();
+    }
+    return res.status(401).json(error);
+  }
+
+  /**
+   *
+   * @param {error} err JWT error
+   * @return {{message: string, status: string}} returns formatted error
+   */
+  static getError(err) {
+    let message = 'Invalid token';
+    if (err instanceof TokenExpiredError) {
+      message = 'Access Token has Expired.';
+    }
+    return {
+      message,
+      status: 'error',
+    };
   }
 
   /**
@@ -58,6 +80,34 @@ class Authorization {
     process.env.JWTSECRET, {
       expiresIn: '24h',
     });
+  }
+
+  /**
+   * Verifies the user token
+   * @param  {object} req - Request object
+   * @param {object} res - Response object
+   * @param {function} next - calls the next middleware
+   * @return {object} return an object
+   * @static
+   */
+  static secureRoutes(req, res, next) {
+    if (Authorization.isAuthNotRequired(req)) {
+      return next();
+    }
+
+    return Authorization.verifyToken(req, res, next);
+  }
+
+  /**
+   *
+   * @param {request} req
+   * @return {boolean} checks if authentication is not required for the request.
+   */
+  static isAuthNotRequired(req) {
+    const { url, method } = req;
+    return url.startsWith('/auth')
+      || (url.startsWith('/articles') && method.toUpperCase() === 'GET')
+      || url.startsWith('/users');
   }
 }
 
