@@ -1,176 +1,207 @@
 swagger: '2.0'
 info:
   title: Odin-ah-backend
-  description: " A Social platform for the creative at heart."
+  description: ' A Social platform for the creative at heart.'
   version: v1
-
-
 securityDefinitions:
   UserSecurity:
     type: apiKey
     in: header
     name: Authorization
-
-host: 127.0.0.1:3000
+host: 'localhost:3000/api/v1'
 produces:
-- application/json
+  - application/json
 schemes:
-- http
-- https
+  - http
+  - https
 paths:
-  "/api/v1/users":
+  /users:
     post:
       summary: Add new user
       consumes:
-      - application/json
+        - application/json
       produces:
-      - application/json
+        - application/json
       parameters:
-      - in: body
-        name: user
-        description: Author's Username
-        schema:
-          $ref: '#/definitions/UserRequest'
-
+        - in: body
+          name: user
+          description: Author's Username
+          schema:
+            $ref: '#/definitions/UserRequest'
       responses:
-        "201":
+        '201':
           description: Expected response to a valid request
           schema:
             $ref: '#/definitions/UserResult'
-        "400":
+        '400':
           description: Bad Request
           schema:
             $ref: '#/definitions/Error'
-        "409":
+        '409':
           description: A conflict occured.
           schema:
             $ref: '#/definitions/Error'
-
+      tags:
+        - auth
+  /auth/login:
+    post:
+      summary: Login in an existing user
+      description: Login in an existing user.
+      parameters:
+        - in: body
+          name: user
+          description: Author's Username
+          schema:
+            $ref: '#/definitions/LoginRequest'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/LoginResponse'
+        '400':
+          description: Bad Request..
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Invalid user credentials.
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - auth
   /articles:
     get:
       summary: Get list of articles
-      description: Returns a list of articles. Authorization Token is optional to use this endpoint.
+      description: >-
+        Returns a list of articles. Authorization Token is optional to use this
+        endpoint.
       parameters:
-      - in: query
-        name: page
-        schema:
-          type: integer
-          description: Page number.
-      - in: query
-        name: size
-        schema:
-          type: integer
-          description: The number of articles to retrieve.
+        - in: query
+          name: page
+          required: true
+          schema:
+            type: integer
+            description: Page number.
+        - in: query
+          name: size
+          required: true
+          schema:
+            type: integer
+            description: The number of articles to retrieve.
       responses:
-        200:
+        '200':
           description: OK
           schema:
-            $ref: "#/definitions/ArticlesResult"
-        400:
+            $ref: '#/definitions/ArticlesResult'
+        '400':
           description: Bad Request.
           schema:
-            $ref: "#/definitions/Error"
-        404:
+            $ref: '#/definitions/Error'
+        '404':
           description: No articles found.
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
       tags:
-      - articles
+        - articles
     post:
       summary: Create new article
-      description: This endpoint is used to create new article. Authorization Token is required to use this endpoint.
+      description: >-
+        This endpoint is used to create new article. Authorization Token is
+        required to use this endpoint.
       parameters:
-      - name: entry
-        in: body
-        description: Request data
-        schema:
-          $ref: "#/definitions/ArticleRequest"
+        - name: entry
+          in: body
+          description: Request data
+          schema:
+            $ref: '#/definitions/ArticleRequest'
       responses:
-        201:
+        '201':
           description: Article Created
           schema:
-            $ref: "#/definitions/ArticleResult"
-        400:
+            $ref: '#/definitions/ArticleResult'
+        '400':
           description: Bad Request.
           schema:
-            $ref: "#/definitions/Error"
-        401:
+            $ref: '#/definitions/Error'
+        '401':
           description: Unauthorizated access.
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
       tags:
-      - articles
+        - articles
       security:
-      - UserSecurity: []
-
+        - UserSecurity: []
+        
   /articles/{slug}:
     get:
-      summary: Gets an article with the given {slug}.
-      description: Returns a single article with the provided {slug}. Authorization Token is optional to use this endpoint.
+      summary: 'Gets an article with the given {slug}.'
+      description: >-
+        Returns a single article with the provided {slug}. Authorization Token
+        is optional to use this endpoint.
       parameters:
-      - name: slug
-        in: path
-        required: true
-        description: The slug of the article to retrieve.
-        type: string
+        - name: slug
+          in: path
+          required: true
+          description: The slug of the article to retrieve.
+          type: string
       responses:
-        200:
+        '200':
           description: Response data
           schema:
-            $ref: "#/definitions/ArticleResult"
-        404:
-          description: No articles found with {slug}.
+            $ref: '#/definitions/ArticleResult'
+        '404':
+          description: 'No articles found with {slug}.'
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
       tags:
-      - articles
-
+        - articles
     put:
-      summary: Update article with the given {slug}.
-      description: Update and Return the modified article with provided {slug}.
+      summary: 'Update article with the given {slug}.'
+      description: 'Update and Return the modified article with provided {slug}.'
       parameters:
-      - name: slug
-        in: path
-        required: true
-        description: The slug of the article to be updated
-        type: string
-      - name: entry
-        in: body
-        description: Request data
-        schema:
-          $ref: "#/definitions/ArticleRequest"
-      responses:
-        200:
-          description: Updated article with the given {slug}
+        - name: slug
+          in: path
+          required: true
+          description: The slug of the article to be updated
+          type: string
+        - name: entry
+          in: body
+          description: Request data
           schema:
-            $ref: "#/definitions/ArticleResult"
-        401:
+            $ref: '#/definitions/ArticleRequest'
+      responses:
+        '200':
+          description: 'Updated article with the given {slug}'
+          schema:
+            $ref: '#/definitions/ArticleResult'
+        '401':
           description: Unauthorizated access.
           schema:
-            $ref: "#/definitions/Error"
-        403:
+            $ref: '#/definitions/Error'
+        '403':
           description: Forbidden Request. Authenticated user cannot modified this article.
           schema:
-            $ref: "#/definitions/Error"
-        404:
-          description: No articles found with {slug}.
+            $ref: '#/definitions/Error'
+        '404':
+          description: 'No articles found with {slug}.'
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
       tags:
-      - articles
+        - articles
       security:
-      - UserSecurity: []
+        - UserSecurity: []
     delete:
       summary: Deletes an article.
-      description: Deletes an article with the {slug} provided. Authorization Token is required to use this endpoint.
+      description: >-
+        Deletes an article with the {slug} provided. Authorization Token is
+        required to use this endpoint.
       parameters:
-      - name: slug
-        in: path
-        required: true
-        description: The ID of the ArticleResult to delete.
-        type: string
+        - name: slug
+          in: path
+          required: true
+          description: The ID of the ArticleResult to delete.
+          type: string
       responses:
-        200:
+        '200':
           description: Reponse data
           schema:
             properties:
@@ -180,24 +211,24 @@ paths:
               message:
                 type: string
                 example: Successfully deleted article
-        401:
+        '401':
           description: Unauthorizated access.
           schema:
-            $ref: "#/definitions/Error"
-        403:
-          description: Authenticated user trying to access this Entity doesn't permission to retrieve Entity.
+            $ref: '#/definitions/Error'
+        '403':
+          description: >-
+            Authenticated user trying to access this Entity doesn't permission
+            to retrieve Entity.
           schema:
-            $ref: "#/definitions/Error"
-        404:
-          description: No articles found with {id}.
+            $ref: '#/definitions/Error'
+        '404':
+          description: 'No articles found with {id}.'
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
       tags:
-      - articles
+        - articles
       security:
-      - UserSecurity: []
-
-
+        - UserSecurity: []
 definitions:
   UserRequest:
     required:
@@ -214,7 +245,6 @@ definitions:
       password:
         type: string
         example: password
-
   UserResult:
     properties:
       username:
@@ -223,7 +253,37 @@ definitions:
       email:
         type: string
         example: hammed@local.host
-
+  LoginRequest:
+    required:
+      - email
+      - password
+    properties:
+      email:
+        type: string
+        example: victor@gmail.com
+      password:
+        type: string
+        example: password
+  LoginResponse:
+    properties:
+      email:
+        type: string
+        example: victor@gmail.com
+      token:
+        type: string
+        example: >-
+          eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIyLCJpYXQiOjE1Mzg2Mzc5NDAsImV4cCI6MTUzODcyNDM0MH0.wX_lC4o3lSILVYJaGp2q-WadFIzdsGwN4QeU7sNAJ8M
+      username:
+        type: string
+        example: victor
+      bio:
+        type: string
+        example:  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
+              vulputate egestas neque et euismod. Fusce sed mi ac tortor aliquam
+              facilisis.'
+      image:
+        type: string
+        example: 'http://image-url.local/localUser.jpg'
   ArticleRequest:
     required:
       - title
@@ -235,15 +295,18 @@ definitions:
         example: My awesome article
       body:
         type: string
-        example: Nunc sed diam suscipit, lobortis eros nec, auctor nisl. Nunc ac magna non justo varius rutrum sit amet feugiat elit. Pellentesque vehicula, ante rutrum condimentum tempor, purus metus vulputate ligula, et commodo tortor massa eu tortor.
+        example: >-
+          Nunc sed diam suscipit, lobortis eros nec, auctor nisl. Nunc ac magna
+          non justo varius rutrum sit amet feugiat elit. Pellentesque vehicula,
+          ante rutrum condimentum tempor, purus metus vulputate ligula, et
+          commodo tortor massa eu tortor.
       description:
         type: string
-        example: Nunc sed diam suscipit, lobortis eros nec, auctor nisl.
+        example: 'Nunc sed diam suscipit, lobortis eros nec, auctor nisl.'
       tags:
         type: array
         items:
           type: string
-
   ArticleResult:
     properties:
       title:
@@ -251,10 +314,14 @@ definitions:
         example: My awesome article
       body:
         type: string
-        example: Nunc sed diam suscipit, lobortis eros nec, auctor nisl. Nunc ac magna non justo varius rutrum sit amet feugiat elit. Pellentesque vehicula, ante rutrum condimentum tempor, purus metus vulputate ligula, et commodo tortor massa eu tortor.
+        example: >-
+          Nunc sed diam suscipit, lobortis eros nec, auctor nisl. Nunc ac magna
+          non justo varius rutrum sit amet feugiat elit. Pellentesque vehicula,
+          ante rutrum condimentum tempor, purus metus vulputate ligula, et
+          commodo tortor massa eu tortor.
       description:
         type: string
-        example: Nunc sed diam suscipit, lobortis eros nec, auctor nisl.
+        example: 'Nunc sed diam suscipit, lobortis eros nec, auctor nisl.'
       tags:
         type: array
         items:
@@ -267,11 +334,13 @@ definitions:
             example: localUser
           bio:
             type: string
-            example: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean vulputate egestas neque et euismod. Fusce sed mi ac tortor aliquam facilisis.
+            example: >-
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
+              vulputate egestas neque et euismod. Fusce sed mi ac tortor aliquam
+              facilisis.
           image:
             type: string
-            example: http://image-url.local/localUser.jpg
-
+            example: 'http://image-url.local/localUser.jpg'
   ArticlesResult:
     properties:
       data:
@@ -280,7 +349,7 @@ definitions:
           articles:
             type: array
             items:
-              $ref: "#/definitions/ArticleResult"
+              $ref: '#/definitions/ArticleResult'
           page:
             type: number
             example: 2
@@ -296,12 +365,11 @@ definitions:
       message:
         type: string
         example: Successfully fetch articles.
-
   Error:
     properties:
-      message:
-        type: string
-        example: Error Message
       status:
         type: string
         example: error
+      message:
+        type: string
+        example: Error Message
