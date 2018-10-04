@@ -11,14 +11,14 @@ securityDefinitions:
     in: header
     name: Authorization
 
-host: 127.0.0.1:3000
+host: 127.0.0.1:3000/api/v1
 produces:
 - application/json
 schemes:
 - http
 - https
 paths:
-  "/api/vi/auth":
+  "/auth/signup":
     post:
       summary: Add new user
       consumes:
@@ -42,7 +42,9 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/Error'
+            $ref: '#/definitions/UserError'
+      tags: 
+       - user
 
 
   /articles:
@@ -222,7 +224,7 @@ definitions:
       message:
         type: string
         example: Please check your Email for account confirmation
-  Error:
+  UserError:
 
     properties:
       status:
