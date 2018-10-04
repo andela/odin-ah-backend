@@ -53,12 +53,9 @@ export default class ArticleController {
   static async getArticles(req, res) {
     const { size } = req.query;
     let { page } = req.query;
-    let offset;
+
     const pageNumber = Number(page);
-    if (!Number.isNaN(pageNumber) && pageNumber > 0) {
-      offset = page;
-    } else {
-      offset = 1;
+    if (!(!Number.isNaN(pageNumber) && pageNumber > 0)) {
       page = 1;
     }
     let limit;
@@ -73,9 +70,10 @@ export default class ArticleController {
     const totalArticle = await Article.findAndCountAll();
 
     const total = totalArticle.count;
-    const totalPages = Math.ceil(total / limit);
-    offset = Math.min(totalPages, offset);
-    offset = (offset - 1) * limit;
+    let totalPages = Math.ceil(total / limit);
+    if (!totalPages) totalPages = 1;
+    page = Math.min(totalPages, page);
+    const offset = (page - 1) * limit;
 
     const allArticle = await Article.findAll({
       limit,
