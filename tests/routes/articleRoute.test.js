@@ -104,6 +104,15 @@ describe('Article CRUD Test', () => {
       response.body.should.be.a('object');
       assertArrayResponse(response, 10);
     });
+    it('should return an empty list of articles', async () => {
+      await deleteArticlesFromTable();
+      const response = await chai.request(server)
+        .get('/api/v1/articles')
+        .send();
+      assertResponseStatus(response, 200);
+      response.body.should.be.a('object');
+      assertArrayResponse(response, 0);
+    });
     it('should return list of articles with pagination', async () => {
       let response = await chai.request(server)
         .get('/api/v1/articles?page=1&size=3')
