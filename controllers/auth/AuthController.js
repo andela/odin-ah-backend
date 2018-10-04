@@ -65,33 +65,30 @@ class AuthController {
     const { username, email, password } = req.body;
     User.findOne({
       where: {
-        email: {
-          $iLike: email
-        }
+        $or: [{ email }, { username }]
       }
     })
       .then((user) => {
         if (user) {
           return res.status(400).json({
             status: 'error',
-            message: `user with email ${email} already have Authors haven account`,
+            message: 'Account already exist'
           });
         }
+        const token = verificationToken();
+        User.create({
+          username,
+          email,
+          password,
+          token
+        }).then((newUser) => {
+          if (newUser) {
+            req.message = 'Please check your Email for account confirmation';
+            req.user = newUser;
+          }
+          Mail.sendVerification(req, res, next);
+        }).catch(err => next(err));
       }).catch(err => next(err));
-
-    const token = verificationToken();
-    User.create({
-      username,
-      email,
-      password,
-      token
-    }).then((user) => {
-      if (user) {
-        req.message = 'Please check your Email for account confirmation';
-        req.user = user;
-      }
-      Mail.sendVerification(req, res, next);
-    }).catch(err => next(err));
   }
 
   /**

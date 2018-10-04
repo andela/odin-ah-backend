@@ -43,9 +43,9 @@ paths:
         '409':
           description: A conflict occured.
           schema:
-            $ref: '#/definitions/Error'
-      tags:
-        - auth
+            $ref: '#/definitions/UserError'
+      tags: 
+       - user
   /auth/login:
     post:
       summary: Login in an existing user
@@ -71,6 +71,7 @@ paths:
             $ref: '#/definitions/Error'
       tags:
         - auth
+
   /articles:
     get:
       summary: Get list of articles
@@ -255,7 +256,15 @@ definitions:
         example: success
       message:
         type: string
-        example: hammed@local.host
+        example: Please check your Email for account confirmation
+  UserError:
+    properties:
+      status:
+        type: string
+        example: failed
+      message:
+        type: string
+        example: Account already exist
   LoginRequest:
     required:
       - email
@@ -287,6 +296,7 @@ definitions:
       image:
         type: string
         example: 'http://image-url.local/localUser.jpg'
+
   ArticleRequest:
     required:
       - title

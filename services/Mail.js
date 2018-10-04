@@ -23,7 +23,8 @@ class Mail {
    */
   static sendVerification(req, res, next) {
     const { email, token } = req.user;
-    const url = `http://localhost:3000/api/v1/auth/confirmation/${token}`;
+    const baseUrl = process.env.BASE_URL;
+    const url = `${baseUrl}auth/confirmation/${token}`;
     const subject = 'Confirmation Email';
     const { message } = emailMessages.signupVerification(email, url);
     const messageInfo = MailHelper.buildMessage(email, subject, message);

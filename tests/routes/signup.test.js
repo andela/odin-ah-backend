@@ -29,7 +29,7 @@ describe('POST /api/v1/auth/signup ', () => {
       .send(userInfo)
       .end((err, res) => {
         expect(res.body.status).to.equal('error');
-        expect(res.body.message).to.equal('user with email hnobi08@gmail.com already have Authors haven account');
+        expect(res.body.message).to.equal('Account already exist');
         done();
       });
   });
