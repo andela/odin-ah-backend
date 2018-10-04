@@ -3,6 +3,7 @@ import Authorization from '../../middlewares/Authorization';
 import UserHelper from '../../helpers/UserHelper';
 import verificationToken from '../../helpers/verificationToken';
 import db from '../../models/index';
+import Mail from '../../services/Mail';
 
 
 const { User } = db;
@@ -76,7 +77,7 @@ class AuthController {
             message: `user with email ${email} already have Authors haven account`,
           });
         }
-      });
+      }).catch(err => next(err));
 
     const token = verificationToken();
     User.create({
@@ -89,7 +90,7 @@ class AuthController {
         req.message = 'Please check your Email for account confirmation';
         req.user = user;
       }
-      return next();
+      Mail.sendVerification(req, res, next);
     }).catch(err => next(err));
   }
 
