@@ -6,6 +6,8 @@ import asyncCatchErrors from '../../middlewares/asyncCatchErrors';
 const router = Router();
 
 router.post('/login', AuthValidator.validateLogin, asyncCatchErrors(AuthController.login));
+router.post('/signup', AuthValidator.validatesignup, AuthController.signUp);
+router.get('/confirmation/:token', AuthController.verifyUser);
 // signup and forget password route comes here
 
 export default router;

@@ -8,14 +8,15 @@ securityDefinitions:
     type: apiKey
     in: header
     name: Authorization
-host: 'localhost:3000/api/v1'
+
+host: 127.0.0.1:3000/api/v1
 produces:
   - application/json
 schemes:
   - http
   - https
 paths:
-  /users:
+  "/auth/signup":
     post:
       summary: Add new user
       consumes:
@@ -23,11 +24,13 @@ paths:
       produces:
         - application/json
       parameters:
-        - in: body
-          name: user
-          description: Author's Username
-          schema:
-            $ref: '#/definitions/UserRequest'
+
+      - in: body
+        name: user information
+        description: user username
+        schema:
+          $ref: '#/definitions/UserRequest'
+     
       responses:
         '201':
           description: Expected response to a valid request
@@ -40,9 +43,9 @@ paths:
         '409':
           description: A conflict occured.
           schema:
-            $ref: '#/definitions/Error'
-      tags:
-        - auth
+            $ref: '#/definitions/UserError'
+      tags: 
+       - user
   /auth/login:
     post:
       summary: Login in an existing user
@@ -68,6 +71,7 @@ paths:
             $ref: '#/definitions/Error'
       tags:
         - auth
+
   /articles:
     get:
       summary: Get list of articles
@@ -241,18 +245,26 @@ definitions:
         example: hammed
       email:
         type: string
-        example: hammed@local.host
+        example: hnobi08@yahoo.com
       password:
         type: string
         example: password
   UserResult:
     properties:
-      username:
+      status:
         type: string
-        example: hammed
-      email:
+        example: success
+      message:
         type: string
-        example: hammed@local.host
+        example: Please check your Email for account confirmation
+  UserError:
+    properties:
+      status:
+        type: string
+        example: failed
+      message:
+        type: string
+        example: Account already exist
   LoginRequest:
     required:
       - email
@@ -284,6 +296,7 @@ definitions:
       image:
         type: string
         example: 'http://image-url.local/localUser.jpg'
+
   ArticleRequest:
     required:
       - title
