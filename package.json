@@ -6,12 +6,12 @@
     "scripts": {
         "build": "npm run clean && babel ./ -d dist/ --ignore node_modules",
         "clean": "rimraf dist/",
-        "start": "npm run build && node --require dotenv/config ./dist/index.js",
-        "dev": "nodemon ./index.js --exec babel-node",
+        "start": "npm run build && node --require dotenv/config ./dist/server.js",
+        "dev": "nodemon ./server.js --exec babel-node",
         "migration": "sequelize db:migrate",
         "migration:test": " cross-env NODE_ENV=test sequelize db:migrate",
         "pretest": "npm run lint && npm run undo && npm run migration:test",
-        "test": "cross-env NODE_ENV=test nyc mocha --compilers js:babel-core/register --timeout 10000 \"tests/**/*.js\" --exit",
+        "test": "cross-env NODE_ENV=test nyc mocha --timeout 10000 \"tests/**/*.js\" --exit",
         "test:dev": "npm run undo && npm run migration:test && cross-env NODE_ENV=test nyc mocha \"tests/**/*.js\" --timeout 10000 --exit",
         "lint": "eslint . --fix",
         "undo": "cross-env NODE_ENV=test sequelize db:migrate:undo:all",
@@ -22,9 +22,12 @@
     "license": "MIT",
     "dependencies": {
         "@sendgrid/mail": "^6.3.1",
+        "ant-pattern-matcher": "0.0.4",
+        "async": "^2.6.1",
         "babel-core": "^6.26.3",
         "babel-loader": "^8.0.2",
         "babel-plugin-transform-object-rest-spread": "^6.26.0",
+        "babel-preset-airbnb": "^2.5.1",
         "babel-preset-env": "^1.7.0",
         "babel-register": "^6.26.0",
         "bcrypt": "^3.0.1",
@@ -52,6 +55,8 @@
         "slug": "^0.9.1",
         "swagger-ui-express": "^4.0.1",
         "underscore": "^1.9.1",
+        "url-slug": "^2.0.0",
+        "validator": "^10.8.0",
         "winston": "^3.1.0",
         "yamljs": "^0.3.0"
     },
@@ -60,8 +65,8 @@
         "babel-eslint": "^9.0.0",
         "chai": "^4.1.2",
         "chai-http": "^4.2.0",
-        "coveralls": "^3.0.2",
         "cross-env": "^5.2.0",
+        "coveralls": "^3.0.2",
         "eslint": "^5.6.0",
         "eslint-config-airbnb": "^17.1.0",
         "eslint-plugin-import": "^2.14.0",
@@ -77,6 +82,10 @@
         "require": [
             "babel-register",
             "dotenv/config"
+        ],
+        "reporter": [
+            "lcov",
+            "text"
         ]
     }
 }

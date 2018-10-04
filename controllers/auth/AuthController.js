@@ -18,7 +18,6 @@ class AuthController {
      * @async
      * @param  {object} req - Request object
      * @param {object} res - Response object
-     * @param {function} next - next middleware
      * @return {json} Returns json object
      * @static
      */

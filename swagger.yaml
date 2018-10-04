@@ -3,6 +3,14 @@ info:
   title: Odin-ah-backend
   description: " A Social platform for the creative at heart."
   version: v1
+
+
+securityDefinitions:
+  UserSecurity:
+    type: apiKey
+    in: header
+    name: Authorization
+
 host: 127.0.0.1:3000
 produces:
 - application/json
@@ -24,7 +32,8 @@ paths:
         description: user username
         schema:
           $ref: '#/definitions/UserRequest'
-     
+  
+
       responses:
         "201":
           description: Expected response to a valid request
@@ -34,6 +43,159 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/Error'
+
+
+  /articles:
+    get:
+      summary: Get list of articles
+      description: Returns a list of articles. Authorization Token is optional to use this endpoint.
+      parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+          description: Page number.
+      - in: query
+        name: size
+        schema:
+          type: integer
+          description: The number of articles to retrieve.
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/ArticlesResult"
+        400:
+          description: Bad Request.
+          schema:
+            $ref: "#/definitions/Error"
+        404:
+          description: No articles found.
+          schema:
+            $ref: "#/definitions/Error"
+      tags:
+      - articles
+    post:
+      summary: Create new article
+      description: This endpoint is used to create new article. Authorization Token is required to use this endpoint.
+      parameters:
+      - name: entry
+        in: body
+        description: Request data
+        schema:
+          $ref: "#/definitions/ArticleRequest"
+      responses:
+        201:
+          description: Article Created
+          schema:
+            $ref: "#/definitions/ArticleResult"
+        400:
+          description: Bad Request.
+          schema:
+            $ref: "#/definitions/Error"
+        401:
+          description: Unauthorizated access.
+          schema:
+            $ref: "#/definitions/Error"
+      tags:
+      - articles
+      security:
+      - UserSecurity: []
+
+  /articles/{slug}:
+    get:
+      summary: Gets an article with the given {slug}.
+      description: Returns a single article with the provided {slug}. Authorization Token is optional to use this endpoint.
+      parameters:
+      - name: slug
+        in: path
+        required: true
+        description: The slug of the article to retrieve.
+        type: string
+      responses:
+        200:
+          description: Response data
+          schema:
+            $ref: "#/definitions/ArticleResult"
+        404:
+          description: No articles found with {slug}.
+          schema:
+            $ref: "#/definitions/Error"
+      tags:
+      - articles
+
+    put:
+      summary: Update article with the given {slug}.
+      description: Update and Return the modified article with provided {slug}.
+      parameters:
+      - name: slug
+        in: path
+        required: true
+        description: The slug of the article to be updated
+        type: string
+      - name: entry
+        in: body
+        description: Request data
+        schema:
+          $ref: "#/definitions/ArticleRequest"
+      responses:
+        200:
+          description: Updated article with the given {slug}
+          schema:
+            $ref: "#/definitions/ArticleResult"
+        401:
+          description: Unauthorizated access.
+          schema:
+            $ref: "#/definitions/Error"
+        403:
+          description: Forbidden Request. Authenticated user cannot modified this article.
+          schema:
+            $ref: "#/definitions/Error"
+        404:
+          description: No articles found with {slug}.
+          schema:
+            $ref: "#/definitions/Error"
+      tags:
+      - articles
+      security:
+      - UserSecurity: []
+    delete:
+      summary: Deletes an article.
+      description: Deletes an article with the {slug} provided. Authorization Token is required to use this endpoint.
+      parameters:
+      - name: slug
+        in: path
+        required: true
+        description: The ID of the ArticleResult to delete.
+        type: string
+      responses:
+        200:
+          description: Reponse data
+          schema:
+            properties:
+              status:
+                type: string
+                example: success
+              message:
+                type: string
+                example: Successfully deleted article
+        401:
+          description: Unauthorizated access.
+          schema:
+            $ref: "#/definitions/Error"
+        403:
+          description: Authenticated user trying to access this Entity doesn't permission to retrieve Entity.
+          schema:
+            $ref: "#/definitions/Error"
+        404:
+          description: No articles found with {id}.
+          schema:
+            $ref: "#/definitions/Error"
+      tags:
+      - articles
+      security:
+      - UserSecurity: []
+
 
 definitions:
   UserRequest:
@@ -51,9 +213,8 @@ definitions:
       password:
         type: string
         example: password
-  
+
   UserResult:
-  
     properties:
       status:
         type: string
@@ -61,9 +222,6 @@ definitions:
       message:
         type: string
         example: Please check your Email for account confirmation
-
-
-        
   Error:
 
     properties:
@@ -73,4 +231,85 @@ definitions:
       message:
         type: string
         example: user with email hnobi08@gmail.com already have Authors haven account
-  
+ 
+  ArticleRequest:
+    required:
+      - title
+      - body
+      - description
+    properties:
+      title:
+        type: string
+        example: My awesome article
+      body:
+        type: string
+        example: Nunc sed diam suscipit, lobortis eros nec, auctor nisl. Nunc ac magna non justo varius rutrum sit amet feugiat elit. Pellentesque vehicula, ante rutrum condimentum tempor, purus metus vulputate ligula, et commodo tortor massa eu tortor.
+      description:
+        type: string
+        example: Nunc sed diam suscipit, lobortis eros nec, auctor nisl.
+      tags:
+        type: array
+        items:
+          type: string
+
+  ArticleResult:
+    properties:
+      title:
+        type: string
+        example: My awesome article
+      body:
+        type: string
+        example: Nunc sed diam suscipit, lobortis eros nec, auctor nisl. Nunc ac magna non justo varius rutrum sit amet feugiat elit. Pellentesque vehicula, ante rutrum condimentum tempor, purus metus vulputate ligula, et commodo tortor massa eu tortor.
+      description:
+        type: string
+        example: Nunc sed diam suscipit, lobortis eros nec, auctor nisl.
+      tags:
+        type: array
+        items:
+          type: string
+      author:
+        type: object
+        properties:
+          username:
+            type: string
+            example: localUser
+          bio:
+            type: string
+            example: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean vulputate egestas neque et euismod. Fusce sed mi ac tortor aliquam facilisis.
+          image:
+            type: string
+            example: http://image-url.local/localUser.jpg
+
+  ArticlesResult:
+    properties:
+      data:
+        type: object
+        properties:
+          articles:
+            type: array
+            items:
+              $ref: "#/definitions/ArticleResult"
+          page:
+            type: number
+            example: 2
+          size:
+            type: number
+            example: 20
+          total:
+            type: number
+            example: 70
+      status:
+        type: string
+        example: success
+      message:
+        type: string
+        example: Successfully fetch articles.
+
+  Error:
+    properties:
+      message:
+        type: string
+        example: Error Message
+      status:
+        type: string
+        example: error

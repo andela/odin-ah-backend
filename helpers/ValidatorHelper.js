@@ -17,7 +17,7 @@ export default class ValidatorHelper {
      * @returns  {Boolean} Returns boolean
      */
   static isEmpty(value) {
-    return (!value || typeof value === 'undefined' || value.trim === '' || value.length === 0);
+    return (!value || value.trim().length === 0);
   }
 
   /**

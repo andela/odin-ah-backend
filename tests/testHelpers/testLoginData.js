@@ -8,6 +8,11 @@ const realUser = {
   username: 'blackshady',
   password: '1234567AB',
 };
+const realUser1 = {
+  email: 'real.user@local.host',
+  username: 'realUser',
+  password: '1234567AB',
+};
 
 const badEmail = {
   email: 'slimbabymail.com',
@@ -32,6 +37,7 @@ const emptyEmail = {
 
 export {
   realUser,
+  realUser1,
   badEmail,
   noPass,
   wrongLength,
