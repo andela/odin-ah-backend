@@ -1,7 +1,7 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
   title: Odin-ah-backend
-  description: ' A Social platform for the creative at heart.'
+  description: " A Social platform for the creative at heart."
   version: v1
 securityDefinitions:
   UserSecurity:
@@ -25,28 +25,26 @@ paths:
       produces:
         - application/json
       parameters:
-
-      - in: body
-        name: user information
-        description: user username
-        schema:
-          $ref: '#/definitions/UserRequest'
-     
+        - in: body
+          name: user information
+          description: user username
+          schema:
+            $ref: "#/definitions/UserRequest"
       responses:
-        '201':
+        "201":
           description: Expected response to a valid request
           schema:
-            $ref: '#/definitions/UserResult'
-        '400':
+            $ref: "#/definitions/UserResult"
+        "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/Error'
-        '409':
+            $ref: "#/definitions/Error"
+        "409":
           description: A conflict occured.
           schema:
-            $ref: '#/definitions/UserError'
-      tags: 
-       - user
+            $ref: "#/definitions/UserError"
+      tags:
+        - User
   /auth/login:
     post:
       summary: Login in an existing user
@@ -56,23 +54,79 @@ paths:
           name: user
           description: Author's Username
           schema:
-            $ref: '#/definitions/LoginRequest'
+            $ref: "#/definitions/LoginRequest"
       responses:
-        '200':
+        "200":
           description: OK
           schema:
-            $ref: '#/definitions/LoginResponse'
-        '400':
+            $ref: "#/definitions/LoginResponse"
+        "400":
           description: Bad Request..
           schema:
-            $ref: '#/definitions/Error'
-        '401':
+            $ref: "#/definitions/Error"
+        "401":
           description: Invalid user credentials.
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
       tags:
-      - Auth
-
+        - Authentication
+  /auth/google:
+    post:
+      summary: Signs in a user with Google OAuth
+      description: Signs in a user with Google OAuth2 and responds with an authentication token for further requests
+      responses:
+        "200":
+          description: Authentication was successful
+          schema:
+            $ref: "#/definitions/LoginResponse"
+        "401":
+          description: Authentication failed
+          schema:
+            $ref: "#/definitions/Error"
+        "422":
+          description: User's social account does not have any associated email. This is especially an issue with Facebook.
+          schema:
+            $ref: "#/definitions/Error"
+      tags:
+        - Authentication
+  /auth/facebook:
+    post:
+      summary: Signs in a user with Facebook OAuth
+      description: Signs in a user with Facebook OAuth2 and responds with an authentication token for further requests
+      responses:
+        "200":
+          description: Authentication was successful
+          schema:
+            $ref: "#/definitions/LoginResponse"
+        "401":
+          description: Authentication failed
+          schema:
+            $ref: "#/definitions/Error"
+        "422":
+          description: User's social account does not have any associated email. This is especially an issue with Facebook.
+          schema:
+            $ref: "#/definitions/Error"
+      tags:
+        - Authentication
+  /auth/twitter:
+    post:
+      summary: Signs in a user with Twitter OAuth
+      description: Signs in a user with Twitter OAuth and responds with an authentication token for further requests
+      responses:
+        "200":
+          description: Authentication was successful
+          schema:
+            $ref: "#/definitions/LoginResponse"
+        "401":
+          description: Authentication failed
+          schema:
+            $ref: "#/definitions/Error"
+        "422":
+          description: User's social account does not have any associated email. This is especially an issue with Facebook.
+          schema:
+            $ref: "#/definitions/Error"
+      tags:
+        - Authentication
   /articles:
     get:
       summary: Get list of articles
@@ -93,20 +147,20 @@ paths:
             type: integer
             description: The number of articles to retrieve.
       responses:
-        '200':
+        "200":
           description: OK
           schema:
-            $ref: '#/definitions/ArticlesResult'
-        '400':
+            $ref: "#/definitions/ArticlesResult"
+        "400":
           description: Bad Request.
           schema:
-            $ref: '#/definitions/Error'
-        '404':
+            $ref: "#/definitions/Error"
+        "404":
           description: No articles found.
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
       tags:
-      - Articles
+        - Articles
     post:
       summary: Create new article
       description: >-
@@ -117,28 +171,27 @@ paths:
           in: body
           description: Request data
           schema:
-            $ref: '#/definitions/ArticleRequest'
+            $ref: "#/definitions/ArticleRequest"
       responses:
-        '201':
+        "201":
           description: Article Created
           schema:
-            $ref: '#/definitions/ArticleResult'
-        '400':
+            $ref: "#/definitions/ArticleResult"
+        "400":
           description: Bad Request.
           schema:
-            $ref: '#/definitions/Error'
-        '401':
+            $ref: "#/definitions/Error"
+        "401":
           description: Unauthorizated access.
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
       tags:
-      - Articles
+        - Articles
       security:
         - UserSecurity: []
-        
-  /articles/{slug}:
+  "/articles/{slug}":
     get:
-      summary: 'Gets an article with the given {slug}.'
+      summary: "Gets an article with the given {slug}."
       description: >-
         Returns a single article with the provided {slug}. Authorization Token
         is optional to use this endpoint.
@@ -149,20 +202,20 @@ paths:
           description: The slug of the article to retrieve.
           type: string
       responses:
-        '200':
+        "200":
           description: Response data
           schema:
-            $ref: '#/definitions/ArticleResult'
-        '404':
-          description: 'No articles found with {slug}.'
+            $ref: "#/definitions/ArticleResult"
+        "404":
+          description: "No articles found with {slug}."
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
       tags:
-      - Articles
+        - Articles
 
     put:
-      summary: 'Update article with the given {slug}.'
-      description: 'Update and Return the modified article with provided {slug}.'
+      summary: "Update article with the given {slug}."
+      description: "Update and Return the modified article with provided {slug}."
       parameters:
         - name: slug
           in: path
@@ -173,26 +226,26 @@ paths:
           in: body
           description: Request data
           schema:
-            $ref: '#/definitions/ArticleRequest'
+            $ref: "#/definitions/ArticleRequest"
       responses:
-        '200':
-          description: 'Updated article with the given {slug}'
+        "200":
+          description: "Updated article with the given {slug}"
           schema:
-            $ref: '#/definitions/ArticleResult'
-        '401':
+            $ref: "#/definitions/ArticleResult"
+        "401":
           description: Unauthorizated access.
           schema:
-            $ref: '#/definitions/Error'
-        '403':
+            $ref: "#/definitions/Error"
+        "403":
           description: Forbidden Request. Authenticated user cannot modified this article.
           schema:
-            $ref: '#/definitions/Error'
-        '404':
-          description: 'No articles found with {slug}.'
+            $ref: "#/definitions/Error"
+        "404":
+          description: "No articles found with {slug}."
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
       tags:
-      - Articles
+        - Articles
       security:
         - UserSecurity: []
     delete:
@@ -201,11 +254,11 @@ paths:
         Deletes an article with the {slug} provided. Authorization Token is
         required to use this endpoint.
       parameters:
-      - name: slug
-        in: path
-        required: true
-        description: The slug of the article to delete.
-        type: string
+        - name: slug
+          in: path
+          required: true
+          description: The slug of the article to delete.
+          type: string
       responses:
         200:
           description: Response data
@@ -217,7 +270,7 @@ paths:
               message:
                 type: string
                 example: Successfully deleted article
-        '401':
+        "401":
           description: Unauthorizated access.
           schema:
             $ref: "#/definitions/Error"
@@ -228,42 +281,42 @@ paths:
         404:
           description: No articles found with {slug}.
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
       tags:
-      - Articles
+        - Articles
       security:
-      - UserSecurity: []
-  
+        - UserSecurity: []
+
   /users:
     put:
       summary: Update a User Profile
       consumes:
-      - application/json
+        - application/json
       produces:
-      - application/json
+        - application/json
       parameters:
-      - in: body
-        name: profile
-        description: A User Profile that needs to be Updated
-        schema:
-          $ref: '#/definitions/UserRequest'
+        - in: body
+          name: profile
+          description: A User Profile that needs to be Updated
+          schema:
+            $ref: "#/definitions/UserRequest"
       responses:
         "200":
           description: successful operation
           schema:
-            $ref: '#/definitions/UserResult'
+            $ref: "#/definitions/UserResult"
         "409":
           description: Conflict
         "500":
           description: Server Error
       tags:
-      - Users
+        - Users
       security:
-      - UserSecurity: []
+        - UserSecurity: []
     get:
       summary: "Get a User Profile"
       produces:
-      - "application/json"
+        - "application/json"
       responses:
         200:
           description: "Successful Operation"
@@ -274,9 +327,9 @@ paths:
         500:
           description: "Server error"
       tags:
-      - Users
+        - Users
       security:
-      - UserSecurity: []
+        - UserSecurity: []
 
 definitions:
   UserRequest:
@@ -335,13 +388,13 @@ definitions:
         example: victor
       bio:
         type: string
-        example:  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
-              vulputate egestas neque et euismod. Fusce sed mi ac tortor aliquam
-              facilisis.'
+        example: >-
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
+          vulputate egestas neque et euismod. Fusce sed mi ac tortor aliquam
+          facilisis.
       image:
         type: string
-        example: 'http://image-url.local/localUser.jpg'
-
+        example: "http://image-url.local/localUser.jpg"
   ArticleRequest:
     required:
       - title
@@ -360,7 +413,7 @@ definitions:
           commodo tortor massa eu tortor.
       description:
         type: string
-        example: 'Nunc sed diam suscipit, lobortis eros nec, auctor nisl.'
+        example: "Nunc sed diam suscipit, lobortis eros nec, auctor nisl."
       tags:
         type: array
         items:
@@ -379,7 +432,7 @@ definitions:
           commodo tortor massa eu tortor.
       description:
         type: string
-        example: 'Nunc sed diam suscipit, lobortis eros nec, auctor nisl.'
+        example: "Nunc sed diam suscipit, lobortis eros nec, auctor nisl."
       tags:
         type: array
         items:
@@ -398,7 +451,7 @@ definitions:
               facilisis.
           image:
             type: string
-            example: 'http://image-url.local/localUser.jpg'
+            example: "http://image-url.local/localUser.jpg"
   ArticlesResult:
     properties:
       data:
@@ -407,7 +460,7 @@ definitions:
           articles:
             type: array
             items:
-              $ref: '#/definitions/ArticleResult'
+              $ref: "#/definitions/ArticleResult"
           page:
             type: number
             example: 2
@@ -460,7 +513,6 @@ definitions:
         type: string
         example: password
   ProfileResponse:
-
     properties:
       username:
         type: string
