@@ -23,13 +23,18 @@ export default (sequelize, Sequelize) => {
       defaultValue: false,
     },
     token: Sequelize.STRING,
+    firstName: {
+      type: Sequelize.STRING
+    },
+    lastName: {
+      type: Sequelize.STRING
+    },
     bio: Sequelize.STRING,
-    image: Sequelize.STRING,
+    imageUrl: Sequelize.STRING,
     password: Sequelize.STRING,
   }, {
     timestamps: true,
   });
-
   User.hook('beforeCreate', (user) => {
     user.email = user.email.toLowerCase();
     user.password = bcrypt.hashSync(user.password, 10);

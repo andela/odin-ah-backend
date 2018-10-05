@@ -79,10 +79,10 @@ class ArticleHelper {
     const {
       title, body, description, slug
     } = article;
-    const { username, bio, image } = user;
+    const { username, bio, imageUrl } = user;
 
     const author = {
-      username, bio, image
+      username, bio, imageUrl
     };
     return {
       slug, title, body, description, author

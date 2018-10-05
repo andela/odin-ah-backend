@@ -71,7 +71,7 @@ export function assertArticleResponse(response, article, user) {
   response.body.article.author.should.have.property('username')
     .eq(user.username);
   response.body.article.author.should.have.property('bio');
-  response.body.article.author.should.have.property('image');
+  response.body.article.author.should.have.property('imageUrl');
 }
 
 /**

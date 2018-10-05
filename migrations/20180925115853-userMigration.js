@@ -21,8 +21,16 @@ module.exports = {
       defaultValue: false,
     },
     token: Sequelize.STRING,
+    firstName: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
+    lastName: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
     bio: Sequelize.STRING,
-    image: Sequelize.STRING,
+    imageUrl: Sequelize.STRING,
     password: Sequelize.STRING,
     createdAt: {
       type: Sequelize.DATE

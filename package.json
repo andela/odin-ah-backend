@@ -15,6 +15,7 @@
         "test:dev": "npm run undo && npm run migration:test && cross-env NODE_ENV=test nyc mocha \"tests/**/*.js\" --timeout 10000 --exit",
         "lint": "eslint . --fix",
         "undo": "cross-env NODE_ENV=test sequelize db:migrate:undo:all",
+        "undo:dev": "sequelize db:migrate:undo:all",
         "coverage:dev": "npm run test && nyc report --reporter=text-lcov | coveralls",
         "coverage": "nyc report --reporter=text-lcov | coveralls"
     },
@@ -24,7 +25,6 @@
         "@sendgrid/mail": "^6.3.1",
         "ant-pattern-matcher": "0.0.4",
         "async": "^2.6.1",
-        "@sendgrid/mail": "^6.3.1",
         "babel-core": "^6.26.3",
         "babel-loader": "^8.0.2",
         "babel-plugin-transform-object-rest-spread": "^6.26.0",
