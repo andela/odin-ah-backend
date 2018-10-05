@@ -24,7 +24,7 @@ class Mail {
   static sendVerification(req, res, next) {
     const { email, token } = req.user;
     const baseUrl = process.env.BASE_URL;
-    const url = `${baseUrl}auth/confirmation/${token}`;
+    const url = `${baseUrl}/auth/confirmation/${token}`;
     const subject = 'Confirmation Email';
     const { message } = emailMessages.signupVerification(email, url);
     const messageInfo = MailHelper.buildMessage(email, subject, message);
@@ -34,7 +34,7 @@ class Mail {
         if (resp[0].statusCode === 202) {
           return res.status(201).send({
             status: 'success',
-            message: req.message,
+            message: req.message
           });
         }
         return res.status(400).send({

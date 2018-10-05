@@ -1,3 +1,7 @@
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 /**
  * @class MailHelper
  */
@@ -15,7 +19,7 @@ class MailHelper {
   static buildMessage(to, subject, message) {
     return {
       to,
-      from: process.env.Email,
+      from: process.env.HOST_EMAIL,
       subject,
       html: message
     };
