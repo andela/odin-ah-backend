@@ -25,7 +25,7 @@ describe('POST /auth/Login', () => {
     expect(response).to.have.status(200);
     expect(response.body.user).to.have.property('token');
     expect(response.body.user.token).that.is.not.equal('');
-    expect(response.body.user).to.have.property('image');
+    expect(response.body.user).to.have.property('imageUrl');
     expect(response.body.user).to.have.property('bio');
     expect(response.body.user).to.have.property('email')
       .that.is.equal('johnwilli@gmail.com');

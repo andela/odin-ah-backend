@@ -45,6 +45,37 @@ class UserHelper {
     }
     return data;
   }
+
+  /**
+    *
+    * @param {request} request HTTP request
+    * @return {object} return user fields to update
+  */
+  static getUpdateFields(request) {
+    const {
+      username, email, firstName, lastName, bio, imageUrl
+    } = request.body;
+    const updateFields = {};
+    if (username) {
+      updateFields.username = username;
+    }
+    if (email) {
+      updateFields.email = email;
+    }
+    if (firstName) {
+      updateFields.firstName = firstName;
+    }
+    if (lastName) {
+      updateFields.lastName = lastName;
+    }
+    if (bio) {
+      updateFields.bio = bio;
+    }
+    if (imageUrl) {
+      updateFields.imageUrl = imageUrl;
+    }
+    return updateFields;
+  }
 }
 
 export default UserHelper;

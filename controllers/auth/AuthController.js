@@ -32,7 +32,7 @@ class AuthController {
           id,
           username,
           bio,
-          image
+          imageUrl
         } = foundUser.dataValues;
         const token = Authorization.generateToken(id);
         return res.status(200).json({
@@ -41,7 +41,7 @@ class AuthController {
             token,
             username,
             bio,
-            image,
+            imageUrl,
           }
         });
       }

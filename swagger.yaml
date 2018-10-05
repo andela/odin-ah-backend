@@ -9,14 +9,15 @@ securityDefinitions:
     in: header
     name: Authorization
 
-host: 127.0.0.1:3000/api/v1
+host: 127.0.0.1:3000
+basePath: /api/v1
 produces:
   - application/json
 schemes:
   - http
   - https
 paths:
-  "/auth/signup":
+  /auth/signup:
     post:
       summary: Add new user
       consumes:
@@ -70,7 +71,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
       tags:
-        - auth
+      - Auth
 
   /articles:
     get:
@@ -105,7 +106,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
       tags:
-        - articles
+      - Articles
     post:
       summary: Create new article
       description: >-
@@ -131,7 +132,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
       tags:
-        - articles
+      - Articles
       security:
         - UserSecurity: []
         
@@ -157,7 +158,8 @@ paths:
           schema:
             $ref: '#/definitions/Error'
       tags:
-        - articles
+      - Articles
+
     put:
       summary: 'Update article with the given {slug}.'
       description: 'Update and Return the modified article with provided {slug}.'
@@ -190,7 +192,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
       tags:
-        - articles
+      - Articles
       security:
         - UserSecurity: []
     delete:
@@ -199,14 +201,14 @@ paths:
         Deletes an article with the {slug} provided. Authorization Token is
         required to use this endpoint.
       parameters:
-        - name: slug
-          in: path
-          required: true
-          description: The ID of the ArticleResult to delete.
-          type: string
+      - name: slug
+        in: path
+        required: true
+        description: The slug of the article to delete.
+        type: string
       responses:
-        '200':
-          description: Reponse data
+        200:
+          description: Response data
           schema:
             properties:
               status:
@@ -218,21 +220,64 @@ paths:
         '401':
           description: Unauthorizated access.
           schema:
-            $ref: '#/definitions/Error'
-        '403':
-          description: >-
-            Authenticated user trying to access this Entity doesn't permission
-            to retrieve Entity.
+            $ref: "#/definitions/Error"
+        403:
+          description: Unauthorized access
           schema:
-            $ref: '#/definitions/Error'
-        '404':
-          description: 'No articles found with {id}.'
+            $ref: "#/definitions/Error"
+        404:
+          description: No articles found with {slug}.
           schema:
             $ref: '#/definitions/Error'
       tags:
-        - articles
+      - Articles
       security:
-        - UserSecurity: []
+      - UserSecurity: []
+  
+  /users:
+    put:
+      summary: Update a User Profile
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: profile
+        description: A User Profile that needs to be Updated
+        schema:
+          $ref: '#/definitions/UserRequest'
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            $ref: '#/definitions/UserResult'
+        "409":
+          description: Conflict
+        "500":
+          description: Server Error
+      tags:
+      - Users
+      security:
+      - UserSecurity: []
+    get:
+      summary: "Get a User Profile"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "Successful Operation"
+          schema:
+            $ref: "#/definitions/UserResult"
+        404:
+          description: "Profile not found"
+        500:
+          description: "Server error"
+      tags:
+      - Users
+      security:
+      - UserSecurity: []
+
 definitions:
   UserRequest:
     required:
@@ -383,6 +428,61 @@ definitions:
       status:
         type: string
         example: error
-      message:
+  ProfileRequest:
+    required:
+      - username
+      - email
+      - firstName
+      - lastName
+      - bio
+      - imageUrl
+      - password
+    properties:
+      username:
         type: string
-        example: Error Message
+        example: hammed
+      email:
+        type: string
+        example: hammed@local.host
+      firstName:
+        type: string
+        example: Hameedah
+      lastName:
+        type: string
+        example: Okoro
+      bio:
+        type: string
+        example: Some description about the user
+      imageUrl:
+        type: string
+        example: http://www.url-to-some-image.com
+      password:
+        type: string
+        example: password
+  ProfileResponse:
+
+    properties:
+      username:
+        type: string
+        example: hammed
+      email:
+        type: string
+        example: hammed@local.host
+      firstName:
+        type: string
+        example: Hameedah
+      lastName:
+        type: string
+        example: Okoro
+      bio:
+        type: string
+        example: Some description about the user
+      imageUrl:
+        type: string
+        example: http://www.url-to-some-image.com
+      createdAt:
+        type: string
+        example: 1/10/ 2018
+      updatedAt:
+        type: string
+        example: 1/10/ 2018

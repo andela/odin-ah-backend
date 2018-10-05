@@ -21,7 +21,6 @@ const { Article, User } = db;
 chai.use(chaiHttp);
 chai.should();
 
-
 describe('Article CRUD Test', () => {
   before(async () => {
     await User.destroy({

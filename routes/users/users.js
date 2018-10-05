@@ -1,12 +1,13 @@
 import { Router } from 'express';
-import UserController from '../../controllers/user/UserController';
+import auth from '../../middlewares/Authorization';
+import userProfile from '../../controllers/user/UserProfile';
+import profileValidator from '../../middlewares/validators/ProfileValidator';
 
 const router = Router();
 
-// router.put('/', UserController.updateUser);
-router.put('/', UserController.updateUser);
 
-router.post('/', UserController.createUser);
+router.put('/', auth.verifyToken, profileValidator.validation, userProfile.updateProfile);
+router.get('/', auth.verifyToken, userProfile.getProfile);
 
 
 export default router;
