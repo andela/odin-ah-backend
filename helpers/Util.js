@@ -1,5 +1,7 @@
+import jwt from 'jsonwebtoken';
 import urlSlug from 'url-slug';
 import { DEFAULT_LIMIT } from './constants';
+import config from '../config';
 
 /**
  * Util class
@@ -43,5 +45,33 @@ export default class Util {
     return {
       page, limit, offset
     };
+  }
+
+  /**
+   *
+   *
+   * @static
+   * @param {*} data
+   * @param {*} signature
+   * @returns {string} returns encoded jwt string
+   * @memberof Util
+   */
+  static generateToken(data, signature) {
+    return jwt.sign(data,
+      signature, {
+        expiresIn: config.passwordResetExpiry,
+      });
+  }
+
+  /**
+   *
+   *
+   * @static
+   * @param {*} date
+   * @returns {string} returns a string format of the timestamp
+   * @memberof Util
+   */
+  static dateToString(date) {
+    return new Date(date).getTime().toString();
   }
 }
