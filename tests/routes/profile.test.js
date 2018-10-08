@@ -4,27 +4,31 @@ import server from '../../index';
 
 import { realUser } from '../testHelpers/testLoginData';
 import Authorization from '../../middlewares/Authorization';
+import db from '../../models';
 
 let accessToken;
 
 chai.use(chaiHttp);
 chai.should();
 
+const { User } = db;
+
 describe('Profile', () => {
   before('Create a user Account', (done) => {
-    chai.request(server)
+    chai
+      .request(server)
       .post('/api/v1/auth/signup')
-      .send({
-        email: 'muche@mail.com',
-        username: 'muche',
-        password: 'password'
-      })
+      .send(realUser)
       .end(() => {
         done();
       });
   });
+  before('Verify user email', async () => {
+    await User.update({ isVerified: true }, { where: { email: realUser.email.toLowerCase() } });
+  });
   before('Login a user', (done) => {
-    chai.request(server)
+    chai
+      .request(server)
       .post('/api/v1/auth/login')
       .send(realUser)
       .end((err, response) => {
@@ -36,7 +40,8 @@ describe('Profile', () => {
   });
   it('should return error for Profile that does not exist', (done) => {
     const token = Authorization.generateToken(10000);
-    chai.request(server)
+    chai
+      .request(server)
       .get('/api/v1/users')
       .set('Authorization', `Bearer ${token}`)
       .end((err, response) => {
@@ -46,7 +51,8 @@ describe('Profile', () => {
       });
   });
   it('should show user profile details', (done) => {
-    chai.request(server)
+    chai
+      .request(server)
       .get('/api/v1/users')
       .set('Authorization', `Bearer ${accessToken}`)
       .end((err, response) => {
@@ -65,7 +71,8 @@ describe('Profile', () => {
       bio: 'Some description about the user',
       imageUrl: 'http://www.url-to-an-image.com'
     };
-    chai.request(server)
+    chai
+      .request(server)
       .put('/api/v1/users')
       .send(userData)
       .set('Authorization', `Bearer: ${accessToken}`)
@@ -84,7 +91,8 @@ describe('Profile', () => {
       });
   });
   it('should return 400 status if username is empty', (done) => {
-    chai.request(server)
+    chai
+      .request(server)
       .put('/api/v1/users')
       .set('Authorization', `Bearer ${accessToken}`)
       .send({
@@ -103,7 +111,8 @@ describe('Profile', () => {
       });
   });
   it('should return 400 status if email is empty', (done) => {
-    chai.request(server)
+    chai
+      .request(server)
       .put('/api/v1/users')
       .set('Authorization', `Bearer ${accessToken}`)
       .send({
@@ -123,7 +132,8 @@ describe('Profile', () => {
   });
   it('should return error for Profile that does not exist', (done) => {
     const token = Authorization.generateToken(10000);
-    chai.request(server)
+    chai
+      .request(server)
       .put('/api/v1/users')
       .set('Authorization', `Bearer ${token}`)
       .send({
@@ -141,11 +151,12 @@ describe('Profile', () => {
       });
   });
   it('should return error if email already exist', (done) => {
-    chai.request(server)
+    chai
+      .request(server)
       .put('/api/v1/users')
       .set('Authorization', `Bearer ${accessToken}`)
       .send({
-        email: 'muche@mail.com',
+        email: 'johndoe@gmail.com',
         username: 'much',
         firstName: 'First',
         lastName: 'Name',
@@ -155,7 +166,9 @@ describe('Profile', () => {
       .end((err, response) => {
         response.should.have.status(409);
         response.body.should.have.property('message');
-        response.body.should.have.property('message').equal('This Email already exists, choose another email');
+        response.body.should.have
+          .property('message')
+          .equal('This Email already exists, choose another email');
         done();
       });
   });

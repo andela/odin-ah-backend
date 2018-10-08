@@ -1,9 +1,11 @@
 import bcrypt from 'bcrypt';
+import validator from 'validator';
 import Authorization from '../../middlewares/Authorization';
 import UserHelper from '../../helpers/UserHelper';
 import verificationToken from '../../helpers/verificationToken';
 import db from '../../models/index';
 import Mail from '../../services/Mail';
+import eventBus from '../../helpers/eventBus';
 
 const { User } = db;
 
@@ -23,28 +25,38 @@ class AuthController {
    */
   static async login(req, res) {
     const { email, password } = req.body;
-    const foundUser = await UserHelper.findByEmail(email);
-    if (foundUser) {
-      const validPassword = await bcrypt.compare(password, foundUser.dataValues.password);
-      if (validPassword) {
-        const {
-          id, username, bio, imageUrl
-        } = foundUser.dataValues;
-        const token = Authorization.generateToken(id);
-        return res.status(200).json({
-          user: {
-            email,
-            token,
-            username,
-            bio,
-            imageUrl
-          }
-        });
-      }
+    const user = await UserHelper.findByEmail(email);
+    if (!user) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Invalid user credentials'
+      });
     }
-    return res.status(401).json({
-      status: 'error',
-      message: 'Invalid user credentials'
+    const isValidPassword = await bcrypt.compare(password, user.dataValues.password);
+    if (!isValidPassword) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Invalid user credentials'
+      });
+    }
+    const {
+      id, username, bio, imageUrl, isVerified
+    } = user.dataValues;
+    if (!isVerified) {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Your email is not yet verified. Please check your email for further instructions.'
+      });
+    }
+    const token = Authorization.generateToken(id);
+    return res.status(200).json({
+      user: {
+        email,
+        token,
+        username,
+        bio,
+        imageUrl
+      }
     });
   }
 
@@ -57,37 +69,36 @@ class AuthController {
    * @return {json} Returns json object
    * @memberof AuthController
    */
-  static signUp(req, res, next) {
-    const { username, email, password } = req.body;
-    User.findOne({
-      where: {
-        $or: [{ email }, { username }]
-      }
-    })
-      .then((user) => {
-        if (user) {
-          return res.status(400).json({
-            status: 'error',
-            message: 'Account already exist'
-          });
+  static async signUp(req, res, next) {
+    try {
+      const { username, email, password } = req.body;
+      const user = await User.findOne({
+        where: {
+          $or: [{ email }, { username }]
         }
-        const token = verificationToken();
-        User.create({
-          username,
-          email,
-          password,
-          token
-        })
-          .then((newUser) => {
-            if (newUser) {
-              req.message = 'Please check your Email for account confirmation';
-              req.user = newUser;
-            }
-            Mail.sendVerification(req, res, next);
-          })
-          .catch(err => next(err));
-      })
-      .catch(err => next(err));
+      });
+      if (user) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'User already exists. Please login'
+        });
+      }
+      const token = verificationToken();
+      const newUser = await User.create({
+        username,
+        email,
+        password,
+        token
+      });
+      eventBus.on('resendEmail', Mail.sendVerification);
+      eventBus.emit('resendEmail', newUser);
+      res.status(201).json({
+        status: 'success',
+        message: 'Please check your Email for account confirmation'
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 
   /**
@@ -99,21 +110,22 @@ class AuthController {
    * @memberof AuthController
    * @return {json} Returns json object
    */
-  static verifyUser(req, res, next) {
-    User.findOne({
-      where: { token: req.params.token }
-    })
-      .then((tokenFound) => {
-        if (!tokenFound) {
-          return res.status(400).send({
-            status: 'error',
-            message: 'invalid verification link'
-          });
-        }
-        return tokenFound.update({ isVerified: true, token: null });
-      })
-      .then(() => res.status(200).send({ message: 'User verified' }))
-      .catch(err => next(err));
+  static async verifyUser(req, res, next) {
+    try {
+      const unverifiedUser = await User.findOne({
+        where: { token: req.params.token }
+      });
+      if (!unverifiedUser) {
+        return res.status(400).send({
+          status: 'error',
+          message: 'invalid verification link'
+        });
+      }
+      await unverifiedUser.update({ isVerified: true, token: null });
+      res.status(200).send({ message: 'User verified' });
+    } catch (error) {
+      next(error);
+    }
   }
 
   /**
@@ -181,6 +193,49 @@ class AuthController {
       done(null, user[0]);
     } catch (err) {
       done(err, null);
+    }
+  }
+
+  /**
+   * Resends verification link to user email
+   * @async
+   * @param  {object} req - Request object
+   * @param {object} res - Response object
+   * @param {function} next - next middleware
+   * @return {json} Returns json object
+   * @static
+   */
+  static async resendVerificationLink(req, res, next) {
+    try {
+      const { email } = req.body;
+      const emailIsValid = validator.isEmail(email);
+      if (!emailIsValid) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Please provide a valid email'
+        });
+      }
+      const user = await User.findOne({ where: { email } });
+      if (!user) {
+        return res.status(404).json({
+          status: 'error',
+          message: 'You have not created an account yet.'
+        });
+      }
+      if (user.isVerified) {
+        return res.status(403).json({
+          status: 'error',
+          message: 'Your account is already verified'
+        });
+      }
+      eventBus.on('resendEmail', Mail.sendVerification);
+      eventBus.emit('resendEmail', user);
+      res.status(200).json({
+        status: 'success',
+        message: 'Confirmation link has been sent. Please check your email or spam folder'
+      });
+    } catch (error) {
+      next(error);
     }
   }
 }

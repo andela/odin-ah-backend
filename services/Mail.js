@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import sgMail from '@sendgrid/mail';
 import MailHelper from '../helpers/MailHelper';
 import emailMessages from './mailMessage';
+import logger from '../helpers/logger';
 
 dotenv.config();
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -15,14 +16,12 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 class Mail {
   /**
    * @static
-   * @param {object} req
-   * @param {object} res
-   * @param {function} next
+   * @param {object} user
    * @return {json} Returns json object
    * @memberof Mail
    */
-  static sendVerification(req, res, next) {
-    const { email, token } = req.user;
+  static sendVerification(user) {
+    const { email, token } = user;
     const baseUrl = process.env.BASE_URL;
     const url = `${baseUrl}/auth/confirmation/${token}`;
     const subject = 'Confirmation Email';
@@ -32,17 +31,11 @@ class Mail {
       .send(messageInfo)
       .then((resp) => {
         if (resp[0].statusCode === 202) {
-          return res.status(201).send({
-            status: 'success',
-            message: req.message
-          });
+          logger.info(`VERIFICATION_EMAIL_SENT: ${email}`);
         }
-        return res.status(400).send({
-          status: 'error',
-          message: 'email not sent'
-        });
+        logger.log(`VERIFICATION_EMAIL_NOT_SENT: ${email}`);
       })
-      .catch(err => next(err));
+      .catch(err => logger.error(`SENDGRID_ERROR: ${err.stack}`));
   }
 }
 
