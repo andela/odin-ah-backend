@@ -10,6 +10,7 @@ import {
   badEmail,
   realUserWithWrongPassword
 } from '../testHelpers/testLoginData';
+import { assertErrorResponse } from '../testHelpers';
 
 const { User } = db;
 
@@ -48,9 +49,7 @@ describe('POST /auth/Login', () => {
       .post('/api/v1/auth/login')
       .send(realUser);
     expect(response).to.have.status(403);
-    expect(response.body)
-      .to.have.property('status')
-      .that.is.equal('error');
+    assertErrorResponse(response);
   });
 
   it('should return a status code of 401 and a message for invalid credentials', async () => {
@@ -59,12 +58,7 @@ describe('POST /auth/Login', () => {
       .post('/api/v1/auth/login')
       .send(wrongEmail);
     expect(response).to.have.status(401);
-    expect(response.body)
-      .to.have.property('status')
-      .that.is.equal('error');
-    expect(response.body)
-      .to.have.property('message')
-      .that.is.equal('Invalid user credentials');
+    assertErrorResponse(response);
   });
 
   it('should return a message when email is empty', async () => {
@@ -73,12 +67,7 @@ describe('POST /auth/Login', () => {
       .post('/api/v1/auth/login')
       .send(emptyEmail);
     expect(response).to.have.status(400);
-    expect(response.body)
-      .to.have.property('status')
-      .that.is.equal('error');
-    expect(response.body)
-      .to.have.property('message')
-      .that.is.equal('Email can not be empty');
+    assertErrorResponse(response);
   });
 
   it('should return a message when password less than 8 character', async () => {
@@ -87,12 +76,7 @@ describe('POST /auth/Login', () => {
       .post('/api/v1/auth/login')
       .send(wrongLength);
     expect(response).to.have.status(400);
-    expect(response.body)
-      .to.have.property('status')
-      .that.is.equal('error');
-    expect(response.body)
-      .to.have.property('message')
-      .that.is.equal('Password must be greater than eight characters');
+    assertErrorResponse(response);
   });
 
   it('should return a message when password is empty ', async () => {
@@ -101,12 +85,7 @@ describe('POST /auth/Login', () => {
       .post('/api/v1/auth/login')
       .send(noPass);
     expect(response).to.have.status(400);
-    expect(response.body)
-      .to.have.property('status')
-      .that.is.equal('error');
-    expect(response.body)
-      .to.have.property('message')
-      .that.is.equal('Password can not be empty');
+    assertErrorResponse(response);
   });
 
   it('should return a message when user submits a wrong password', async () => {
@@ -115,10 +94,7 @@ describe('POST /auth/Login', () => {
       .post('/api/v1/auth/login')
       .send(realUserWithWrongPassword);
     expect(response).to.have.status(401);
-    expect(response.body)
-      .to.have.property('status')
-      .that.is.equal('error');
-    expect(response.body).to.have.property('message');
+    assertErrorResponse(response);
   });
 
   it('should return a message when their is Email ', async () => {
@@ -127,11 +103,6 @@ describe('POST /auth/Login', () => {
       .post('/api/v1/auth/login')
       .send(badEmail);
     expect(response).to.have.status(400);
-    expect(response.body)
-      .to.have.property('status')
-      .that.is.equal('error');
-    expect(response.body)
-      .to.have.property('message')
-      .that.is.equal('It seems your email is not valid, or is incorrect');
+    assertErrorResponse(response);
   });
 });

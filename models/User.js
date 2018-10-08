@@ -44,8 +44,9 @@ export default (sequelize, Sequelize) => {
     if (user.password) user.password = bcrypt.hashSync(user.password, 10);
   });
 
-  User.associate = () => {
-    // associations can be defined here
+  User.associate = (models) => {
+    User.hasMany(models.Article, { as: 'Articles', foreignKey: 'userId' });
+    User.hasMany(models.Comment, { as: 'Comments', foreignKey: 'userId' });
   };
   return User;
 };

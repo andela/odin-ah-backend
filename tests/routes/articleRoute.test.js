@@ -9,12 +9,12 @@ import { AUTHORIZATION_HEADER } from '../../helpers/constants';
 import {
   assertArrayResponse,
   assertArticleResponse,
-  assertErrorResponse,
-  assertResponseStatus, assertTrue, createDummyArticles,
+  createDummyArticles,
   defaultArticle,
   deleteArticlesFromTable,
   validateArticleInput
 } from '../testHelpers/articleUtil';
+import { assertErrorResponse, assertResponseStatus, assertTrue } from '../testHelpers';
 
 const { Article, User } = db;
 
@@ -27,7 +27,8 @@ describe('Article CRUD Test', () => {
       truncate: true,
       cascade: true
     });
-    await Promise.all([User.create(realUser), User.create(realUser1)]);
+    await Promise.all([User.create({ ...realUser, isVerified: true }),
+      User.create({ ...realUser1, isVerified: true })]);
   });
   describe('POST /api/v1/articles', () => {
     beforeEach(async () => {

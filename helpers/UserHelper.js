@@ -1,7 +1,7 @@
-import user from '../models';
+import db from '../models';
 import logger from './exceptionHandler/errorHandler';
 
-const { User } = user;
+const { User } = db;
 
 
 /**
@@ -75,6 +75,31 @@ class UserHelper {
       updateFields.imageUrl = imageUrl;
     }
     return updateFields;
+  }
+
+  /**
+   *
+   * @param {User} user
+   * @return {object} return user's profile
+   */
+  static getUserProfileData(user) {
+    const {
+      id, firstName, lastName, username, email, bio, imageUrl
+    } = user.dataValues;
+    return {
+      id, firstName, lastName, username, email, bio, imageUrl
+    };
+  }
+
+  /**
+   *
+   * @param {User} userResultById
+   * @param {User} userResultByEmail
+   * @return {boolean} Compare two users by ids
+   */
+  static notSameUser(userResultById, userResultByEmail) {
+    return userResultByEmail && userResultById
+      && userResultById.dataValues.id !== userResultByEmail.dataValues.id;
   }
 }
 

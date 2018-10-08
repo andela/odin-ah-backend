@@ -1,7 +1,5 @@
-import chai, { expect } from 'chai';
-import server from '../../index';
-import { AUTHORIZATION_HEADER } from '../../helpers/constants';
 import db from '../../models';
+import { assertErrorResponse, assertResponseStatus, getRequest } from './index';
 
 const { Article, User } = db;
 
@@ -10,44 +8,6 @@ export const defaultArticle = {
   description: 'Ever wonder how?',
   body: 'It takes a Jacobian',
 };
-
-/**
- *
- * @param {boolean} match
- * @return {void} void
- *
- */
-export function assertTrue(match) {
-  expect(match)
-    .to
-    .be
-    .a('boolean')
-    .eq(true);
-}
-
-/**
- *  Assert the response status code
- * @param {res} response
- * @param {number} status
- * @return {void}
- */
-export function assertResponseStatus(response, status) {
-  const code = status || 200;
-  response.should.have.status(code);
-  response.body.should.be.a('object');
-}
-
-/**
- *  Assert the response body is an error
- * @param {response} response
- * @return {void}
- */
-export function assertErrorResponse(response) {
-  response.body.should.be.a('object');
-  response.body.should.have.property('status')
-    .eq('error');
-  response.body.should.have.property('message');
-}
 
 /**
  *
@@ -72,23 +32,6 @@ export function assertArticleResponse(response, article, user) {
     .eq(user.username);
   response.body.article.author.should.have.property('bio');
   response.body.article.author.should.have.property('imageUrl');
-}
-
-/**
- * Helper function
- * @param {string} url
- * @param {string} jwt
- * @param {boolean} update
- * @return {*} return a chai request object
- */
-export function getRequest(url, jwt, update) {
-  let request = chai.request(server);
-  if (update) {
-    request = request.put(url);
-  } else {
-    request = request.post(url);
-  }
-  return request.set(AUTHORIZATION_HEADER, `Bearer ${jwt}`);
 }
 
 /**
@@ -179,9 +122,9 @@ export function assertArrayResponse(response, length) {
  * @return {Promise<void>} Create 10 dummy articles
  */
 export async function createDummyArticles() {
-  const userModel = await User.findAll();
   const slug = 'dummy-slug';
-  const articleModels = await Promise.all([
+  const [users, ...articleModels] = await Promise.all([
+    User.findAll(),
     Article.create({
       ...defaultArticle,
       slug: `${slug}-1`
@@ -225,7 +168,7 @@ export async function createDummyArticles() {
   ]);
   const addUserToArticlePromise = [];
   articleModels.forEach((articleData) => {
-    addUserToArticlePromise.push(articleData.setUser(userModel[0]));
+    addUserToArticlePromise.push(articleData.setUser(users[0]));
   });
   await Promise.all(addUserToArticlePromise);
 }

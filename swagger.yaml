@@ -1,7 +1,7 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
   title: Odin-ah-backend
-  description: ' A Social platform for the creative at heart.'
+  description: "A Social platform for the creative at heart."
   version: v1
 securityDefinitions:
   UserSecurity:
@@ -11,10 +11,10 @@ securityDefinitions:
 host: '127.0.0.1:3000'
 basePath: /api/v1
 produces:
-  - application/json
+- application/json
 schemes:
-  - http
-  - https
+- http
+- https
 paths:
   /auth/signup:
     post:
@@ -43,36 +43,36 @@ paths:
           schema:
             $ref: '#/definitions/UserError'
       tags:
-        - User
+      - User
   /auth/login:
     post:
       summary: Login in an existing user
       description: Login in an existing user.
       parameters:
-        - in: body
-          name: user
-          description: Author's Username
-          schema:
-            $ref: '#/definitions/LoginRequest'
+      - in: body
+        name: user
+        description: Author's Username
+        schema:
+          $ref: "#/definitions/LoginRequest"
       responses:
-        '200':
+        "200":
           description: OK
           schema:
-            $ref: '#/definitions/LoginResponse'
-        '400':
+            $ref: "#/definitions/LoginResponse"
+        "400":
           description: Bad Request..
           schema:
-            $ref: '#/definitions/Error'
-        '401':
+            $ref: "#/definitions/Error"
+        "401":
           description: Invalid user credentials.
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
         '403':
           description: Forbidden request. User has to verify their email before login
           schema:
             $ref: '#/definitions/Error'
       tags:
-        - Authentication
+      - Authentication
   /auth/google:
     post:
       summary: Signs in a user with Google OAuth
@@ -95,7 +95,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
       tags:
-        - Authentication
+      - Authentication
   /auth/facebook:
     post:
       summary: Signs in a user with Facebook OAuth
@@ -118,7 +118,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
       tags:
-        - Authentication
+      - Authentication
   /auth/twitter:
     post:
       summary: Signs in a user with Twitter OAuth
@@ -147,6 +147,13 @@ paths:
       summary: Resends verification link to user email
       description: >-
         Resends verification link to user email for account verification
+      parameters:
+        - in: body
+          name: email
+          required: true
+          schema:
+            type: string
+            description: User email
       responses:
         '200':
           description: Verification email was successfully resent
@@ -165,7 +172,7 @@ paths:
           schema:
             $ref: '#/definitions/UserError'
       tags:
-        - Authentication
+      - Authentication
   /articles:
     get:
       summary: Get list of articles
@@ -173,18 +180,18 @@ paths:
         Returns a list of articles. Authorization Token is optional to use this
         endpoint.
       parameters:
-        - in: query
-          name: page
-          required: true
-          schema:
-            type: integer
-            description: Page number.
-        - in: query
-          name: size
-          required: true
-          schema:
-            type: integer
-            description: The number of articles to retrieve.
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          description: Page number.
+      - in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          description: The number of articles to retrieve.
       responses:
         '200':
           description: OK
@@ -199,7 +206,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
       tags:
-        - Articles
+      - Articles
     post:
       summary: Create new article
       description: >-
@@ -225,21 +232,21 @@ paths:
           schema:
             $ref: '#/definitions/Error'
       tags:
-        - Articles
+      - Articles
       security:
         - UserSecurity: []
-  '/articles/{slug}':
+  "/articles/{slug}":
     get:
       summary: 'Gets an article with the given {slug}.'
       description: >-
         Returns a single article with the provided {slug}. Authorization Token
         is optional to use this endpoint.
       parameters:
-        - name: slug
-          in: path
-          required: true
-          description: The slug of the article to retrieve.
-          type: string
+      - name: slug
+        in: path
+        required: true
+        description: The slug of the article to retrieve.
+        type: string
       responses:
         '200':
           description: Response data
@@ -250,21 +257,21 @@ paths:
           schema:
             $ref: '#/definitions/Error'
       tags:
-        - Articles
+      - Articles
     put:
       summary: 'Update article with the given {slug}.'
       description: 'Update and Return the modified article with provided {slug}.'
       parameters:
-        - name: slug
-          in: path
-          required: true
-          description: The slug of the article to be updated
-          type: string
-        - name: entry
-          in: body
-          description: Request data
-          schema:
-            $ref: '#/definitions/ArticleRequest'
+      - name: slug
+        in: path
+        required: true
+        description: The slug of the article to be updated
+        type: string
+      - name: article
+        in: body
+        description: Request data
+        schema:
+          $ref: "#/definitions/ArticleRequest"
       responses:
         '200':
           description: 'Updated article with the given {slug}'
@@ -283,20 +290,20 @@ paths:
           schema:
             $ref: '#/definitions/Error'
       tags:
-        - Articles
+      - Articles
       security:
-        - UserSecurity: []
+      - UserSecurity: []
     delete:
       summary: Deletes an article.
       description: >-
         Deletes an article with the {slug} provided. Authorization Token is
         required to use this endpoint.
       parameters:
-        - name: slug
-          in: path
-          required: true
-          description: The slug of the article to delete.
-          type: string
+      - name: slug
+        in: path
+        required: true
+        description: The slug of the article to delete.
+        type: string
       responses:
         '200':
           description: Response data
@@ -312,8 +319,8 @@ paths:
           description: Unauthorizated access.
           schema:
             $ref: '#/definitions/Error'
-        '403':
-          description: Unauthorized access
+        403:
+          description: Forbidden Request. Authenticated user cannot delete this article.
           schema:
             $ref: '#/definitions/Error'
         '404':
@@ -321,16 +328,183 @@ paths:
           schema:
             $ref: '#/definitions/Error'
       tags:
-        - Articles
+      - Articles
+      security:
+      - UserSecurity: []
+  "/articles/{slug}/comments":
+    get:
+      summary: "Gets all the comments for a particular article with the given {slug}."
+      description: >-
+        Returns return the first level comments of an article. Authorization Token
+        is optional to use this endpoint.
+      parameters:
+      - name: slug
+        in: path
+        required: true
+        description: The slug of the article to retrieve.
+        type: string
+      responses:
+        "200":
+          description: Response data
+          schema:
+            $ref: "#/definitions/ArticleCommentsResult"
+        "404":
+          description: "No articles found with {slug}"
+          schema:
+            $ref: "#/definitions/Error"
+      tags:
+      - Comments
+    post:
+      summary: Create a new comment for an article.
+      description: >-
+        Create a commment for the an article with the given {slug}. Authorization Token is
+        required to use this endpoint.
+      parameters:
+      - name: slug
+        in: path
+        required: true
+        description: The slug of the article to delete.
+        type: string
+
+      - name: article
+        in: body
+        description: Request data
+        schema:
+          $ref: "#/definitions/CommentRequest"
+      responses:
+        200:
+          description: Response data
+          schema:
+            $ref: "#/definitions/CommentResult"
+        "401":
+          description: Unauthorized access.
+          schema:
+            $ref: "#/definitions/Error"
+        409:
+          description: Conflict
+          schema:
+            $ref: "#/definitions/Error"
+        404:
+          description: No articles found with {slug}.
+          schema:
+            $ref: "#/definitions/Error"
+      tags:
+      - Comments
+      security:
+      - UserSecurity: []
+  "/articles/{slug}/comments/{id}":
+    get:
+      summary: "Gets an article with the given {slug}."
+      description: >-
+        Returns a comment with the provided {id} and article {slug}. This method also fetches all comment under it.
+      parameters:
+      - name: slug
+        in: path
+        required: true
+        description: The slug of the article to retrieve.
+        type: string
+      - name: id
+        in: path
+        required: true
+        description: The slug of the article to retrieve.
+        type: string
+      responses:
+        "200":
+          description: Response data
+          schema:
+            $ref: "#/definitions/CommentsResult"
+        "404":
+          description: "No articles found with {slug} or No comment found with {id}"
+          schema:
+            $ref: "#/definitions/Error"
+      tags:
+      - Comments
+    post:
+      summary: "Adds a new comment under an existing comment with the provided id."
+      description: "Adds a new comment under an existing comment with the provided id."
+      parameters:
+      - name: slug
+        in: path
+        required: true
+        description: The slug of the article with the comment with the id.
+        type: string
+      - name: id
+        in: path
+        required: true
+        description: The id of the comment to place this comment under.
+        type: string
+      - name: comment
+        in: body
+        description: Request data
+        schema:
+          $ref: "#/definitions/CommentRequest"
+      responses:
+        "200":
+          description: "Updated article with the given {slug}"
+          schema:
+            $ref: "#/definitions/CommentResult"
+        "401":
+          description: Unauthorizated access.
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: "No articles found with {slug} or No comment found with the {id}"
+          schema:
+            $ref: "#/definitions/Error"
+      tags:
+      - Comments
+      security:
+      - UserSecurity: []
+    delete:
+      summary: Delete a comment.
+      description: >-
+        Deletes the comment with the provided {id}, This will also delete any other comments under this comment.
+      parameters:
+      - name: slug
+        in: path
+        required: true
+        description: The slug of the article to delete.
+        type: string
+      - name: id
+        in: path
+        required: true
+        description: The id of the comment to delete.
+        type: string
+      responses:
+        200:
+          description: Response data
+          schema:
+            properties:
+              status:
+                type: string
+                example: success
+              message:
+                type: string
+                example: Successfully deleted comment
+        "401":
+          description: Unauthorizated access.
+          schema:
+            $ref: "#/definitions/Error"
+        403:
+          description: Forbidden Request. Authenticated user cannot delete this comment.
+          schema:
+            $ref: "#/definitions/Error"
+        404:
+          description: No articles found with {slug}.
+          schema:
+            $ref: "#/definitions/Error"
+      tags:
+      - Comments
       security:
         - UserSecurity: []
+
   /users:
     put:
       summary: Update a User Profile
       consumes:
-        - application/json
+      - application/json
       produces:
-        - application/json
+      - application/json
       parameters:
         - in: body
           name: profile
@@ -347,9 +521,9 @@ paths:
         '500':
           description: Server Error
       tags:
-        - Users
+      - Users
       security:
-        - UserSecurity: []
+      - UserSecurity: []
     get:
       summary: Get a User Profile
       produces:
@@ -364,15 +538,16 @@ paths:
         '500':
           description: Server error
       tags:
-        - Users
+      - Users
       security:
-        - UserSecurity: []
+      - UserSecurity: []
+
 definitions:
   UserRequest:
     required:
-      - email
-      - username
-      - password
+    - email
+    - username
+    - password
     properties:
       username:
         type: string
@@ -401,8 +576,8 @@ definitions:
         example: Account already exist
   LoginRequest:
     required:
-      - email
-      - password
+    - email
+    - password
     properties:
       email:
         type: string
@@ -428,14 +603,14 @@ definitions:
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
           vulputate egestas neque et euismod. Fusce sed mi ac tortor aliquam
           facilisis.
-      image:
+      imageUrl:
         type: string
         example: 'http://image-url.local/localUser.jpg'
   ArticleRequest:
     required:
-      - title
-      - body
-      - description
+    - title
+    - body
+    - description
     properties:
       title:
         type: string
@@ -485,7 +660,7 @@ definitions:
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
               vulputate egestas neque et euismod. Fusce sed mi ac tortor aliquam
               facilisis.
-          image:
+          imageUrl:
             type: string
             example: 'http://image-url.local/localUser.jpg'
   ArticlesResult:
@@ -512,6 +687,125 @@ definitions:
       message:
         type: string
         example: Successfully fetch articles.
+
+  CommentRequest:
+    required:
+    - type
+    - body
+    properties:
+      type:
+        type: string
+        example: highlight
+      body:
+        type: string
+        example: >-
+          Nunc sed diam suscipit, lobortis eros nec, auctor nisl. Nunc ac magna
+          non justo varius rutrum sit amet feugiat elit. Pellentesque vehicula,
+          ante rutrum condimentum tempor, purus metus vulputate ligula, et
+          commodo tortor massa eu tortor.
+  CommentResult:
+    properties:
+      id:
+        type: number
+        example: 1
+      body:
+        type: string
+        example: >-
+          Nunc sed diam suscipit, lobortis eros nec, auctor nisl. Nunc ac magna
+          non justo varius rutrum sit amet feugiat elit. Pellentesque vehicula,
+          ante rutrum condimentum tempor, purus metus vulputate ligula, et
+          commodo tortor massa eu tortor.
+      createdAt:
+        type: date
+        example: "2018-10-08T05:02:07.631Z"
+      type:
+        type: string
+        example: "highlight"
+      author:
+        type: object
+        properties:
+          username:
+            type: string
+            example: localUser
+          bio:
+            type: string
+            example: >-
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
+              vulputate egestas neque et euismod. Fusce sed mi ac tortor aliquam
+              facilisis.
+          imageUrl:
+            type: string
+            example: "http://image-url.local/localUser.jpg"
+  ArticleCommentsResult:
+    properties:
+      data:
+        type: object
+        properties:
+          comments:
+            type: array
+            items:
+              $ref: "#/definitions/CommentResult"
+          count:
+            type: number
+            example: 2
+      status:
+        type: string
+        example: success
+      message:
+        type: string
+        example: Successfully fetch comment.
+  CommentsResult:
+    properties:
+      comment:
+        type: object
+        properties:
+          id:
+            type: number
+            example: 1
+          body:
+            type: string
+            example: >-
+              Nunc sed diam suscipit, lobortis eros nec, auctor nisl. Nunc ac magna
+              non justo varius rutrum sit amet feugiat elit. Pellentesque vehicula,
+              ante rutrum condimentum tempor, purus metus vulputate ligula, et
+              commodo tortor massa eu tortor.
+          createdAt:
+            type: date
+            example: "2018-10-08T05:02:07.631Z"
+          type:
+            type: string
+            example: "highlight"
+          author:
+            type: object
+            properties:
+              username:
+                type: string
+                example: localUser
+              bio:
+                type: string
+                example: >-
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
+                  vulputate egestas neque et euismod. Fusce sed mi ac tortor aliquam
+                  facilisis.
+              imageUrl:
+                type: string
+                example: "http://image-url.local/localUser.jpg"
+
+
+            comments:
+              type: array
+              items:
+                $ref: "#/definitions/CommentResult"
+            count:
+              type: number
+              example: 2
+      status:
+        type: string
+        example: success
+      message:
+        type: string
+        example: Successfully fetch comment.
+
   Error:
     properties:
       status:
@@ -519,13 +813,13 @@ definitions:
         example: error
   ProfileRequest:
     required:
-      - username
-      - email
-      - firstName
-      - lastName
-      - bio
-      - imageUrl
-      - password
+    - username
+    - email
+    - firstName
+    - lastName
+    - bio
+    - imageUrl
+    - password
     properties:
       username:
         type: string

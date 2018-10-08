@@ -86,6 +86,8 @@ describe('Profile', () => {
         response.body.data.should.have.property('imageUrl').eq(userData.imageUrl);
         response.body.data.should.have.property('username').eq(userData.username);
         response.body.data.should.have.property('email').eq(userData.email);
+        response.body.data.should.not.have.property('password');
+        response.body.data.should.not.have.property('token');
         response.body.should.have.property('message').equal('Profile Updated Successfully!');
         done();
       });
@@ -105,8 +107,25 @@ describe('Profile', () => {
       })
       .end((err, response) => {
         response.should.have.status(400);
-        response.body.should.have.property('message');
         response.body.should.have.property('message').equal('Username cannot be empty');
+        done();
+      });
+  });
+  it('should return 400 status if username is not alphanumeric', (done) => {
+    chai.request(server)
+      .put('/api/v1/users')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        email: 'Johnwilli@gmail.com',
+        username: '~{}/><>?????><',
+        firstName: 'First',
+        lastName: 'Name',
+        bio: 'Some description about the user',
+        imageUrl: 'http://www.url-to-an-image.com'
+      })
+      .end((err, response) => {
+        response.should.have.status(400);
+        response.body.should.have.property('message');
         done();
       });
   });
@@ -132,8 +151,7 @@ describe('Profile', () => {
   });
   it('should return error for Profile that does not exist', (done) => {
     const token = Authorization.generateToken(10000);
-    chai
-      .request(server)
+    chai.request(server)
       .put('/api/v1/users')
       .set('Authorization', `Bearer ${token}`)
       .send({
@@ -151,8 +169,7 @@ describe('Profile', () => {
       });
   });
   it('should return error if email already exist', (done) => {
-    chai
-      .request(server)
+    chai.request(server)
       .put('/api/v1/users')
       .set('Authorization', `Bearer ${accessToken}`)
       .send({
@@ -165,7 +182,6 @@ describe('Profile', () => {
       })
       .end((err, response) => {
         response.should.have.status(409);
-        response.body.should.have.property('message');
         response.body.should.have
           .property('message')
           .equal('This Email already exists, choose another email');

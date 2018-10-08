@@ -74,6 +74,34 @@ class ArticleValidator {
     }
     return next();
   }
+
+  /**
+   * Validates user input values
+   * @param  {req} req - Request object
+   * @param {res} res - Request object
+   * @param {next} next - calls next middleware
+   * @return {res} Returns response message
+   * @static
+   */
+  static createCommentValidator(req, res, next) {
+    const { body } = req.body;
+    const { id } = req.params;
+    if (Validator.isEmpty(body)) {
+      return res.status(400)
+        .json({
+          message: 'body field cannot be empty',
+          status: 'error'
+        });
+    }
+    if (id && Number.isNaN(Number(id))) {
+      return res.status(400)
+        .json({
+          message: 'id must be a number',
+          status: 'error'
+        });
+    }
+    return next();
+  }
 }
 
 export default ArticleValidator;

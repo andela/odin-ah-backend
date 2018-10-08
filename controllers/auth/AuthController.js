@@ -78,6 +78,7 @@ class AuthController {
         }
       });
       if (user) {
+        // return next(new HttpError('Account already exist', 400));
         return res.status(400).json({
           status: 'error',
           message: 'User already exists. Please login'
@@ -133,7 +134,6 @@ class AuthController {
    * @async
    * @param  {object} req - Request object
    * @param {object} res - Response object
-   * @param {function} next - next middleware
    * @return {json} Returns json object
    * @static
    */
