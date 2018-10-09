@@ -1,3 +1,5 @@
+import ValidationError from './ValidationError';
+
 /**
  * Handles operational and some programmer errors
  * @param  {object} error - Error object
@@ -8,9 +10,14 @@
  */
 
 const errorHandler = (error, req, res, next) => { // eslint-disable-line no-unused-vars
+  let { errors } = error;
+  if (error instanceof ValidationError) {
+    errors = error.messages;
+  }
   res.status(error.status || 500).json({
-    message: error.message,
-    status: 'error'
+    status: 'error',
+    message: error.message || 'An error occured',
+    errors,
   });
 };
 export default errorHandler;

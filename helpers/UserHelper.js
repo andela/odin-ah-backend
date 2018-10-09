@@ -1,5 +1,4 @@
 import db from '../models';
-import logger from './exceptionHandler/errorHandler';
 
 const { User } = db;
 
@@ -25,7 +24,7 @@ class UserHelper {
       }
       return null;
     } catch (e) {
-      throw new Error('Somthing went wrong', e);
+      throw new Error('Something went wrong', e);
     }
   }
 
@@ -41,7 +40,7 @@ class UserHelper {
     try {
       data = await User.findOne({ where: { id } });
     } catch (e) {
-      logger.error(e);
+      throw new Error('Something went wrong', e);
     }
     return data;
   }
