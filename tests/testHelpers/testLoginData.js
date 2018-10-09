@@ -6,33 +6,38 @@
 const realUser = {
   email: 'Johnwilli@gmail.com',
   username: 'blackshady',
-  password: '1234567AB',
+  password: '1234567AB'
+};
+const realUserWithWrongPassword = {
+  email: 'johnwilli@gmail.com',
+  username: 'blackshady',
+  password: '1234567CA'
 };
 const realUser1 = {
   email: 'real.user@local.host',
   username: 'realUser',
-  password: '1234567AB',
+  password: '1234567AB'
 };
 
 const badEmail = {
   email: 'slimbabymail.com',
-  password: '1234567AB',
+  password: '1234567AB'
 };
 const wrongEmail = {
   email: 'slimbaby@gmail.com',
-  password: '1234567AB',
+  password: '1234567AB'
 };
 const noPass = {
-  email: 'mosoes@gmail.com',
+  email: 'mosoes@gmail.com'
 };
 
 const wrongLength = {
   email: 'franckp@gmail.com',
-  password: '187',
+  password: '187'
 };
 const emptyEmail = {
   email: '',
-  password: '12',
+  password: '12'
 };
 
 export {
@@ -42,5 +47,6 @@ export {
   noPass,
   wrongLength,
   emptyEmail,
-  wrongEmail
+  wrongEmail,
+  realUserWithWrongPassword
 };
