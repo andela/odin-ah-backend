@@ -16,13 +16,13 @@ const { User } = db;
  * */
 class AuthController {
   /**
-   * Authenticate and Login the User to the application
-   * @async
-   * @param  {object} req - Request object
-   * @param {object} res - Response object
-   * @return {json} Returns json object
-   * @static
-   */
+     * Authenticate and Login the User to the application
+     * @async
+     * @param  {object} req - Request object
+     * @param {object} res - Response object
+     * @return {json} Returns json object
+     * @static
+     */
   static async login(req, res) {
     const { email, password } = req.body;
     const user = await UserHelper.findByEmail(email);
@@ -40,7 +40,11 @@ class AuthController {
       });
     }
     const {
-      id, username, bio, imageUrl, isVerified
+      id,
+      username,
+      bio,
+      imageUrl,
+      isVerified
     } = user.dataValues;
     if (!isVerified) {
       return res.status(403).json({
@@ -61,14 +65,14 @@ class AuthController {
   }
 
   /**
-   * Create user account and call the next function for email verification
-   * @static
-   * @param {object} req
-   * @param {object} res
-   * @param {function} next
-   * @return {json} Returns json object
-   * @memberof AuthController
-   */
+     * Create user account and call the next function for email verification
+     * @static
+     * @param {object} req
+     * @param {object} res
+     * @param {function} next
+     * @return {json} Returns json object
+     * @memberof AuthController
+     */
   static async signUp(req, res, next) {
     try {
       const { username, email, password } = req.body;
@@ -103,14 +107,14 @@ class AuthController {
   }
 
   /**
-   *
-   * @static
-   * @param {object} req
-   * @param {object} res
-   *  @param {function} next
-   * @memberof AuthController
-   * @return {json} Returns json object
-   */
+     *
+     * @static
+     * @param {object} req
+     * @param {object} res
+     *  @param {function} next
+     * @memberof AuthController
+     * @return {json} Returns json object
+     */
   static async verifyUser(req, res, next) {
     try {
       const unverifiedUser = await User.findOne({
@@ -130,24 +134,27 @@ class AuthController {
   }
 
   /**
-   * Generates JWT for user after successful social login
-   * @async
-   * @param  {object} req - Request object
-   * @param {object} res - Response object
-   * @return {json} Returns json object
-   * @static
-   */
+     * Generates JWT for user after successful social login
+     * @async
+     * @param  {object} req - Request object
+     * @param {object} res - Response object
+     * @return {json} Returns json object
+     * @static
+     */
   static serializeUser(req, res) {
     if (req.user.hasNoEmail) {
       return res.status(422).json({
         errors: {
-          message:
-            'Your social account does not have an email associated. Please sign up with email'
+          message: 'Your social account does not have an email associated. Please sign up with email'
         }
       });
     }
     const {
-      id, email, username, bio, imageUrl
+      id,
+      email,
+      username,
+      bio,
+      imageUrl
     } = req.user;
     const token = Authorization.generateToken(id);
     res.status(200).json({
@@ -162,15 +169,15 @@ class AuthController {
   }
 
   /**
-   * Generates JWT for user after successful social login
-   * @async
-   * @param  {string} accessToken - accessToken
-   * @param {string} otherToken - refreshToken or tokenSecret
-   * @param {object} profile - user profile
-   * @param {function} done - verify callback
-   * @return {object} null - Returns doesn't return
-   * @static
-   */
+     * Generates JWT for user after successful social login
+     * @async
+     * @param  {string} accessToken - accessToken
+     * @param {string} otherToken - refreshToken or tokenSecret
+     * @param {object} profile - user profile
+     * @param {function} done - verify callback
+     * @return {object} null - Returns doesn't return
+     * @static
+     */
   static async strategyCallback(accessToken, otherToken, profile, done) {
     if (!profile.emails) {
       const userWithNoEmail = { hasNoEmail: true };
@@ -197,46 +204,42 @@ class AuthController {
   }
 
   /**
-   * Resends verification link to user email
-   * @async
-   * @param  {object} req - Request object
-   * @param {object} res - Response object
-   * @param {function} next - next middleware
-   * @return {json} Returns json object
-   * @static
-   */
-  static async resendVerificationLink(req, res, next) {
-    try {
-      const { email } = req.body;
-      const emailIsValid = validator.isEmail(email);
-      if (!emailIsValid) {
-        return res.status(400).json({
-          status: 'error',
-          message: 'Please provide a valid email'
-        });
-      }
-      const user = await User.findOne({ where: { email } });
-      if (!user) {
-        return res.status(404).json({
-          status: 'error',
-          message: 'You have not created an account yet.'
-        });
-      }
-      if (user.isVerified) {
-        return res.status(403).json({
-          status: 'error',
-          message: 'Your account is already verified'
-        });
-      }
-      eventBus.on('resendEmail', Mail.sendVerification);
-      eventBus.emit('resendEmail', user);
-      res.status(200).json({
-        status: 'success',
-        message: 'Confirmation link has been sent. Please check your email or spam folder'
+     * Resends verification link to user email
+     * @async
+     * @param  {object} req - Request object
+     * @param {object} res - Response object
+     * @param {function} next - next middleware
+     * @return {json} Returns json object
+     * @static
+     */
+  static async resendVerificationLink(req, res) {
+    const { email } = req.body;
+    const emailIsValid = validator.isEmail(email);
+    if (!emailIsValid) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Please provide a valid email'
       });
-    } catch (error) {
-      next(error);
     }
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'You have not created an account yet.'
+      });
+    }
+    if (user.isVerified) {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Your account is already verified'
+      });
+    }
+    eventBus.on('resendEmail', Mail.sendVerification);
+    eventBus.emit('resendEmail', user);
+    res.status(200).json({
+      status: 'success',
+      message: 'Confirmation link has been sent. Please check your email or spam folder'
+    });
   }
 }
 

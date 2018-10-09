@@ -7,7 +7,6 @@ import methodOverride from 'method-override';
 import swaggerUi from 'swagger-ui-express';
 import passport from 'passport';
 import session from 'express-session';
-import Authorization from './middlewares/Authorization';
 import routes from './routes';
 import googleStrategy from './config/passport/google';
 import facebookStrategy from './config/passport/facebook';
@@ -38,7 +37,6 @@ passport.use(facebookStrategy);
 passport.use(twitterStrategy);
 app.use(passport.initialize());
 
-app.use('/api/v1', Authorization.secureRoutes);
 app.use(routes);
 
 export default app;

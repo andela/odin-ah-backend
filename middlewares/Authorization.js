@@ -52,10 +52,10 @@ class Authorization {
   }
 
   /**
-   *
-   * @param {error} err JWT error
-   * @return {{message: string, status: string}} returns formatted error
-   */
+     *
+     * @param {error} err JWT error
+     * @return {{message: string, status: string}} returns formatted error
+     */
   static getError(err) {
     let message = 'Invalid token';
     if (err instanceof TokenExpiredError) {
@@ -83,13 +83,13 @@ class Authorization {
   }
 
   /**
-   * Verifies the user token
-   * @param  {object} req - Request object
-   * @param {object} res - Response object
-   * @param {function} next - calls the next middleware
-   * @return {object} return an object
-   * @static
-   */
+     * Verifies the user token
+     * @param  {object} req - Request object
+     * @param {object} res - Response object
+     * @param {function} next - calls the next middleware
+     * @return {object} return an object
+     * @static
+     */
   static secureRoutes(req, res, next) {
     if (Authorization.isAuthNotRequired(req)) {
       return next();
@@ -99,15 +99,15 @@ class Authorization {
   }
 
   /**
-   *
-   * @param {request} req
-   * @return {boolean} checks if authentication is not required for the request.
-   */
+     *
+     * @param {request} req
+     * @return {boolean} checks if authentication is not required for the request.
+     */
   static isAuthNotRequired(req) {
     const { url, method } = req;
     return url.startsWith('/auth')
-      || (url.startsWith('/articles') && method.toUpperCase() === 'GET')
-      || url.startsWith('/users');
+            || (url.startsWith('/articles') && method.toUpperCase() === 'GET')
+            || url.startsWith('/users');
   }
 }
 

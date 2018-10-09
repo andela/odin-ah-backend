@@ -8,24 +8,25 @@ import config from '../config';
  */
 export default class Util {
   /**
-   *
-   * @param {string}username
-   * @param {string}title
-   * @return {string} Return a slug value of the provided username and tite
-   */
+     *
+     * @param {string}username
+     * @param {string}title
+     * @return {string} Return a slug value of the provided username and tite
+     */
   static createSlug(username, title) {
     return `${username}-${urlSlug(title)}`;
   }
 
   /**
-   *
-   * @param {number} page
-   * @param {number} size
-   * @param {number} total
-   * @return {object} returns information for pagination.
-   */
+     *
+     * @param {number} page
+     * @param {number} size
+     * @param {number} total
+     * @return {object} returns information for pagination.
+     */
   static getPageInfo(page, size, total) {
     const pageNumber = Number(page);
+    // checks if pageNumber is a number if and if the number is greater than zero.
     if (!(!Number.isNaN(pageNumber) && pageNumber > 0)) {
       page = 1;
     }
@@ -43,19 +44,21 @@ export default class Util {
 
     const offset = (page - 1) * limit;
     return {
-      page, limit, offset
+      page,
+      limit,
+      offset
     };
   }
 
   /**
-   *
-   *
-   * @static
-   * @param {*} data
-   * @param {*} signature
-   * @returns {string} returns encoded jwt string
-   * @memberof Util
-   */
+     *
+     *
+     * @static
+     * @param {*} data
+     * @param {*} signature
+     * @returns {string} returns encoded jwt string
+     * @memberof Util
+     */
   static generateToken(data, signature) {
     return jwt.sign(data,
       signature, {
@@ -64,13 +67,13 @@ export default class Util {
   }
 
   /**
-   *
-   *
-   * @static
-   * @param {*} date
-   * @returns {string} returns a string format of the timestamp
-   * @memberof Util
-   */
+     *
+     *
+     * @static
+     * @param {*} date
+     * @returns {string} returns a string format of the timestamp
+     * @memberof Util
+     */
   static dateToString(date) {
     return new Date(date).getTime().toString();
   }

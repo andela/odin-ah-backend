@@ -15,11 +15,11 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
  */
 class Mail {
   /**
-   * @static
-   * @param {object} user
-   * @return {json} Returns json object
-   * @memberof Mail
-   */
+     * @static
+     * @param {object} user
+     * @return {json} Returns json object
+     * @memberof Mail
+     */
   static sendVerification(user) {
     const { email, token } = user;
     const baseUrl = process.env.BASE_URL;
@@ -39,14 +39,14 @@ class Mail {
   }
 
   /**
-   *
-   *
-   * @static
-   * @param {string} email
-   * @param {string} url
-   * @memberof Mail
-   * @returns {res} response
-   */
+     *
+     *
+     * @static
+     * @param {string} email
+     * @param {string} url
+     * @memberof Mail
+     * @returns {res} response
+     */
   static async sendPasswordReset(email, url) {
     const subject = 'Password Reset Email';
     const { message } = emailMessages.passwordReset(url);

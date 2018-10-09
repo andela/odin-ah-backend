@@ -9,15 +9,15 @@ import ValidationError from '../../helpers/exceptionHandler/ValidationError';
  */
 class UserValidator {
   /**
-   *
-   *
-   * @static
-   * @param {object} req
-   * @param {object} res
-   * @param {function} next
-   * @returns {function} returns a validator function
-   * @memberof UserValidator
-   */
+     *
+     *
+     * @static
+     * @param {object} req
+     * @param {object} res
+     * @param {function} next
+     * @returns {function} returns a validator function
+     * @memberof UserValidator
+     */
   static beginResetPassword(req, res, next) {
     const errors = validate(req.body, Constraints.User.beginResetPassword);
     if (errors) {
@@ -27,15 +27,15 @@ class UserValidator {
   }
 
   /**
-   *
-   *
-   * @static
-   * @param {object} req
-   * @param {object} res
-   * @param {function} next
-   * @returns {function} returns a validator function
-   * @memberof UserValidator
-   */
+     *
+     *
+     * @static
+     * @param {object} req
+     * @param {object} res
+     * @param {function} next
+     * @returns {function} returns a validator function
+     * @memberof UserValidator
+     */
   static completeResetPassword(req, res, next) {
     const errors = validate(req.body, Constraints.User.completeResetPassword);
     if (errors) {

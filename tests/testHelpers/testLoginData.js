@@ -44,7 +44,34 @@ const emptyEmail = {
   email: '',
   password: '12'
 };
-
+const sampleUser = {
+  email: 'victorbk1234@gmail.com',
+  username: 'victorbk1234',
+  password: '108275386vgmdj678',
+  isVerified: true,
+  token: 'ykwh8ws31yiykwh8ws31yi',
+};
+const sampleUser2 = {
+  email: 'victorbk14@gmail.com',
+  username: 'great34',
+  password: '108275386vgmdj678',
+  isVerified: true,
+  token: 'ykwh8ws31yiykwh8ws31yi',
+};
+const sampleUser3 = {
+  email: 'Aliquam.erat.volutpat@sagittisplacerat.edu',
+  username: 'Kellie',
+  password: 'HBF51DQC2JU',
+  isVerified: true,
+  token: 'ykwh8ws31yiykwh8ws31yi',
+};
+const sampleUser4 = {
+  email: 'Etiam.bibendum.fermentum@accumsanlaoreetipsum.net',
+  username: 'Cathleen',
+  password: 'UMR78YRX3OP',
+  isVerified: true,
+  token: 'ykwh8ws31yiykwh8ws31yi',
+};
 export {
   realUser,
   realUser1,
@@ -54,5 +81,9 @@ export {
   wrongLength,
   emptyEmail,
   wrongEmail,
-  realUserWithWrongPassword
+  realUserWithWrongPassword,
+  sampleUser,
+  sampleUser2,
+  sampleUser3,
+  sampleUser4,
 };

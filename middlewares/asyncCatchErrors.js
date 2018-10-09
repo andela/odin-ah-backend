@@ -4,5 +4,5 @@
  *
  * */
 
-const asyncCatchErrors = fn => (req, res, next) => fn(req, res, next).catch(next);
+const asyncCatchErrors = fn => (req, res, next) => fn(req, res, next).catch(e => next(e));
 export default asyncCatchErrors;

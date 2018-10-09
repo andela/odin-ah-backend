@@ -1,9 +1,12 @@
 import chai, {
   expect
 } from 'chai';
+import sinon from 'sinon';
 import server from '../../index';
 import UserHelper from '../../helpers/UserHelper';
 import Util from '../../helpers/Util';
+import Mail from '../../services/Mail';
+
 
 const user = {
   email: 'resettester@havenmail.com',
@@ -76,6 +79,41 @@ describe('Reset Password', () => {
           expect(response.body).to.have.property('status')
             .that.is.equal('error');
           expect(response.body).to.have.property('message');
+          done();
+        });
+    });
+    it('should resolve Mail.sendPasswordReset method', (done) => {
+      const mockMail = sinon.stub(Mail, 'sendPasswordReset').resolves();
+      chai.request(server)
+        .post(beginResetEndpoint)
+        .send({
+          email
+        })
+        .end((err, response) => {
+          expect(response).to.have.status(200);
+          expect(response.body).to.have.property('status')
+            .that.is.equal('success');
+          expect(response.body).to.have.property('message');
+          mockMail.restore();
+          done();
+        });
+    });
+    it('should throw error to logger if Mail.sendPasswordReset recieves error status', (done) => {
+      const mockMail = sinon.stub(Mail, 'sendPasswordReset').returns(Promise.resolve([{
+        status: 'error',
+        message: 'error sending mail'
+      }]));
+      chai.request(server)
+        .post(beginResetEndpoint)
+        .send({
+          email
+        })
+        .end((err, response) => {
+          expect(response).to.have.status(200);
+          expect(response.body).to.have.property('status')
+            .that.is.equal('success');
+          expect(response.body).to.have.property('message');
+          mockMail.restore();
           done();
         });
     });
