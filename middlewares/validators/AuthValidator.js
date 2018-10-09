@@ -19,29 +19,25 @@ class AuthValidator {
       password,
     } = req.body;
 
+    let message = null;
     if (!email) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Email can not be empty',
-      });
+      message = 'Email can not be empty';
     }
     if (!ValidatorHelper.isEmail(email)) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'It seems your email is not valid, or is incorrect',
-      });
+      message = 'It seems your email is not valid, or is incorrect';
     }
 
     if (!password) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Password can not be empty',
-      });
+      message = 'Password can not be empty';
     }
-    if (!ValidatorHelper.isMinLen(password)) {
+    if (password && !ValidatorHelper.isMinLen(password)) {
+      message = 'Password must be greater than eight characters';
+    }
+
+    if (message) {
       return res.status(400).json({
         status: 'error',
-        message: 'Password must be greater than eight characters',
+        message
       });
     }
 

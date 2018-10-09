@@ -1,5 +1,6 @@
 import urlSlug from 'url-slug';
 import db from '../models';
+import HttpError from './exceptionHandler/httpError';
 
 const { Article, User } = db;
 
@@ -91,20 +92,43 @@ class ArticleHelper {
 
   /**
    *
+   * @param {Array}allArticle
+   * @return {object} returns response data.
+   */
+  static getArticlesResponseData(allArticle) {
+    const articles = [];
+    allArticle.forEach((article) => {
+      const { user } = article;
+      articles.push(ArticleHelper.getArticleResponseData(user,
+        article.dataValues));
+    });
+    return articles;
+  }
+
+  /**
+   *
    * @param {string}slug
+   * @param {include} [include]
    * @return {Promise<Model>} gets an article by slug
    */
-  static async findArticleBySlug(slug) {
+  static async findArticleBySlug(slug, include = [{ model: User, as: 'user', }]) {
     return Article.findOne({
       where: { slug },
-      include: [
-        {
-          model: User,
-          as: 'user',
-        }
-      ]
-
+      include
     });
+  }
+
+  /**
+   *
+   * @param {string} slug
+   * @return {Promise<void>} Throws an error if article already.
+   */
+  static async throwErrorIfArticleExists(slug) {
+    const article = await ArticleHelper.findArticleBySlug(slug);
+    if (article) {
+      throw new HttpError('Article already exists. Use PUT to update article', 409);
+    }
+    return null;
   }
 }
 
