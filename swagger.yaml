@@ -541,6 +541,38 @@ paths:
       - Users
       security:
         - UserSecurity: []
+  "/articles//likes/{slug}/{status}":
+    post:
+      summary: Create new like
+      description: >-
+       The route allows Authenticated users to like, dislike or neutral on any articles
+      parameters:
+        - name: slug
+          in: path
+          description: article unique slug
+          schema:
+            $ref: "#/definitions/LikeRequest"
+        - name: status
+          in: path
+          description: like, dislike or neutral
+          schema:
+            $ref: "#/definitions/LikeRequest"
+      responses:
+        201:
+          description: successfully liked an article
+          schema:
+            $ref: "#/definitions/LikeResult"
+        200:
+          description: successfully modified like status
+          schema:
+            $ref: "#/definitions/LikeResult"
+        400:
+          description: status can only be either like, dislike or neutral.
+          schema:
+            $ref: "#/definitions/Error"
+      tags:
+        - Articles
+
 
   /users/reset-password/begin:
     post:
@@ -955,3 +987,28 @@ definitions:
       message:
         type: string
         example: Password has been successfully reset!.
+
+
+  LikeRequest:
+    required:
+      - slug
+      - status
+    properties:
+     slug:
+      type: string
+      example: My-awesome-article-hammed
+    status:
+      type: string
+      example: like
+  LikeResult:
+      message:
+        type: string
+        example: successfully liked an article
+    
+  properties:
+      status:
+        type: string
+        example: error
+      message:
+        type: string
+        example: user already liked this article
