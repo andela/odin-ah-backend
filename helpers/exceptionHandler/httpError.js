@@ -14,14 +14,15 @@ export default class HttpError extends Error {
 
   /**
    *
-   * @param {object} data
-   * @param {string} message
+   * @param {object} data - The object to test.
+   * @param {string} message - The error message to return to the user
+   * @param {number} [status] - The status to return to the user
    * @return {void} Throws an error if data is equal to null.
    * @throws HttpError
    */
-  static throw404ErrorIfNull(data, message) {
+  static throwErrorIfNull(data, message, status = 404) {
     if (!data) {
-      throw new HttpError(message, 404);
+      throw new HttpError(message, status);
     }
   }
 }

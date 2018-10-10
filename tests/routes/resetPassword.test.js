@@ -64,7 +64,7 @@ describe('Reset Password', () => {
           email: 'jarever555@invalidmails.com'
         })
         .end((err, response) => {
-          expect(response).to.have.status(400);
+          expect(response).to.have.status(404);
           expect(response.body).to.have.property('status')
             .that.is.equal('error');
           expect(response.body).to.have.property('message');

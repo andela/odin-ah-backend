@@ -26,7 +26,7 @@ class ProfileController {
       UserHelper.findById(userId), UserHelper.findByEmail(email)
     ]);
 
-    HttpError.throw404ErrorIfNull(userResultById, 'User not found!');
+    HttpError.throwErrorIfNull(userResultById, 'User not found!');
 
     if (UserHelper.notSameUser(userResultById, userResultByEmail)) {
       return response.status(409)
@@ -54,7 +54,7 @@ class ProfileController {
   static async getProfile(request, response) {
     const { userId } = request.authData;
     const user = await User.findById(userId);
-    HttpError.throw404ErrorIfNull(user, 'User is not found');
+    HttpError.throwErrorIfNull(user, 'User is not found');
     const { dataValues } = user;
     return response.status(200)
       .json({
@@ -122,7 +122,7 @@ class ProfileController {
         following: follower.id
       }
     });
-    HttpError.throw404ErrorIfNull(count, `You were not following ${follower.username}`);
+    HttpError.throwErrorIfNull(count, `You were not following ${follower.username}`);
     const response = await Follows.destroy({
       where: {
         follower: id,

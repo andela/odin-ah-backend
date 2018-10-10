@@ -6,6 +6,7 @@ import UserHelper from '../../helpers/UserHelper';
 import Util from '../../helpers/Util';
 import Mailer from '../../services/Mail';
 import config from '../../config';
+import HttpError from '../../helpers/exceptionHandler/httpError';
 
 const { User } = db;
 /**
@@ -13,19 +14,21 @@ const { User } = db;
  */
 export default class UserController {
   /**
-     *
-     *
-     * @static
-     * @param {request} req
-     * @param {response} res
-     * @param {next} next
-     * @returns {json} return json object to user
-     * @memberof UserController
-     */
-  static async beginResetPassword(req, res) {
+   *
+   *
+   * @static
+   * @param {request} req
+   * @param {response} res
+   * @param {next} next
+   * @returns {json} return json object to user
+   * @memberof UserController
+   */
+  static async beginResetPassword(req, res, next) {
     const { email } = req.body;
-    const user = await UserHelper.findByEmail(email);
-    if (user) {
+    try {
+      const user = await UserHelper.findByEmail(email);
+      HttpError.throwErrorIfNull(user, 'Oops! user not found');
+
       const { id, updatedAt } = user;
       const resetToken = Util.generateToken({ id, updatedAt },
         Util.dateToString(updatedAt));
@@ -44,23 +47,21 @@ export default class UserController {
           status: 'success',
           message: 'An email containing the reset password link has been sent to you. If you can\'t find the link, please try again.'
         });
+    } catch (error) {
+      next(error);
     }
-    return res.status(400).json({
-      status: 'error',
-      message: 'Oops! user not found'
-    });
   }
 
   /**
-     *
-     *
-     * @static
-     * @param {object} req
-     * @param {object} res
-     * @param {function} next
-     * @returns {object} a response object
-     * @memberof UserController
-     */
+   *
+   *
+   * @static
+   * @param {object} req
+   * @param {object} res
+   * @param {function} next
+   * @returns {object} a response object
+   * @memberof UserController
+   */
   static async completePasswordReset(req, res) {
     const { token } = req.params;
     const { password } = req.body;
@@ -75,13 +76,16 @@ export default class UserController {
       }
       const { updatedAt } = user;
       await jwt.verify(token, Util.dateToString(updatedAt));
-      await user.update({
-        password: bcrypt.hashSync(password, 10),
-      }, {
-        where: {
-          id
+      await user.update(
+        {
+          password: bcrypt.hashSync(password, 10),
+        },
+        {
+          where: {
+            id
+          }
         }
-      });
+      );
       return res.status(200).json({
         status: 'success',
         message: 'Password has been successfully reset!',

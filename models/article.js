@@ -9,10 +9,21 @@ module.exports = (sequelize, DataTypes) => {
     Article.belongsTo(models.User, {
       as: 'user',
     });
-    Article.hasMany(models.Comment, { as: 'comments', foreignKey: 'articleId' });
+
+    Article.hasMany(models.Comment, {
+      as: 'comments',
+      foreignKey: 'articleId'
+    });
+
     Article.hasMany(models.Like, {
       foreignKey: 'articleId',
       as: 'likes',
+    });
+
+    Article.belongsToMany(models.Tag, {
+      as: 'tags',
+      through: 'ArticleTags',
+      foreignKey: 'articleId'
     });
   };
 

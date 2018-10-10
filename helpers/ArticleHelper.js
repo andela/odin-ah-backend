@@ -1,8 +1,12 @@
 import urlSlug from 'url-slug';
+import TagHelper from './TagHelper';
 import db from '../models';
 import HttpError from './exceptionHandler/httpError';
+import Util from './Util';
 
-const { Article, User } = db;
+const {
+  Article, Tag, User, ArticleTag
+} = db;
 
 /**
  * Helper class for Article Controller
@@ -19,16 +23,11 @@ class ArticleHelper {
    * @return {object} returns article field to update
    */
   static getUpdateField(req, username) {
-    const {
-      body, title, description
-    } = req.body;
-    const field = {};
-    if (title) {
-      field.title = (title);
-      field.slug = `${username}-${urlSlug(title)}`;
+    const field = Util.extractFieldsFromObject(['body', 'title', 'tags', 'description'],
+      req.body);
+    if (field.title) {
+      field.slug = `${username}-${urlSlug(field.title)}`;
     }
-    if (body) field.body = body;
-    if (description) field.description = description;
     return field;
   }
 
@@ -41,19 +40,23 @@ class ArticleHelper {
    */
   static async saveArticle(req, slug, userData) {
     const {
-      body, title, description
+      body, title, tags, description
     } = req.body;
-    const articleData = await Article.create({
+    const createArticle = Article.create({
       body,
       title,
       slug,
       description,
     });
+    const createTags = TagHelper.findOrCreateTags(tags);
 
+    const [articleData, tagData] = await Promise.all([createArticle, createTags]);
+
+    if (tags) await articleData.addTags(tagData);
     await articleData.setUser(userData);
 
     return ArticleHelper.getArticleResponseData(userData.dataValues,
-      articleData.dataValues);
+      articleData.dataValues, tagData);
   }
 
   /**
@@ -63,30 +66,61 @@ class ArticleHelper {
    * @return {Promise<object>} return json data to be sent as a response
    */
   static async saveUpdates(req, articleData) {
-    const userData = articleData.user;
-    const { username } = userData.dataValues;
+    const { tags } = req.body;
+    const { user } = articleData;
+    const [updateTag] = await Promise.all([TagHelper.findOrCreateTags(tags),
+      ArticleHelper.unLinkTags(articleData)]);
+    const { username } = user.dataValues;
     await articleData.update(ArticleHelper.getUpdateField(req, username));
-    return ArticleHelper.getArticleResponseData(userData.dataValues,
-      articleData.dataValues);
+    await articleData.addTags(updateTag);
+    return ArticleHelper.getArticleResponseData(user.dataValues,
+      articleData.dataValues, updateTag);
+  }
+
+  /**
+   *
+   * @param {Article} article
+   * @return {Promise<void>} remove tag dependencies from an article.
+   * @constructor
+   */
+  static async unLinkTags(article) {
+    await Promise.all(article.tags.map(tag => ArticleTag
+      .destroy({
+        where: {
+          articleId: article.id,
+          tagId: tag.id
+        }
+      })));
   }
 
   /**
    *
    * @param {User} user
    * @param {Article}article
+   * @param {Array} tagList
    * @return {object} returns response data.
    */
-  static getArticleResponseData(user, article) {
+  static getArticleResponseData(user, article, tagList) {
     const {
       title, body, description, slug
     } = article;
     const { username, bio, imageUrl } = user;
-
+    let tags = [];
+    if (tagList && tagList.length > 0) {
+      tags = tagList.map(tag => tag.dataValues.name);
+    }
     const author = {
-      username, bio, imageUrl
+      username,
+      bio,
+      imageUrl
     };
     return {
-      slug, title, body, description, author
+      slug,
+      title,
+      body,
+      description,
+      tags,
+      author
     };
   }
 
@@ -98,9 +132,9 @@ class ArticleHelper {
   static getArticlesResponseData(allArticle) {
     const articles = [];
     allArticle.forEach((article) => {
-      const { user } = article;
+      const { user, tags } = article;
       articles.push(ArticleHelper.getArticleResponseData(user,
-        article.dataValues));
+        article, tags));
     });
     return articles;
   }
@@ -111,7 +145,18 @@ class ArticleHelper {
    * @param {include} [include]
    * @return {Promise<Model>} gets an article by slug
    */
-  static async findArticleBySlug(slug, include = [{ model: User, as: 'user', }]) {
+  static async findArticleBySlug(slug, include = null) {
+    if (!include) {
+      include = [{
+        model: User,
+        as: 'user',
+      },
+      {
+        model: Tag,
+        as: 'tags'
+      }];
+    }
+
     return Article.findOne({
       where: { slug },
       include

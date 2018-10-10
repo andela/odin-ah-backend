@@ -24,7 +24,7 @@ export default class LikeController {
     const article = await ArticleHelper.findArticleBySlug(slug);
 
 
-    HttpError.throw404ErrorIfNull(article, 'Article not found');
+    HttpError.throwErrorIfNull(article, 'Article not found');
 
     const articleId = article.id;
     const existingLike = await Like.findOne({ where: { $and: [{ articleId }, { userId }] } });

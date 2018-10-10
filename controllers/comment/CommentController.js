@@ -24,7 +24,7 @@ export default class CommentController {
     try {
       const { slug } = req;
       const article = await ArticleHelper.findArticleBySlug(slug);
-      HttpError.throw404ErrorIfNull(article, 'Article not found');
+      HttpError.throwErrorIfNull(article, 'Article not found');
 
       let comments = await Comment.findAll({
         where: { $and: [{ articleId: article.id }, { parentId: null }] },
@@ -100,14 +100,14 @@ export default class CommentController {
     const { userId } = req.authData;
     try {
       const article = await ArticleHelper.findArticleBySlug(slug);
-      HttpError.throw404ErrorIfNull(article, 'Article not found');
+      HttpError.throwErrorIfNull(article, 'Article not found');
       let parent = null;
       if (id && !Number.isNaN(Number(id))) {
         parent = await Comment.findOne({
           where: { id }
         });
         // Throws an error if parent comment does not exist.
-        HttpError.throw404ErrorIfNull(parent, 'comment not found');
+        HttpError.throwErrorIfNull(parent, 'comment not found');
       }
       if (parent && parent.parentId) {
         return res.status(403)

@@ -2,17 +2,18 @@ import bcrypt from 'bcrypt';
 import validator from 'validator';
 import Authorization from '../../middlewares/Authorization';
 import UserHelper from '../../helpers/UserHelper';
-import verificationToken from '../../helpers/verificationToken';
 import db from '../../models/index';
 import Mail from '../../services/Mail';
 import eventBus from '../../helpers/eventBus';
+import HttpError from '../../helpers/exceptionHandler/httpError';
+import Util from '../../helpers/Util';
 
 const { User } = db;
 
 /**
  * @exports AuthController
  * @class AuthController
- * @description Handles the user registartion and Sigin
+ * @description Handles the user registration and sign in
  * */
 class AuthController {
   /**
@@ -82,13 +83,9 @@ class AuthController {
         }
       });
       if (user) {
-        // return next(new HttpError('Account already exist', 400));
-        return res.status(400).json({
-          status: 'error',
-          message: 'User already exists. Please login'
-        });
+        return next(new HttpError('User already exists. Please login', 400));
       }
-      const token = verificationToken();
+      const token = Util.generateRandomString(32);
       const newUser = await User.create({
         username,
         email,
