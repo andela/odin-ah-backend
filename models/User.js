@@ -41,6 +41,13 @@ export default (sequelize, Sequelize) => {
     user.email = user.email.toLowerCase();
     if (user.password) user.password = bcrypt.hashSync(user.password, 10);
   });
+  User.hook('beforeBulkCreate', (users) => {
+    users.map((user) => {
+      user.email = user.email.toLowerCase();
+      if (user.password) user.password = bcrypt.hashSync(user.password, 10);
+      return user;
+    });
+  });
 
   User.associate = (models) => {
     User.hasMany(models.Article, { as: 'Articles', foreignKey: 'userId' });

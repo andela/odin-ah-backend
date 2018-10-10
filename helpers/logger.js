@@ -6,7 +6,7 @@ const logger = winston.createLogger({
   transports: [
     new winston.transports.Console({
       level,
-      timestamp: () => (new Date()).toISOString(),
+      timestamp: 'true',
     }),
   ],
 });

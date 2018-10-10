@@ -54,6 +54,23 @@ describe('POST /api/v1/auth/signup ', () => {
         done();
       });
   });
+  it('should return a error message when Email is invalid', (done) => {
+    chai
+      .request(server)
+      .post('/api/v1/auth/signup')
+      .send({
+        username: 'hnobi',
+        email: '3fwet5ytf34er.melomelo.com',
+        password: '12345678',
+        token
+      })
+      .end((err, res) => {
+        expect(res).to.have.status(400);
+        expect(res.body.status).to.equal('error');
+        expect(res.body.message).to.equal('It seems your email is not valid, or is incorrect');
+        done();
+      });
+  });
   it('should return a error message when password is empty return a `400`', (done) => {
     chai
       .request(server)
@@ -70,7 +87,7 @@ describe('POST /api/v1/auth/signup ', () => {
         done();
       });
   });
-  it('should only take password lenght of 8 and greater than 8 `400`', (done) => {
+  it('should only take password length of 8 and greater than 8 `400`', (done) => {
     chai
       .request(server)
       .post('/api/v1/auth/signup')

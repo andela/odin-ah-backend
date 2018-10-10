@@ -1,4 +1,5 @@
 import chai, { expect } from 'chai';
+import jwt from 'jsonwebtoken';
 import { mockReq, mockRes } from 'sinon-express-mock';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -10,6 +11,12 @@ describe('Authorization', () => {
   const res = mockRes();
   const userId = 1;
   const token = Authorization.generateToken(userId);
+  const expiredToken = jwt.sign({
+    userId
+  },
+  process.env.JWTSECRET, {
+    expiresIn: '0s',
+  });
   const realReq = mockReq({
     headers: {
       authorization: `Bearer: ${token}`
@@ -22,6 +29,11 @@ describe('Authorization', () => {
   });
   const noReq = mockReq({
     headers: {}
+  });
+  const expiredTokenRequest = mockReq({
+    headers: {
+      authorization: `Bearer: ${expiredToken}`
+    }
   });
   it('should return a token', () => {
     expect(token).to.be.a('string');
@@ -49,5 +61,14 @@ describe('Authorization', () => {
   it('should return a string when no token is passed', async () => {
     const result = await Authorization.getToken(noReq);
     expect(result).to.be.equal(null);
+  });
+  it('should return a 401 status code  and a message', async () => {
+    const next = sinon.spy();
+    await Authorization.verifyToken(expiredTokenRequest, res, next);
+    expect(res.status).to.be.calledWith(401);
+    expect(res.json).to.be.calledWith({
+      status: 'error',
+      message: 'Access Token has Expired.',
+    });
   });
 });
