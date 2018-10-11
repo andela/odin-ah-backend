@@ -11,6 +11,6 @@ describe('sendPasswordReset() method', () => {
         expect(res).to.have.property('status')
           .that.is.equal('success');
         done();
-      });
+      })
   });
 });
