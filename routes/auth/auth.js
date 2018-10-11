@@ -10,7 +10,7 @@ router.post('/login', AuthValidator.validateLogin, asyncCatchErrors(AuthControll
 router.post('/signup', AuthValidator.validatesignup, AuthController.signUp);
 
 router.get('/confirmation/:token', AuthController.verifyUser);
-router.post('/confirmation', AuthController.resendVerificationLink);
+router.post('/confirmation', asyncCatchErrors(AuthController.resendVerificationLink));
 
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 router.get(

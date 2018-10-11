@@ -2,8 +2,7 @@ import bcrypt from 'bcrypt';
 
 export default (sequelize, Sequelize) => {
   const User = sequelize.define(
-    'User',
-    {
+    'User', {
       username: {
         type: Sequelize.STRING,
         allowNull: true,
@@ -34,8 +33,7 @@ export default (sequelize, Sequelize) => {
       bio: Sequelize.STRING,
       imageUrl: Sequelize.STRING,
       password: Sequelize.STRING
-    },
-    {
+    }, {
       timestamps: true
     }
   );
@@ -47,6 +45,10 @@ export default (sequelize, Sequelize) => {
   User.associate = (models) => {
     User.hasMany(models.Article, { as: 'Articles', foreignKey: 'userId' });
     User.hasMany(models.Comment, { as: 'Comments', foreignKey: 'userId' });
+    User.belongsToMany(models.Follows, {
+      foreignKey: 'userId',
+      through: 'UserFollows'
+    });
   };
   return User;
 };

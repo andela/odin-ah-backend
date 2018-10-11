@@ -27,4 +27,12 @@ export default class ValidatorHelper {
   static isMinLen(data) {
     return data.length >= 8;
   }
+
+  /**
+     * @param  {number} number - the value to verify if it is a number
+     * @returns  {Boolean} Returns boolean
+     */
+  static isNumber(number) {
+    return !!number.match(/^\d+$/);
+  }
 }

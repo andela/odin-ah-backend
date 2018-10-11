@@ -1,5 +1,6 @@
 import db from '../models';
 
+
 const { User } = db;
 
 
@@ -10,12 +11,12 @@ const { User } = db;
  * */
 class UserHelper {
   /**
-   * Find a particular user  by emial
-   * @async
-   * @param {string} email - the user email
-   * @return {object} Returns json object
-   * @static
-   */
+     * Find a particular user  by emial
+     * @async
+     * @param {string} email - the user email
+     * @return {object} Returns json object
+     * @static
+     */
   static async findByEmail(email) {
     try {
       const foundUser = await User.findOne({ where: { email } });
@@ -29,12 +30,12 @@ class UserHelper {
   }
 
   /**
-   * Find a particular user by id
-   * @async
-   * @param {number} id - the user email
-   * @return {object} Returns json object
-   * @static
-   */
+     * Find a particular user by id
+     * @async
+     * @param {number} id - the user email
+     * @return {object} Returns json object
+     * @static
+     */
   static async findById(id) {
     let data = null;
     try {
@@ -46,13 +47,18 @@ class UserHelper {
   }
 
   /**
-    *
-    * @param {request} request HTTP request
-    * @return {object} return user fields to update
-  */
+     *
+     * @param {request} request HTTP request
+     * @return {object} return user fields to update
+     */
   static getUpdateFields(request) {
     const {
-      username, email, firstName, lastName, bio, imageUrl
+      username,
+      email,
+      firstName,
+      lastName,
+      bio,
+      imageUrl
     } = request.body;
     const updateFields = {};
     if (username) {
@@ -77,28 +83,40 @@ class UserHelper {
   }
 
   /**
-   *
-   * @param {User} user
-   * @return {object} return user's profile
-   */
+     *
+     * @param {User} user
+     * @return {object} return user's profile
+     */
   static getUserProfileData(user) {
     const {
-      id, firstName, lastName, username, email, bio, imageUrl
+      id,
+      firstName,
+      lastName,
+      username,
+      email,
+      bio,
+      imageUrl
     } = user.dataValues;
     return {
-      id, firstName, lastName, username, email, bio, imageUrl
+      id,
+      firstName,
+      lastName,
+      username,
+      email,
+      bio,
+      imageUrl
     };
   }
 
   /**
-   *
-   * @param {User} userResultById
-   * @param {User} userResultByEmail
-   * @return {boolean} Compare two users by ids
-   */
+     *
+     * @param {User} userResultById
+     * @param {User} userResultByEmail
+     * @return {boolean} Compare two users by ids
+     */
   static notSameUser(userResultById, userResultByEmail) {
     return userResultByEmail && userResultById
-      && userResultById.dataValues.id !== userResultByEmail.dataValues.id;
+            && userResultById.dataValues.id !== userResultByEmail.dataValues.id;
   }
 }
 
