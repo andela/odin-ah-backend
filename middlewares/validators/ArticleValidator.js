@@ -1,5 +1,5 @@
-import validator from 'validator';
 import Validator from '../../helpers/ValidatorHelper';
+import HttpError from '../../helpers/exceptionHandler/httpError';
 
 /**
  * @exports ArticleValidator
@@ -17,26 +17,40 @@ class ArticleValidator {
    */
   static createArticleValidator(req, res, next) {
     const {
-      body, title, description
+      body, title, description, tags
     } = req.body;
     let message = null;
     if (Validator.isEmpty(body) || Validator.isEmpty(title) || Validator.isEmpty(description)) {
       message = 'description, title or body field cannot be empty';
     }
-    if (title && !validator.isLength(title, { min: 5 })) {
-      message = 'Title must be at least 5 characters long';
+
+    message = message || ArticleValidator.validateTitleLength(title)
+      || ArticleValidator.validateTags(tags);
+    if (message) {
+      return next(new HttpError(message, 400));
     }
 
-    if (message) {
-      return res.status(400)
-        .json({
-          status: 'error',
-          message,
-        });
-    }
     return next();
   }
 
+  /**
+   *
+   * @param {Array} tags
+   * @return {*} checks if a tag is valid. returns an error message if the tags field is not valid.
+   */
+  static validateTags(tags) {
+    let message = null;
+
+    if (tags && !(tags instanceof Array)) {
+      message = 'tags field must be an array';
+    }
+
+    if (tags && (tags instanceof Array)) {
+      message = ArticleValidator.containsValidStrings(tags);
+    }
+
+    return message;
+  }
 
   /**
    * Validates user input values
@@ -48,29 +62,25 @@ class ArticleValidator {
    */
   static updateArticleValidator(req, res, next) {
     const {
-      body, title, description
+      body, title, description, tags
     } = req.body;
     let message = null;
 
     if (body && Validator.isEmpty(body)) {
       message = 'body field cannot be empty';
     }
-    if (title && Validator.isEmpty(title)) {
-      message = 'title field cannot be empty';
-    }
     if (description && Validator.isEmpty(description)) {
       message = 'description field cannot be empty';
     }
-    if (title && !validator.isLength(title, { min: 5 })) {
-      message = 'Title must be at least 5 characters long';
+    if (title && Validator.isEmpty(title)) {
+      message = 'title field cannot be empty';
     }
 
+    message = message || ArticleValidator.validateTitleLength(title)
+      || ArticleValidator.validateTags(tags);
+
     if (message) {
-      return res.status(400)
-        .json({
-          status: 'error',
-          message,
-        });
+      return next(new HttpError(message, 400));
     }
     return next();
   }
@@ -101,6 +111,36 @@ class ArticleValidator {
         });
     }
     return next();
+  }
+
+  /**
+   *
+   * @param {string} tags
+   * @return {string} return a message if the array of tags contain an invalid tag.
+   */
+  static containsValidStrings(tags) {
+    const invalidStrings = tags.filter(tag => Validator.isEmpty(tag));
+    if (invalidStrings.length) {
+      return 'tags array contains an invalid tag';
+    }
+    return null;
+  }
+
+  /**
+   *
+   * @param {string} title
+   * @return {string} checks if the length of the title is valid.
+   * It return an error message if title is invalid.
+   */
+  static validateTitleLength(title) {
+    let message = null;
+    if (title && title.length < 5) {
+      message = 'Title must be at least 5 characters long';
+    }
+    if (title && title.length > 80) {
+      message = 'Title must not exceed 80 characters';
+    }
+    return message;
   }
 }
 

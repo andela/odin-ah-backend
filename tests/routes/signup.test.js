@@ -2,8 +2,8 @@ import chai from 'chai';
 import chaiHtpp from 'chai-http';
 import sinon from 'sinon';
 import server from '../..';
-import verificationToken from '../../helpers/verificationToken';
 import db from '../../models/index';
+import Util from '../../helpers/Util';
 
 chai.use(chaiHtpp);
 const { expect } = chai;
@@ -15,7 +15,7 @@ describe('POST /api/v1/auth/signup ', () => {
     email: 'hnobi08@gmail.com',
     password: '12345678'
   };
-  const token = verificationToken();
+  const token = Util.generateRandomString(32);
   it('should create a new user account and return a `201`', (done) => {
     chai
       .request(server)

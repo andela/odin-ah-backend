@@ -6,7 +6,10 @@ const { Article, User } = db;
 export const defaultArticle = {
   title: 'How to train your dragon',
   description: 'Ever wonder how?',
-  body: 'It takes a Jacobian',
+  body: 'Nunc sed diam suscipit, lobortis eros nec, auctor nisl. Nunc ac magna\n'
+    + '          non justo varius rutrum sit amet feugiat elit. Pellentesque vehicula,\n'
+    + '          ante rutrum condimentum tempor, purus metus vulputate ligula, et\n'
+    + '          commodo tortor massa eu tortor.',
 };
 
 /**
@@ -14,9 +17,10 @@ export const defaultArticle = {
  * @param {response} response
  * @param {Article} article
  * @param {User} user
+ * @param {Array} tags
  * @return {void}
  */
-export function assertArticleResponse(response, article, user) {
+export function assertArticleResponse(response, article, user, tags) {
   response.body.should.be.a('object');
   response.body.should.have.property('article');
   response.body.article.should.have.property('title')
@@ -32,6 +36,12 @@ export function assertArticleResponse(response, article, user) {
     .eq(user.username);
   response.body.article.author.should.have.property('bio');
   response.body.article.author.should.have.property('imageUrl');
+
+  response.body.article.should.have.property('tags');
+  response.body.article.tags.should.be.a('Array');
+  if (tags) {
+    response.body.article.tags.length.should.be.eql(tags.length);
+  }
 }
 
 /**
@@ -83,6 +93,29 @@ export async function validateArticleInput(url, jwt, update) {
       body: 'body body'
     });
 
+  const response7 = await getRequest(url, jwt, update)
+    .send({
+      title: 'How to train your dragon',
+      description: 'Ever wonder how?',
+      body: 'body body',
+      tags: 'eesff '
+    });
+
+  const response8 = await getRequest(url, jwt, update)
+    .send({
+      title: 'How to train your dragon',
+      description: 'Ever wonder how?',
+      body: 'body body',
+      tags: ['eesff ', '            ']
+    });
+  const response9 = await getRequest(url, jwt, update)
+    .send({
+      title: defaultArticle.body,
+      description: 'Ever wonder how?',
+      body: 'body body',
+      tags: ['eesff ']
+    });
+
   if (!update) {
     assertResponseStatus(response0, 400);
     assertErrorResponse(response0);
@@ -99,6 +132,12 @@ export async function validateArticleInput(url, jwt, update) {
   assertErrorResponse(response5);
   assertResponseStatus(response6, 400);
   assertErrorResponse(response6);
+  assertResponseStatus(response7, 400);
+  assertErrorResponse(response7);
+  assertResponseStatus(response8, 400);
+  assertErrorResponse(response8);
+  assertResponseStatus(response9, 400);
+  assertErrorResponse(response9);
 }
 
 /**

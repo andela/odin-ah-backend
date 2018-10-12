@@ -52,6 +52,7 @@
         "passport-twitter": "^1.0.4",
         "pg": "^7.4.3",
         "pg-hstore": "^2.3.2",
+        "randomstring": "^1.1.5",
         "request": "^2.87.0",
         "rimraf": "^2.6.2",
         "sequelize": "^4.38.1",

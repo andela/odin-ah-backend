@@ -4,7 +4,6 @@ import db from '../../models';
 import Authorization from '../../middlewares/Authorization';
 import server from '../../index';
 import { realUser, realUser1 } from '../testHelpers/testLoginData';
-import Util from '../../helpers/Util';
 import { AUTHORIZATION_HEADER } from '../../helpers/constants';
 import {
   assertArrayResponse,
@@ -16,7 +15,7 @@ import {
 } from '../testHelpers/articleUtil';
 import { assertErrorResponse, assertResponseStatus, assertTrue } from '../testHelpers';
 
-const { Article, User } = db;
+const { Article, User, Tag } = db;
 
 chai.use(chaiHttp);
 chai.should();
@@ -40,37 +39,22 @@ describe('Article CRUD Test', () => {
       const jwt = Authorization.generateToken(user.id);
       await validateArticleInput('/api/v1/articles', jwt, false);
     });
-    it('should return 409 if article already exists', async () => {
-      const users = await User.findAll();
-      const user = users[0].dataValues;
-      let article = {
-        ...defaultArticle,
-        slug: Util.createSlug(user.username, defaultArticle.title)
-      };
 
-      article = await Article.create(article);
-      await article.setUser(users[0]);
-      const jwt = Authorization.generateToken(user.id);
-      const response = await chai.request(server)
-        .post('/api/v1/articles')
-        .set(AUTHORIZATION_HEADER, `Bearer ${jwt}`)
-        .send({ ...defaultArticle });
-      assertResponseStatus(response, 409);
-      assertErrorResponse(response);
-    });
     it('should create new article for logged in user', async () => {
       const users = await User.findAll();
       const user = users[0].dataValues;
       const jwt = Authorization.generateToken(user.id);
+      const tags = ['nodejs', 'mocha'];
       const article = {
         ...defaultArticle,
+        tags
       };
       const response = await chai.request(server)
         .post('/api/v1/articles')
         .set(AUTHORIZATION_HEADER, `Bearer ${jwt}`)
         .send(article);
       assertResponseStatus(response, 201);
-      assertArticleResponse(response, article, user);
+      assertArticleResponse(response, article, user, tags);
     });
     it('should not POST article token is not provided', async () => {
       const response = await chai.request(server)
@@ -202,13 +186,27 @@ describe('Article CRUD Test', () => {
     it('should modify article I have authored', async () => {
       const users = await User.findAll();
       let user = users[0];
+      const tags = [
+        {
+          name: 'mocha-test',
+        },
+        {
+          name: 'reactjs',
+        }];
 
       let article = await Article.create({
         ...defaultArticle,
         slug: 'dummy-slug-article',
+        tags
+      }, {
+        include: [{
+          model: Tag,
+          as: 'tags'
+        }]
       });
       article.setUser(user);
 
+      const updateTag = [tags[0].name, tags[1].name, 'chaijs'];
       user = user.dataValues;
       const jwt = Authorization.generateToken(user.id);
 
@@ -216,13 +214,14 @@ describe('Article CRUD Test', () => {
       const update = {
         title: `mod ${article.title}`,
         body: `mod ${article.body}`,
+        tags: updateTag,
       };
       const response = await chai.request(server)
         .put(`/api/v1/articles/${article.slug}`)
         .set(AUTHORIZATION_HEADER, `Bearer ${jwt}`)
         .send(update);
       assertResponseStatus(response, 200);
-      assertArticleResponse(response, { ...article, ...update }, user);
+      assertArticleResponse(response, { ...article, ...update }, user, updateTag);
     });
     it('should return 404 if article does not exist', async () => {
       const users = await User.findAll();
@@ -252,7 +251,13 @@ describe('Article CRUD Test', () => {
       const slug = 'dummy-slug-article';
       let article = await Article.create({
         ...defaultArticle,
-        slug
+        slug,
+        tags: [{ name: 'delete-article' }]
+      }, {
+        include: [{
+          model: Tag,
+          as: 'tags'
+        }]
       });
       article.setUser(user);
 

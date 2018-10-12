@@ -5,7 +5,7 @@ import Util from '../../helpers/Util';
 import ArticleHelper from '../../helpers/ArticleHelper';
 import HttpError from '../../helpers/exceptionHandler/httpError';
 
-const { Article, User } = db;
+const { Article, User, Tag } = db;
 
 /**
  * Crud controller for Article entity
@@ -24,12 +24,11 @@ export default class ArticleController {
     const { slug } = req.params;
     try {
       let article = await ArticleHelper.findArticleBySlug(slug);
-      HttpError.throw404ErrorIfNull(article, 'Article not found');
+      HttpError.throwErrorIfNull(article, 'Article not found');
 
-      const { user } = article;
+      const { user, tags } = article;
 
-      article = ArticleHelper.getArticleResponseData(user.dataValues,
-        article.dataValues);
+      article = ArticleHelper.getArticleResponseData(user, article, tags);
 
       return res.status(200)
         .json({
@@ -61,10 +60,15 @@ export default class ArticleController {
       const allArticle = await Article.findAll({
         limit,
         offset,
-        include: [{
-          model: User,
-          as: 'user'
-        }]
+        include: [
+          {
+            model: Tag,
+            as: 'tags'
+          },
+          {
+            model: User,
+            as: 'user'
+          }]
       });
       const articles = ArticleHelper.getArticlesResponseData(allArticle);
       return res.status(200)
@@ -99,8 +103,7 @@ export default class ArticleController {
       const { title } = req.body;
       const id = req.authData.userId;
       const userData = await UserHelper.findById(id);
-      const { username } = userData.dataValues;
-      const slug = Util.createSlug(username, title);
+      const slug = Util.createSlug(title);
       await ArticleHelper.throwErrorIfArticleExists(slug);
       const article = await ArticleHelper.saveArticle(req, slug, userData);
       status = 201;
@@ -131,10 +134,10 @@ export default class ArticleController {
     const { slug } = req.params;
     try {
       const article = await ArticleHelper.findArticleBySlug(slug);
-      HttpError.throw404ErrorIfNull(article, 'Article not found');
+      HttpError.throwErrorIfNull(article, 'Article not found');
 
       if (article.dataValues.userId === userId) {
-        await article.destroy({ force: true });
+        await ArticleHelper.unLinkTags(article).then(() => article.destroy({ force: true }));
         return res.status(200)
           .json({
             message: 'deleted article successfully',
@@ -164,7 +167,7 @@ export default class ArticleController {
     const { slug } = req.params;
     try {
       const articleData = await ArticleHelper.findArticleBySlug(slug);
-      HttpError.throw404ErrorIfNull(articleData, 'Article not found');
+      HttpError.throwErrorIfNull(articleData, 'Article not found');
       if (articleData.dataValues.userId === userId) {
         const article = await ArticleHelper.saveUpdates(req, articleData);
         res.status(200)

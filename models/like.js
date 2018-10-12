@@ -9,7 +9,7 @@ module.exports = (sequelize, Sequelize) => {
     },
 
   }, {});
-  Like.associate = function (models) {
+  Like.associate = (models) => {
     Like.belongsTo(models.Article, {
       foreignKey: 'articleId',
       onDelete: 'CASCADE',
