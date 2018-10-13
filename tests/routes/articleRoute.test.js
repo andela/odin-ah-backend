@@ -1,5 +1,6 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
+import sinon from 'sinon';
 import db from '../../models';
 import Authorization from '../../middlewares/Authorization';
 import server from '../../index';
@@ -56,6 +57,24 @@ describe('Article CRUD Test', () => {
       assertResponseStatus(response, 201);
       assertArticleResponse(response, article, user, tags);
     });
+    it('should throw an error if there was an error creating an article', async () => {
+      const users = await User.findAll();
+      const user = users[0].dataValues;
+      const jwt = Authorization.generateToken(user.id);
+      const tags = ['nodejs', 'mocha'];
+      const article = {
+        ...defaultArticle,
+        tags
+      };
+      const stubFindAll = sinon.stub(User, 'findAll').rejects();
+      const response = await chai.request(server)
+        .post('/api/v1/articles')
+        .set(AUTHORIZATION_HEADER, `Bearer ${jwt}`)
+        .send(article);
+      stubFindAll.restore();
+      assertResponseStatus(response, 500);
+      assertErrorResponse(response);
+    });
     it('should not POST article token is not provided', async () => {
       const response = await chai.request(server)
         .post('/api/v1/articles')
@@ -87,6 +106,15 @@ describe('Article CRUD Test', () => {
       assertResponseStatus(response, 200);
       response.body.should.be.a('object');
       assertArrayResponse(response, 10);
+    });
+    it('should return error response if an error occurred during get all articles', async () => {
+      const stubArticleCount = sinon.stub(Article, 'count').rejects();
+      const response = await chai.request(server)
+        .get('/api/v1/articles')
+        .send();
+      stubArticleCount.restore();
+      assertResponseStatus(response, 500);
+      assertErrorResponse(response);
     });
     it('should return an empty list of articles', async () => {
       await deleteArticlesFromTable();
@@ -126,7 +154,7 @@ describe('Article CRUD Test', () => {
       response.body.should.be.a('object');
       assertArrayResponse(response, 10);
     });
-    it('should return 400 if valid query is provided', async () => {
+    it('should return 400 if invalid query is provided', async () => {
       const baseUrl = '/api/v1/articles';
       let response = await chai.request(server)
         .get(`${baseUrl}?page=-2&size=2`)

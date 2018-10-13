@@ -1,6 +1,9 @@
+import validate from 'validate.js';
 import validator from 'validator';
 import UserHelper from '../../helpers/UserHelper';
 import ValidatorHelper from '../../helpers/ValidatorHelper';
+import ValidationError from '../../helpers/exceptionHandler/ValidationError';
+
 /**
  * @exports ProfileValidator
  * @class ProfileValidator
@@ -39,13 +42,13 @@ class ProfileValidator {
   }
 
   /**
-     * Validates Follows functionality
-     * @async
-     * @param  {request} request - Request object
-     * @param {response} response - Request object
-     * @param {next} next - calls next middleware
-     * @return {response} Returns response message
-     */
+   * Validates Follows functionality
+   * @async
+   * @param  {request} request - Request object
+   * @param {response} response - Request object
+   * @param {next} next - calls next middleware
+   * @return {response} Returns response message
+   */
   static async validateFollow(request, response, next) {
     const { userId } = request.params;
     const id = request.authData.userId;
@@ -67,6 +70,24 @@ class ProfileValidator {
       follower,
       id
     };
+    next();
+  }
+
+  /**
+   *
+   * @static
+   * @param {request} req
+   * @param {response} res
+   * @param {function} next
+   * @returns {object} returns error object if validation error
+   * @memberof ProfileValidator
+   */
+  static validateId(req, res, next) {
+    req.params.id = Number(req.params.id);
+    const errors = validate(req.params, { id: { numericality: { noStrings: true } } });
+    if (errors) {
+      return next(new ValidationError(errors));
+    }
     next();
   }
 }

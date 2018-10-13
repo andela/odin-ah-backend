@@ -45,31 +45,29 @@ class ProfileController {
   }
 
   /**
-     *
-     * @param {request} request HTTP request
-     * @param {response} response HTTP response
-     * @param {response} next HTTP next response
-     * @return {object} return response to user
-     */
-  static async getProfile(request, response) {
-    const { userId } = request.authData;
-    const user = await User.findById(userId);
-    HttpError.throwErrorIfNull(user, 'User is not found');
-    const { dataValues } = user;
-    return response.status(200)
-      .json({
-        profile: {
-          email: dataValues.email,
-          username: dataValues.username,
-          firstName: dataValues.firstName,
-          lastName: dataValues.lastName,
-          bio: dataValues.bio,
-          imageUrl: dataValues.imageUrl,
-          createdAt: dataValues.createdAt,
-          updatedAt: dataValues.updatedAt
-        },
-        message: 'Successful!',
+   *
+   *
+   * @static
+   * @param {request} req
+   * @param {response} res
+   * @param {function} next
+   * @returns {object} returns profile for a specific user
+   * @memberof UserProfile
+   */
+  static async getProfileById(req, res, next) {
+    const id = req.params.id || req.authData.userId;
+    try {
+      const user = await User.findById(id);
+      HttpError.throwErrorIfNull(user, 'User not found');
+      const profile = UserHelper.profileListResponse(user);
+      res.status(200).json({
+        status: 'success',
+        message: 'Successfully retrieved user profile!',
+        profile
       });
+    } catch (error) {
+      next(error);
+    }
   }
 
   /**
@@ -205,6 +203,58 @@ class ProfileController {
         total,
       }
     });
+  }
+
+  /**
+   *
+   *
+   * @static
+   * @param {request} req
+   * @param {response} res
+   * @param {function} next
+   * @returns {object} return a json response
+   * @memberof UserProfile
+   */
+  static async getAllProfile(req, res, next) {
+    try {
+      const { userId } = req.authData;
+      const profilesCount = await User.count({
+        where: {
+          id: {
+            $not: userId
+          }
+        }
+      });
+      const {
+        page,
+        limit,
+        offset
+      } = Util.getPageInfo(req.query.page, req.query.size, profilesCount);
+      const authorsData = await User.findAll({
+        where: {
+          id: {
+            $not: userId
+          }
+        },
+        limit,
+        offset
+      });
+      if (authorsData) {
+        const authors = UserHelper.profileListArrayResponse(authorsData);
+        return res.status(200).json({
+          status: 'success',
+          message: 'Successfully retrieved list of authors.',
+          data: {
+            total: profilesCount,
+            size: authorsData.length,
+            page,
+            authors,
+          }
+        });
+      }
+    } catch (error) {
+      next(error);
+    }
   }
 }
 export default ProfileController;

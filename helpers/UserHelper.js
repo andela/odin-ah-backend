@@ -80,6 +80,44 @@ class UserHelper {
     return userResultByEmail && userResultById
       && userResultById.dataValues.id !== userResultByEmail.dataValues.id;
   }
+
+  /**
+   *
+   *
+   * @static
+   * @param {object} { username, email, firsName , lastName }
+   * @returns {object} an object containing the attributes needed
+   * @memberof UserHelper
+   */
+  static profileListResponse({
+    id, username, email, firstName, lastName, bio, imageUrl, createdAt, updatedAt
+  }) {
+    return {
+      id,
+      username,
+      email,
+      firstName,
+      lastName,
+      bio,
+      imageUrl,
+      createdAt,
+      updatedAt
+    };
+  }
+
+  /**
+   *
+   *
+   * @static
+   * @param {array} profiles
+   * @returns {array} returns object containing required response
+   * @memberof UserHelper
+   */
+  static profileListArrayResponse(profiles) {
+    return profiles.map(profile => (
+      UserHelper.profileListResponse(profile)
+    ));
+  }
 }
 
 export default UserHelper;

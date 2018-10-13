@@ -10,9 +10,11 @@ const router = Router();
 
 
 router.put('/', auth.verifyToken, profileValidator.validation, asyncCatchErrors(profileController.updateProfile));
-router.get('/', auth.verifyToken, asyncCatchErrors(profileController.getProfile));
+router.get('/', auth.verifyToken, asyncCatchErrors(profileController.getProfileById));
 
+router.get('/list', auth.verifyToken, asyncCatchErrors(profileController.getAllProfile));
+router.get('/:id', auth.verifyToken, profileValidator.validateId, asyncCatchErrors(profileController.getProfileById));
 router.post('/reset-password/begin', Validator.User.beginResetPassword, asyncCatchErrors(UserController.beginResetPassword));
-router.post('/reset-password/complete/:token', Validator.User.completeResetPassword, UserController.completePasswordReset);
+router.post('/reset-password/complete/:token', Validator.User.completeResetPassword, asyncCatchErrors(UserController.completePasswordReset));
 
 export default router;

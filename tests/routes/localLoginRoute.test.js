@@ -1,4 +1,5 @@
 import chai, { expect } from 'chai';
+import sinon from 'sinon';
 import server from '../../index';
 import db from '../../models';
 import {
@@ -104,5 +105,14 @@ describe('POST /auth/Login', () => {
       .send(badEmail);
     expect(response).to.have.status(400);
     assertErrorResponse(response);
+  });
+  it('should return 500 status if there was an error getting user by email', async () => {
+    const userStubFindOne = sinon.stub(User, 'findOne').rejects();
+    const response = await chai
+      .request(server)
+      .post('/api/v1/auth/login')
+      .send(realUser);
+    userStubFindOne.restore();
+    expect(response).to.have.status(500);
   });
 });

@@ -1,8 +1,9 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
+import sinon from 'sinon';
 import server from '../../index';
-
 import { realUser } from '../testHelpers/testLoginData';
+import testUserData from '../testHelpers/testUserData';
 import Authorization from '../../middlewares/Authorization';
 import db from '../../models';
 
@@ -20,6 +21,14 @@ describe('Profile', () => {
       .post('/api/v1/auth/signup')
       .send(realUser)
       .end(() => {
+        done();
+      });
+  });
+  before('Create a number of users', (done) => {
+    User.bulkCreate(testUserData)
+      .then(() => {
+        done();
+      }).catch(() => {
         done();
       });
   });
@@ -46,7 +55,7 @@ describe('Profile', () => {
       .set('Authorization', `Bearer ${token}`)
       .end((err, response) => {
         response.should.have.status(404);
-        response.body.should.have.property('message').equal('User is not found');
+        response.body.should.have.property('message').equal('User not found');
         done();
       });
   });
@@ -57,7 +66,7 @@ describe('Profile', () => {
       .set('Authorization', `Bearer ${accessToken}`)
       .end((err, response) => {
         response.should.have.status(200);
-        response.body.should.have.property('message').equal('Successful!');
+        response.body.should.have.property('message').equal('Successfully retrieved user profile!');
         done();
       });
   });
@@ -185,6 +194,57 @@ describe('Profile', () => {
         response.body.should.have
           .property('message')
           .equal('This Email already exists, choose another email');
+        done();
+      });
+  });
+  it('should return success response and get list of authors', (done) => {
+    chai.request(server)
+      .get('/api/v1/users/list?page=1&size=2')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .end((err, response) => {
+        response.should.have.status(200);
+        response.body.should.have.property('status');
+        response.body.should.have.property('data');
+        response.body.data.should.have.property('total');
+        response.body.data.should.have.property('size');
+        response.body.data.should.have.property('page');
+        response.body.data.should.have.property('authors');
+        response.body.data.authors.should.be.a('array');
+        response.body.data.authors[0].should.be.a('object');
+        done();
+      });
+  });
+  it('should return 500 status if there was an error finding all users', (done) => {
+    const userStub = sinon.stub(User, 'findAll').rejects();
+    chai.request(server)
+      .get('/api/v1/users/list?page=1&size=2')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .end((err, response) => {
+        userStub.restore();
+        response.should.have.status(500);
+        response.body.should.have.property('status').that.is.equal('error');
+        done();
+      });
+  });
+  it('should return 500 status if there was an error getting user by id', (done) => {
+    const userStub = sinon.stub(User, 'findById').rejects();
+    chai.request(server)
+      .get('/api/v1/users/2')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .end((err, response) => {
+        userStub.restore();
+        response.should.have.status(500);
+        response.body.should.have.property('status').that.is.equal('error');
+        done();
+      });
+  });
+  it('should return 400 status if id is not a number', (done) => {
+    chai.request(server)
+      .get('/api/v1/users/yfdfsadfv')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .end((err, response) => {
+        response.should.have.status(400);
+        response.body.should.have.property('status').that.is.equal('error');
         done();
       });
   });

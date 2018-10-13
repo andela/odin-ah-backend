@@ -52,8 +52,7 @@ export default class ArticleController {
    */
   static async getArticles(req, res, next) {
     try {
-      const totalArticle = await Article.findAndCountAll();
-      const total = totalArticle.count;
+      const total = await Article.count();
       const pageInfo = Util.getPageInfo(req.query.page, req.query.size, total);
       const { page, limit, offset } = pageInfo;
 
