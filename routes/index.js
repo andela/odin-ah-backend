@@ -6,7 +6,7 @@ import Authorization from '../middlewares/Authorization';
 import articles from './article';
 import like from './like';
 import profiles from './profiles';
-
+import bookmark from './bookmark';
 
 const router = Router();
 
@@ -18,6 +18,7 @@ router.use(
   articles,
   like,
   profiles,
+  bookmark,
   errorhandler,
 );
 
