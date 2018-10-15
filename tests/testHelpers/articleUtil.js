@@ -162,63 +162,19 @@ export function assertArrayResponse(response, length) {
  */
 export async function createDummyArticles() {
   const slug = 'dummy-slug';
-  const [users, ...articleModels] = await Promise.all([
-    User.findAll(),
-    Article.create({
-      ...defaultArticle,
-      slug: `${slug}-1`
-    }),
-    Article.create({
-      ...defaultArticle,
-      slug: `${slug}-2`
-    }),
-    Article.create({
-      ...defaultArticle,
-      slug: `${slug}-3`
-    }),
-    Article.create({
-      ...defaultArticle,
-      slug: `${slug}-4`
-    }),
-    Article.create({
-      ...defaultArticle,
-      slug: `${slug}-5`
-    }),
-    Article.create({
-      ...defaultArticle,
-      slug: `${slug}-6`
-    }),
-    Article.create({
-      ...defaultArticle,
-      slug: `${slug}-7`
-    }),
-    Article.create({
-      ...defaultArticle,
-      slug: `${slug}-8`
-    }),
-    Article.create({
-      ...defaultArticle,
-      slug: `${slug}-9`
-    }),
-    Article.create({
-      ...defaultArticle,
-      slug: `${slug}-10`
-    }),
-  ]);
-  const addUserToArticlePromise = [];
-  articleModels.forEach((articleData) => {
-    addUserToArticlePromise.push(articleData.setUser(users[0]));
-  });
-  await Promise.all(addUserToArticlePromise);
-}
 
-/**
- *
- * @return {Promise<void>} Delete all articles from database
- */
-export async function deleteArticlesFromTable() {
-  await Article.destroy({
-    truncate: true,
-    cascade: true
-  });
+  const articles = [];
+  for (let i = 1; i < 11; i += 1) {
+    articles.push({
+      ...defaultArticle,
+      slug: `${slug}-${i}`
+    });
+  }
+
+  const [users, articleModels] = await Promise.all([
+    User.findAll(),
+    Article.bulkCreate(articles, { individualHooks: true })
+  ]);
+  const addUserToArticlePromise = articleModels.map(articleData => (articleData.setUser(users[0])));
+  await Promise.all(addUserToArticlePromise);
 }

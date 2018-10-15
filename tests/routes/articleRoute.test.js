@@ -11,10 +11,11 @@ import {
   assertArticleResponse,
   createDummyArticles,
   defaultArticle,
-  deleteArticlesFromTable,
   validateArticleInput
 } from '../testHelpers/articleUtil';
-import { assertErrorResponse, assertResponseStatus, assertTrue } from '../testHelpers';
+import {
+  assertErrorResponse, assertResponseStatus, assertTrue, deleteTable
+} from '../testHelpers';
 
 const { Article, User, Tag } = db;
 
@@ -23,16 +24,14 @@ chai.should();
 
 describe('Article CRUD Test', () => {
   before(async () => {
-    await User.destroy({
-      truncate: true,
-      cascade: true
-    });
+    await deleteTable(User);
     await Promise.all([User.create({ ...realUser, isVerified: true }),
       User.create({ ...realUser1, isVerified: true })]);
   });
   describe('POST /api/v1/articles', () => {
     beforeEach(async () => {
-      await deleteArticlesFromTable();
+      await deleteTable(Tag);
+      await deleteTable(Article);
     });
     it('should have a valid input', async () => {
       const users = await User.findAll();
@@ -84,7 +83,7 @@ describe('Article CRUD Test', () => {
   });
   describe('GET /api/v1/articles', () => {
     beforeEach(async () => {
-      await deleteArticlesFromTable();
+      await deleteTable(Article);
       await createDummyArticles();
     });
     it('should return list of articles token provided', async () => {
@@ -117,7 +116,7 @@ describe('Article CRUD Test', () => {
       assertErrorResponse(response);
     });
     it('should return an empty list of articles', async () => {
-      await deleteArticlesFromTable();
+      await deleteTable(Article);
       const response = await chai.request(server)
         .get('/api/v1/articles')
         .send();
@@ -183,7 +182,7 @@ describe('Article CRUD Test', () => {
   });
   describe('PUT /api/v1/articles/:slug', () => {
     beforeEach(async () => {
-      await deleteArticlesFromTable();
+      await deleteTable(Article);
     });
     it('should not PUT article with invalid input', async () => {
       const users = await User.findAll();
@@ -271,7 +270,7 @@ describe('Article CRUD Test', () => {
   });
   describe('DELETE /api/v1/articles/:slug', () => {
     beforeEach(async () => {
-      await deleteArticlesFromTable();
+      await deleteTable(Article);
     });
     it('should delete article author by user', async () => {
       const users = await User.findAll();
@@ -338,7 +337,7 @@ describe('Article CRUD Test', () => {
   });
   describe('GET /api/v1/articles/:slug', () => {
     beforeEach(async () => {
-      await deleteArticlesFromTable();
+      await deleteTable(Article);
       await createDummyArticles();
     });
     it('should get authors article', async () => {

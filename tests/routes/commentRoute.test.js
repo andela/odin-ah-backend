@@ -3,14 +3,17 @@ import chaiHttp from 'chai-http';
 import db from '../../models';
 import Authorization from '../../middlewares/Authorization';
 import server from '../../index';
-import { realUser, realUser1, realUser2 } from '../testHelpers/testLoginData';
 import { AUTHORIZATION_HEADER, MAX_INT } from '../../helpers/constants';
 import { defaultArticle } from '../testHelpers/articleUtil';
 import {
-  assertErrorResponse, assertResponseStatus, assertTrue, getRequest
+  assertErrorResponse,
+  assertResponseStatus,
+  assertTrue, deleteTable,
+  getRequest,
+  initCommentTest
 } from '../testHelpers';
 
-const { Article, User, Comment } = db;
+const { Comment } = db;
 
 chai.use(chaiHttp);
 chai.should();
@@ -20,34 +23,6 @@ let mainArticle = null;
 let commenter = null;
 let nonCommenter = null;
 let firstLevelComment = null;
-
-/**
- *
- * @return {Promise<void>} initialize data for testing
- */
-async function initCommentTest() {
-  await User.destroy({
-    truncate: true, cascade: true
-  });
-  const slug = 'dummy-slug';
-  [mainAuthor, commenter, nonCommenter, mainArticle] = await Promise.all(
-    [
-      User.create(realUser), User.create(realUser1), User.create(realUser2),
-      Article.create({ ...defaultArticle, slug: `${slug}-1` }),
-    ]
-  );
-  await mainArticle.setUser(mainAuthor);
-}
-
-/**
- *
- * @return {Promise<void>} delete all entries in the comment table
- */
-async function deleteCommentFromTable() {
-  await Comment.destroy({
-    truncate: true, cascade: true
-  });
-}
 
 /**
  *
@@ -135,11 +110,15 @@ function assertCommentArrayResponse(response, length) {
 
 describe('Comment CRUD Test', () => {
   before(async () => {
-    await initCommentTest();
+    const data = await initCommentTest();
+    mainAuthor = data.author;
+    mainArticle = data.article;
+    commenter = data.user1;
+    nonCommenter = data.user2;
   });
   describe('POST /api/v1/articles/:slug/comments', () => {
     beforeEach(async () => {
-      await deleteCommentFromTable();
+      await deleteTable(Comment);
     });
     it('should have a valid input', async () => {
       const invalidBody = '                 ';
@@ -188,7 +167,7 @@ describe('Comment CRUD Test', () => {
 
   describe('POST /api/v1/articles/:slug/comments/:id', () => {
     beforeEach(async () => {
-      await deleteCommentFromTable();
+      await deleteTable(Comment);
       await createDummyComments();
     });
     it('should have a valid input', async () => {
@@ -258,7 +237,7 @@ describe('Comment CRUD Test', () => {
 
   describe('GET /api/v1/articles/:slug/comments', () => {
     before(async () => {
-      await deleteCommentFromTable();
+      await deleteTable(Comment);
       await createDummyComments();
     });
     it('should get a list of comment for a given article, without sub-comments. No authentication required',
@@ -271,7 +250,7 @@ describe('Comment CRUD Test', () => {
         assertCommentArrayResponse(response, 2);
       });
     it('should return empty list of comments', async () => {
-      await deleteCommentFromTable();
+      await deleteTable(Comment);
       const url = `/api/v1/articles/${mainArticle.slug}/comments`;
       const response = await chai.request(server)
         .get(url)
@@ -291,7 +270,7 @@ describe('Comment CRUD Test', () => {
 
   describe('GET /api/v1/articles/:slug/comments/:id', () => {
     before(async () => {
-      await deleteCommentFromTable();
+      await deleteTable(Comment);
       await createDummyComments();
     });
     it('should get a list of comment for a given comment. No authentication required',
@@ -332,11 +311,19 @@ describe('Comment CRUD Test', () => {
       assertResponseStatus(response, 404);
       assertErrorResponse(response);
     });
+    it('should not get list if id is not valid', async () => {
+      const url = `/api/v1/articles/${mainArticle.slug}/comments/67uhbn`;
+      const response = await chai.request(server)
+        .get(url)
+        .send();
+      assertResponseStatus(response, 400);
+      assertErrorResponse(response);
+    });
   });
 
   describe('DELETE /api/v1/articles/:slug/comments/id', () => {
     beforeEach(async () => {
-      await deleteCommentFromTable();
+      await deleteTable(Comment);
       await createDummyComments();
     });
     it('should delete comment author by user', async () => {
@@ -414,6 +401,19 @@ describe('Comment CRUD Test', () => {
         .delete(url)
         .send(defaultArticle);
       assertResponseStatus(response, 401);
+    });
+    it('should not get list if id is not valid', async () => {
+      const jwt = Authorization.generateToken(commenter.id);
+      const url = `/api/v1/articles/${mainArticle.slug}/comments/67uhbn`;
+      const response = await chai.request(server)
+        .delete(url)
+        .set(AUTHORIZATION_HEADER, `Bearer ${jwt}`)
+        .send();
+      assertResponseStatus(response, 400);
+      assertErrorResponse(response);
+    });
+    it('should delete all associated reaction when a comment is deleted', async () => {
+
     });
   });
 });

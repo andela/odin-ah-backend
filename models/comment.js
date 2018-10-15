@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       as: 'parent',
     });
     Comment.hasMany(models.Comment, { as: 'comments', foreignKey: 'parentId' });
+    Comment.hasMany(models.CommentReaction, { as: 'reactions', foreignKey: 'commentId' });
   };
   return Comment;
 };

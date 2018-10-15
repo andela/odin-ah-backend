@@ -39,4 +39,5 @@ module.exports = {
 
   down: queryInterface => queryInterface.removeColumn('Comments', 'userId')
     .then(() => queryInterface.removeColumn('Comments', 'articleId'))
+    .then(() => queryInterface.removeColumn('Comments', 'parentId'))
 };

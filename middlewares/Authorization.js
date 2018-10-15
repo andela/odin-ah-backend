@@ -8,28 +8,35 @@ import ValidatorHelper from '../helpers/ValidatorHelper';
  *  */
 class Authorization {
   /**
-     * Get the token from the request
-     * @param  {object} req - Request object
-     * @return {string} Returns the user token
-     * @static
-     */
+   * Get the token from the request
+   * @param  {object} req - Request object
+   * @return {string} Returns the user token
+   * @static
+   *
+   */
   static getToken(req) {
-    const bearerHeader = req.headers.authorization;
-    if (!ValidatorHelper.isEmpty(bearerHeader)) {
-      const bearer = bearerHeader.split(' ');
-      return bearer[1];
+    if (ValidatorHelper.isEmpty(req.headers.authorization)) {
+      return null;
     }
-    return null;
+    const bearerHeader = req.headers.authorization.trim();
+    const bearer = bearerHeader.substring(0, 6);
+    let token;
+    if (bearer.toLowerCase() === 'bearer') {
+      token = bearerHeader.substring(7)
+        .trim();
+    }
+    return token;
   }
 
+
   /**
-     * Verifies the user token
-     * @param  {object} req - Request object
-     * @param {object} res - Response object
-     * @param {function} next - calls the next middleware
-     * @return {json} Returns json object
-     * @static
-     */
+   * Verifies the user token
+   * @param  {object} req - Request object
+   * @param {object} res - Response object
+   * @param {function} next - calls the next middleware
+   * @return {json} Returns json object
+   * @static
+   */
   static verifyToken(req, res, next) {
     const token = Authorization.getToken(req);
     let error = null;
@@ -52,10 +59,10 @@ class Authorization {
   }
 
   /**
-     *
-     * @param {error} err JWT error
-     * @return {{message: string, status: string}} returns formatted error
-     */
+   *
+   * @param {error} err JWT error
+   * @return {{message: string, status: string}} returns formatted error
+   */
   static getError(err) {
     let message = 'Invalid token';
     if (err instanceof TokenExpiredError) {
@@ -68,11 +75,11 @@ class Authorization {
   }
 
   /**
-     * Generate a user Token
-     * @param  {string} userId - The user id
-     * @return {string} Returns json object
-     * @static
-     */
+   * Generate a user Token
+   * @param  {string} userId - The user id
+   * @return {string} Returns json object
+   * @static
+   */
   static generateToken(userId) {
     return jwt.sign({
       userId
@@ -83,13 +90,13 @@ class Authorization {
   }
 
   /**
-     * Verifies the user token
-     * @param  {object} req - Request object
-     * @param {object} res - Response object
-     * @param {function} next - calls the next middleware
-     * @return {object} return an object
-     * @static
-     */
+   * Verifies the user token
+   * @param  {object} req - Request object
+   * @param {object} res - Response object
+   * @param {function} next - calls the next middleware
+   * @return {object} return an object
+   * @static
+   */
   static secureRoutes(req, res, next) {
     if (Authorization.isAuthNotRequired(req)) {
       return next();
@@ -99,15 +106,15 @@ class Authorization {
   }
 
   /**
-     *
-     * @param {request} req
-     * @return {boolean} checks if authentication is not required for the request.
-     */
+   *
+   * @param {request} req
+   * @return {boolean} checks if authentication is not required for the request.
+   */
   static isAuthNotRequired(req) {
     const { url, method } = req;
     return url.startsWith('/auth')
-            || (url.startsWith('/articles') && method.toUpperCase() === 'GET')
-            || url.startsWith('/users');
+      || (url.startsWith('/articles') && method.toUpperCase() === 'GET')
+      || url.startsWith('/users/reset-password/');
   }
 }
 

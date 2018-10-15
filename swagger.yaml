@@ -20,15 +20,15 @@ paths:
     post:
       summary: Add new user
       consumes:
-        - application/json
+      - application/json
       produces:
-        - application/json
+      - application/json
       parameters:
-        - in: body
-          name: user information
-          description: user username
-          schema:
-            $ref: '#/definitions/UserRequest'
+      - in: body
+        name: user information
+        description: user username
+        schema:
+          $ref: '#/definitions/UserRequest'
       responses:
         '201':
           description: Expected response to a valid request
@@ -141,19 +141,19 @@ paths:
           schema:
             $ref: '#/definitions/Error'
       tags:
-        - Authentication
+      - Authentication
   /auth/confirmation:
     post:
       summary: Resends verification link to user email
       description: >-
         Resends verification link to user email for account verification
       parameters:
-        - in: body
-          name: email
-          required: true
-          schema:
-            type: string
-            description: User email
+      - in: body
+        name: email
+        required: true
+        schema:
+          type: string
+          description: User email
       responses:
         '200':
           description: Verification email was successfully resent
@@ -213,11 +213,11 @@ paths:
         This endpoint is used to create new article. Authorization Token is
         required to use this endpoint.
       parameters:
-        - name: entry
-          in: body
-          description: Request data
-          schema:
-            $ref: '#/definitions/ArticleRequest'
+      - name: entry
+        in: body
+        description: Request data
+        schema:
+          $ref: '#/definitions/ArticleRequest'
       responses:
         '201':
           description: Article Created
@@ -234,7 +234,7 @@ paths:
       tags:
       - Articles
       security:
-        - UserSecurity: []
+      - UserSecurity: []
   "/articles/{slug}":
     get:
       summary: 'Gets an article with the given {slug}.'
@@ -496,7 +496,44 @@ paths:
       tags:
       - Comments
       security:
-        - UserSecurity: []
+      - UserSecurity: []
+  "/articles/{slug}/comments/{id}/reactions":
+    post:
+      summary: "Adds a new comment under an existing comment with the provided id."
+      description: "Adds a new comment under an existing comment with the provided id."
+      parameters:
+      - name: slug
+        in: path
+        required: true
+        description: The slug of the article with the comment with the id.
+        type: string
+      - name: id
+        in: path
+        required: true
+        description: The id of the comment to place this comment under.
+        type: string
+      - name: comment
+        in: body
+        description: Request data
+        schema:
+          $ref: "#/definitions/CommentReactionRequest"
+      responses:
+        "200":
+          description: "Updated article with the given {slug}"
+          schema:
+            $ref: "#/definitions/CommentReactionResult"
+        "401":
+          description: Unauthorizated access.
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: "No articles found with {slug} or No comment found with the {id}"
+          schema:
+            $ref: "#/definitions/Error"
+      tags:
+      - Comments
+      security:
+      - UserSecurity: []
 
   /users:
     put:
@@ -506,11 +543,11 @@ paths:
       produces:
       - application/json
       parameters:
-        - in: body
-          name: profile
-          description: A User Profile that needs to be Updated
-          schema:
-            $ref: '#/definitions/UserRequest'
+      - in: body
+        name: profile
+        description: A User Profile that needs to be Updated
+        schema:
+          $ref: '#/definitions/UserRequest'
       responses:
         '200':
           description: successful operation
@@ -527,7 +564,7 @@ paths:
     get:
       summary: Get a User Profile
       produces:
-        - application/json
+      - application/json
       responses:
         '200':
           description: Successful Operation
@@ -540,23 +577,23 @@ paths:
       tags:
       - Users
       security:
-        - UserSecurity: []
-  "/articles/likes/{slug}/{status}":
+      - UserSecurity: []
+  "/articles//likes/{slug}/{status}":
     post:
       summary: Create new like
       description: >-
-       The route allows Authenticated users to like, dislike or neutral on any articles
+        The route allows Authenticated users to like, dislike or neutral on any articles
       parameters:
-        - name: slug
-          in: path
-          description: article unique slug
-          schema:
-            $ref: "#/definitions/LikeRequest"
-        - name: status
-          in: path
-          description: like, dislike or neutral
-          schema:
-            $ref: "#/definitions/LikeRequest"
+      - name: slug
+        in: path
+        description: article unique slug
+        schema:
+          $ref: "#/definitions/LikeRequest"
+      - name: status
+        in: path
+        description: like, dislike or neutral
+        schema:
+          $ref: "#/definitions/LikeRequest"
       responses:
         201:
           description: successfully liked an article
@@ -571,23 +608,23 @@ paths:
           schema:
             $ref: "#/definitions/Error"
       tags:
-        - Articles
+      - Articles
 
 
   /users/reset-password/begin:
     post:
       summary: Start password reset process
       consumes:
-        - application/json
+      - application/json
       produces:
-        - application/json
+      - application/json
       parameters:
-        - in: body
-          name: body
-          required: true
-          description: The email of the user who wants to reset password
-          schema:
-            $ref: "#/definitions/BeginPasswordResetRequest"
+      - in: body
+        name: body
+        required: true
+        description: The email of the user who wants to reset password
+        schema:
+          $ref: "#/definitions/BeginPasswordResetRequest"
       responses:
         "200":
           description: successful operation
@@ -598,27 +635,27 @@ paths:
         "500":
           description: Server Error
       tags:
-        - Users
-        
+      - Users
+
   /users/reset-password/complete/{token}:
     post:
       summary: Complete reset password process
       consumes:
-        - application/json
+      - application/json
       produces:
-        - application/json
+      - application/json
       parameters:
-        - name: "token"
-          in: "path"
-          description: "Password reset token sent to email as part of url"
-          required: true
-          type: "string"
-        - in: body
-          name: body
-          required: true
-          description: The new password for resetting
-          schema:
-            $ref: "#/definitions/CompletePasswordResetRequest"
+      - name: "token"
+        in: "path"
+        description: "Password reset token sent to email as part of url"
+        required: true
+        type: "string"
+      - in: body
+        name: body
+        required: true
+        description: The new password for resetting
+        schema:
+          $ref: "#/definitions/CompletePasswordResetRequest"
       responses:
         "200":
           description: successful operation
@@ -629,24 +666,24 @@ paths:
         "500":
           description: Server Error
       tags:
-        - Users
-        
+      - Users
+
       security:
       - UserSecurity: []
-        
+
   '/profiles/{userId}/follow':
     post:
       summary: Follow other users
       consumes:
-        - application/json
+      - application/json
       produces:
-        - application/json
+      - application/json
       parameters:
-        - name: userId
-          in: path
-          required: true
-          description: The user Id you want to follow.
-          type: number
+      - name: userId
+        in: path
+        required: true
+        description: The user Id you want to follow.
+        type: number
       responses:
         '200':
           description: successful operation
@@ -655,20 +692,20 @@ paths:
         '500':
           description: Server Error
       tags:
-        - Follow Users
+      - Follow Users
       security:
-        - UserSecurity: []
+      - UserSecurity: []
     delete:
       summary: Unfollow a user
       produces:
-        - application/json
+      - application/json
 
       parameters:
-        - name: userId
-          in: path
-          required: true
-          description: The user Id you want to unfollow.
-          type: number
+      - name: userId
+        in: path
+        required: true
+        description: The user Id you want to unfollow.
+        type: number
       responses:
         '200':
           description: Successful Operation
@@ -677,16 +714,16 @@ paths:
         '500':
           description: Server error
       tags:
-        - Follow Users
+      - Follow Users
       security:
-        - UserSecurity: []
+      - UserSecurity: []
   '/profiles/follower':
     get:
       summary: Get list of users following me
       consumes:
-        - application/json
+      - application/json
       produces:
-        - application/json
+      - application/json
       responses:
         '200':
           description: successful operation
@@ -695,17 +732,17 @@ paths:
         '500':
           description: Server Error
       tags:
-        - Follow Users
+      - Follow Users
       security:
-        - UserSecurity: []
-        
+      - UserSecurity: []
+
   '/profiles/following':
     get:
       summary: Get list of users I am following
       consumes:
-        - application/json
+      - application/json
       produces:
-        - application/json
+      - application/json
       responses:
         '200':
           description: successful operation
@@ -714,24 +751,24 @@ paths:
         '500':
           description: Server Error
       tags:
-        - Follow Users
+      - Follow Users
       security:
-        - UserSecurity: []
+      - UserSecurity: []
 
   /users/list:
     get:
       summary: Get a list of authors
       parameters:
-        - name: "page"
-          in: "query"
-          description: "Page number"
-          required: false
-          type: "number"
-        - name: "size"
-          in: "query"
-          description: "The number of authors info per page"
-          required: false
-          type: "number"
+      - name: "page"
+        in: "query"
+        description: "Page number"
+        required: false
+        type: "number"
+      - name: "size"
+        in: "query"
+        description: "The number of authors info per page"
+        required: false
+        type: "number"
       responses:
         "200":
           description: successful operation
@@ -742,18 +779,18 @@ paths:
         "500":
           description: Server Error
       tags:
-        - Users
+      - Users
       security:
-        - UserSecurity: []
+      - UserSecurity: []
   /users/{id}:
     get:
       summary: Get user(author) by id
       parameters:
-        - name: "id"
-          in: "path"
-          description: "id of the user"
-          required: true
-          type: "number"
+      - name: "id"
+        in: "path"
+        description: "id of the user"
+        required: true
+        type: "number"
       responses:
         "200":
           description: successful operation
@@ -764,21 +801,21 @@ paths:
         "500":
           description: Server Error
       tags:
-        - Users
+      - Users
       security:
-        - UserSecurity: []
-        
+      - UserSecurity: []
 
-  
+
+
   /bookmark/articles:
-   get:
+    get:
       summary: Get list of articles bookmarked
       consumes:
-        - application/json
+      - application/json
       produces:
-        - application/json
+      - application/json
       description: >-
-        Returns a list of bookmarked article with the provided {slug}. 
+        Returns a list of bookmarked article with the provided {slug}.
 
       parameters:
       - in: query
@@ -796,7 +833,7 @@ paths:
           schema:
             $ref: '#/definitions/BookmarksRequest'
       tags:
-         - Bookmark
+      - Bookmark
 
       responses:
         200:
@@ -812,54 +849,54 @@ paths:
           schema:
             $ref: '#/definitions/Error'
         tags:
-         - Bookmark
+        - Bookmark
       security:
-        - UserSecurity: []
+      - UserSecurity: []
 
   '/bookmark/articles/{slug}':
-     post:
-       summary: bookmark an article
-       description: >-
-           The route allows Authenticated users his or any other authors article
-       parameters:
-       - name: slug
-         in: path
-         description: article unique slug
-       responses:
-          201:
-            description:  successfully Bookmarked an article
-          
-          200:
-            description:  This article is already bookmarked
-          
-          404:
-             description: Article not found
-          
-       tags:
-        - Bookmark
-       security:
-        - UserSecurity: []
+    post:
+      summary: bookmark an article
+      description: >-
+        The route allows Authenticated users his or any other authors article
+      parameters:
+      - name: slug
+        in: path
+        description: article unique slug
+      responses:
+        201:
+          description:  successfully Bookmarked an article
 
-     delete:
-       summary: bookmark an article
-       description: >-
-             The route allows Authenticated users his or any other authors article
-       parameters:
-       - name: slug
-         in: path
-         description: article unique slug
-       responses:
-         200:
-            description:  successfully  deleted article Bookmarked 
-          
-         404:
-            description: Article not found
-          
-       tags:
-        - Bookmark
-       security:
-        - UserSecurity: []
-        
+        200:
+          description:  This article is already bookmarked
+
+        404:
+          description: Article not found
+
+      tags:
+      - Bookmark
+      security:
+      - UserSecurity: []
+
+    delete:
+      summary: bookmark an article
+      description: >-
+        The route allows Authenticated users his or any other authors article
+      parameters:
+      - name: slug
+        in: path
+        description: article unique slug
+      responses:
+        200:
+          description:  successfully  deleted article Bookmarked
+
+        404:
+          description: Article not found
+
+      tags:
+      - Bookmark
+      security:
+      - UserSecurity: []
+
 
 
 
@@ -1057,6 +1094,27 @@ definitions:
           imageUrl:
             type: string
             example: "http://image-url.local/localUser.jpg"
+
+  CommentReactionRequest:
+    required:
+    - reaction
+    properties:
+      reaction:
+        type: string
+        example: like
+
+  CommentReactionResult:
+    properties:
+      reaction:
+        type: string
+        example: like
+      status:
+        type: string
+        example: success
+      message:
+        type: string
+        example: successfully reacted to this commment
+
   ArticleCommentsResult:
     properties:
       data:
@@ -1111,8 +1169,6 @@ definitions:
               imageUrl:
                 type: string
                 example: "http://image-url.local/localUser.jpg"
-
-
             comments:
               type: array
               items:
@@ -1192,16 +1248,16 @@ definitions:
       updatedAt:
         type: string
         example: 1/10/ 2018
-  BeginPasswordResetRequest: 
+  BeginPasswordResetRequest:
     required:
-      - email
+    - email
     properties:
       email:
         type: string
         example: femwal@maildomain.com
-  CompletePasswordResetRequest: 
+  CompletePasswordResetRequest:
     required:
-      - password
+    - password
     properties:
       password:
         type: string
@@ -1224,12 +1280,12 @@ definitions:
         example: Password has been successfully reset!.
   LikeRequest:
     required:
-      - slug
-      - status
+    - slug
+    - status
     properties:
-     slug:
-      type: string
-      example: My-awesome-article-hammed
+      slug:
+        type: string
+        example: My-awesome-article-hammed
     status:
       type: string
       example: like
@@ -1271,15 +1327,15 @@ definitions:
 
   BookmarksRequest:
     required:
-      - slug
+    - slug
     properties:
       slug:
-       type: string
-       example: My-awesome-article-hammed
+        type: string
+        example: My-awesome-article-hammed
 
   BookmarksResult:
     properties:
-     data:
+      data:
         type: object
         properties:
           bookmarks:
@@ -1287,16 +1343,16 @@ definitions:
             items:
               type: object
               properties:
-                  slug:
-                    type: string
-                    example: xxxxzzzmy-slug2-I244n1RA
-                  description:
-                    type: string
-                    example: art of coding 
-                  body:
-                    type: string
-                    example: I started coding last and really awesome how much I have learnt.
-                    
+                slug:
+                  type: string
+                  example: xxxxzzzmy-slug2-I244n1RA
+                description:
+                  type: string
+                  example: art of coding
+                body:
+                  type: string
+                  example: I started coding last and really awesome how much I have learnt.
+
           page:
             type: number
             example: 2
@@ -1306,29 +1362,29 @@ definitions:
           total:
             type: number
             example: 70
-     status:
-          type: string
-          example: success
-     message:
-          type: string
-          example: Successfully fetch  bookmarked articles.
+      status:
+        type: string
+        example: success
+      message:
+        type: string
+        example: Successfully fetch  bookmarked articles.
 
   BookmarkRequest:
     required:
-      - slug
+    - slug
     properties:
       slug:
-       type: string
-       example: My-awesome-article-hammed
+        type: string
+        example: My-awesome-article-hammed
 
   BookmarkResult:
-  
+
     properties:
       status:
-         type: string
-         example: success
+        type: string
+        example: success
       message:
         type: string
         example: successfully bookmarked an article
 
-    
+

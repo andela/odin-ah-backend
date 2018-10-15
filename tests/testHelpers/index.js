@@ -6,7 +6,12 @@
 import chai, { expect } from 'chai';
 import server from '../../index';
 import { AUTHORIZATION_HEADER } from '../../helpers/constants';
+import { realUser, realUser1, realUser2 } from './testLoginData';
+import { defaultArticle } from './articleUtil';
+import db from '../../models';
 
+
+const { Article, User } = db;
 
 /**
  *
@@ -61,4 +66,41 @@ export function getRequest(url, jwt, update) {
     request = request.post(url);
   }
   return request.set(AUTHORIZATION_HEADER, `Bearer ${jwt}`);
+}
+
+/**
+ *
+ * @param {Model} model
+ * @return {Promise<void>} delete all entries in the comment table
+ */
+export async function deleteTable(model) {
+  await model.destroy({
+    truncate: true,
+    cascade: true
+  });
+}
+
+/**
+ *
+ * @return {Promise<void>} initialize data for testing
+ */
+export async function initCommentTest() {
+  await deleteTable(User);
+  const slug = 'dummy-slug';
+  const [author, user1, user2, article] = await Promise.all(
+    [
+      User.create(realUser), User.create(realUser1), User.create(realUser2),
+      Article.create({
+        ...defaultArticle,
+        slug: `${slug}-1`
+      }),
+    ]
+  );
+  await article.setUser(author);
+  return {
+    author,
+    user1,
+    user2,
+    article
+  };
 }
