@@ -52,6 +52,8 @@ export default (sequelize, Sequelize) => {
   User.associate = (models) => {
     User.hasMany(models.Article, { as: 'Articles', foreignKey: 'userId' });
     User.hasMany(models.Comment, { as: 'Comments', foreignKey: 'userId' });
+    User.hasMany(models.Bookmark, { as: 'Bookmarks', foreignKey: 'userId' });
+
     User.belongsToMany(models.Follows, {
       foreignKey: 'userId',
       through: 'UserFollows'

@@ -25,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
       through: 'ArticleTags',
       foreignKey: 'articleId'
     });
+    Article.hasMany(models.Bookmark, { as: 'bookmarks', foreignKey: 'articleId' });
   };
 
   return Article;

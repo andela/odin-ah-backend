@@ -541,7 +541,7 @@ paths:
       - Users
       security:
         - UserSecurity: []
-  "/articles//likes/{slug}/{status}":
+  "/articles/likes/{slug}/{status}":
     post:
       summary: Create new like
       description: >-
@@ -768,6 +768,101 @@ paths:
       security:
         - UserSecurity: []
         
+
+  
+  /bookmark/articles:
+   get:
+      summary: Get list of articles bookmarked
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: >-
+        Returns a list of bookmarked article with the provided {slug}. 
+
+      parameters:
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          description: Page number.
+      - in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          description: The number of bookmark to retrieve.
+          schema:
+            $ref: '#/definitions/BookmarksRequest'
+      tags:
+         - Bookmark
+
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/BookmarksResult'
+        400:
+          description: Bad Request.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: No articles found.
+          schema:
+            $ref: '#/definitions/Error'
+        tags:
+         - Bookmark
+      security:
+        - UserSecurity: []
+
+  '/bookmark/articles/{slug}':
+     post:
+       summary: bookmark an article
+       description: >-
+           The route allows Authenticated users his or any other authors article
+       parameters:
+       - name: slug
+         in: path
+         description: article unique slug
+       responses:
+          201:
+            description:  successfully Bookmarked an article
+          
+          200:
+            description:  This article is already bookmarked
+          
+          404:
+             description: Article not found
+          
+       tags:
+        - Bookmark
+       security:
+        - UserSecurity: []
+
+     delete:
+       summary: bookmark an article
+       description: >-
+             The route allows Authenticated users his or any other authors article
+       parameters:
+       - name: slug
+         in: path
+         description: article unique slug
+       responses:
+         200:
+            description:  successfully  deleted article Bookmarked 
+          
+         404:
+            description: Article not found
+          
+       tags:
+        - Bookmark
+       security:
+        - UserSecurity: []
+        
+
+
+
 definitions:
   UserRequest:
     required:
@@ -1173,3 +1268,67 @@ definitions:
             type: array
             items:
               $ref: '#/definitions/ProfileResponse'
+
+  BookmarksRequest:
+    required:
+      - slug
+    properties:
+      slug:
+       type: string
+       example: My-awesome-article-hammed
+
+  BookmarksResult:
+    properties:
+     data:
+        type: object
+        properties:
+          bookmarks:
+            type: array
+            items:
+              type: object
+              properties:
+                  slug:
+                    type: string
+                    example: xxxxzzzmy-slug2-I244n1RA
+                  description:
+                    type: string
+                    example: art of coding 
+                  body:
+                    type: string
+                    example: I started coding last and really awesome how much I have learnt.
+                    
+          page:
+            type: number
+            example: 2
+          size:
+            type: number
+            example: 2
+          total:
+            type: number
+            example: 70
+     status:
+          type: string
+          example: success
+     message:
+          type: string
+          example: Successfully fetch  bookmarked articles.
+
+  BookmarkRequest:
+    required:
+      - slug
+    properties:
+      slug:
+       type: string
+       example: My-awesome-article-hammed
+
+  BookmarkResult:
+  
+    properties:
+      status:
+         type: string
+         example: success
+      message:
+        type: string
+        example: successfully bookmarked an article
+
+    
