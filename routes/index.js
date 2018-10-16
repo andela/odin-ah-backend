@@ -7,19 +7,21 @@ import articles from './article';
 import like from './like';
 import profiles from './profiles';
 import bookmark from './bookmark';
+import searchRouter from './search';
 
 const router = Router();
 
 router.use(
   '/api/v1',
   Authorization.secureRoutes,
+  searchRouter,
   auth,
   users,
   articles,
   like,
   profiles,
   bookmark,
-  errorhandler,
+  errorhandler
 );
 
 export default router;
