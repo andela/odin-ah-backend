@@ -6,16 +6,14 @@ import Mail from '../../services/Mail';
 import { realUser } from '../testHelpers/testLoginData';
 import Util from '../../helpers/Util';
 import db from '../../models';
+import { deleteTable } from '../testHelpers';
 
 const { User } = db;
 const { expect } = chai;
 describe('Mail', () => {
   let user = null;
   before(async () => {
-    await User.destroy({
-      truncate: true,
-      cascade: true
-    });
+    await deleteTable(User);
     user = await User.create({
       ...realUser,
       token: Util.generateRandomString(32)

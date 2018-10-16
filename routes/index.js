@@ -8,6 +8,7 @@ import like from './like';
 import profiles from './profiles';
 import bookmark from './bookmark';
 import searchRouter from './search';
+import sentiment from './sentiment';
 
 const router = Router();
 
@@ -21,7 +22,8 @@ router.use(
   like,
   profiles,
   bookmark,
-  errorhandler
+  sentiment,
+  errorhandler,
 );
 
 export default router;
