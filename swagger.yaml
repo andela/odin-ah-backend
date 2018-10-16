@@ -1008,6 +1008,9 @@ definitions:
         type: array
         items:
           type: string
+      readingTime:
+        type: string
+        example: 3000 
   ArticleResult:
     properties:
       title:
@@ -1027,6 +1030,10 @@ definitions:
         type: array
         items:
           type: string
+      readingTime:
+        type: string
+        example: 3000    
+   
       author:
         type: object
         properties:
@@ -1367,9 +1374,11 @@ definitions:
                   example: art of coding
                 body:
                   type: string
-                  example: >-
-                    I started coding last and really awesome how much I have
-                    learnt.
+                  example: I started coding last and really awesome how much I have learnt.
+                readingTime: 
+                  type: string
+                  example: 3500   
+
           page:
             type: number
             example: 2

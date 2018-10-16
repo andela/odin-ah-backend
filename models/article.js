@@ -3,8 +3,19 @@ module.exports = (sequelize, DataTypes) => {
     slug: DataTypes.STRING,
     body: DataTypes.TEXT,
     title: DataTypes.STRING,
-    description: DataTypes.STRING
+    description: DataTypes.STRING,
+    readingTime: DataTypes.STRING
   }, {});
+  Article.hook('beforeCreate', (article) => {
+    const wordLength = (article.body).split(' ').length,
+      minute = wordLength / 200;
+    article.readingTime = minute * 60 * 1000;
+  });
+  Article.hook('beforeUpdate', (article) => {
+    const wordLength = (article.body).split(' ').length,
+      minute = wordLength / 200;
+    article.readingTime = minute * 60 * 1000;
+  });
   Article.associate = (models) => {
     Article.belongsTo(models.User, {
       as: 'user',
@@ -19,7 +30,6 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'articleId',
       as: 'likes',
     });
-
     Article.belongsToMany(models.Tag, {
       as: 'tags',
       through: 'ArticleTags',

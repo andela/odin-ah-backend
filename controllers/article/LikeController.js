@@ -1,4 +1,4 @@
-import db from '../../models';
+ import db from '../../models';
 import ArticleHelper from '../../helpers/ArticleHelper';
 import HttpError from '../../helpers/exceptionHandler/httpError';
 
