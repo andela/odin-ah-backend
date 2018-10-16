@@ -1,33 +1,34 @@
 
 module.exports = {
-  up: (queryInterface, Sequelize) => queryInterface.createTable('Likes', {
+  up: (queryInterface, Sequelize) => queryInterface.createTable('CommentReactions', {
     id: {
       allowNull: false,
       autoIncrement: true,
       primaryKey: true,
       type: Sequelize.INTEGER
     },
-    articleId: {
-      type: Sequelize.INTEGER,
-      onDelete: 'CASCADE',
-      references: {
-        id: 'id',
-        model: 'Articles'
-      }
-    },
-    userId: {
-      type: Sequelize.INTEGER,
-      onDelete: 'CASCADE',
-      references: {
-        id: 'id',
-        model: 'Users'
-      }
-    },
-    status: {
+    reaction: {
       type: Sequelize.ENUM,
       values: ['like', 'dislike', 'neutral'],
     },
-
+    commentId: {
+      type: Sequelize.INTEGER,
+      references: {
+        model: 'Comments',
+        key: 'id',
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL',
+    },
+    userId: {
+      type: Sequelize.INTEGER,
+      references: {
+        id: 'id',
+        model: 'Users'
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL',
+    },
     createdAt: {
       allowNull: false,
       type: Sequelize.DATE
@@ -35,7 +36,7 @@ module.exports = {
     updatedAt: {
       allowNull: false,
       type: Sequelize.DATE
-    },
+    }
   }),
-  down: queryInterface => queryInterface.dropTable('Likes')
+  down: queryInterface => queryInterface.dropTable('CommentReactions')
 };

@@ -71,7 +71,7 @@ describe('Like or Dislike', () => {
           done();
         });
     });
-    it('should not be able like article not availabe', (done) => {
+    it('should not be able like article not available', (done) => {
       chai.request(server)
         .post('/api/v1/articles/likes/dummy-slug-134/dislike')
         .set('Authorization', `Bearer: ${accessToken}`)
@@ -83,7 +83,7 @@ describe('Like or Dislike', () => {
           done();
         });
     });
-    it('should not be able like article not availabe', (done) => {
+    it('should not be able like article not available', (done) => {
       chai.request(server)
         .post('/api/v1/articles/likes/dummy-slug-134/anythingelse')
         .set('Authorization', `Bearer: ${accessToken}`)

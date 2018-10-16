@@ -34,25 +34,6 @@ class ArticleValidator {
   }
 
   /**
-   *
-   * @param {Array} tags
-   * @return {*} checks if a tag is valid. returns an error message if the tags field is not valid.
-   */
-  static validateTags(tags) {
-    let message = null;
-
-    if (tags && !(tags instanceof Array)) {
-      message = 'tags field must be an array';
-    }
-
-    if (tags && (tags instanceof Array)) {
-      message = ArticleValidator.containsValidStrings(tags);
-    }
-
-    return message;
-  }
-
-  /**
    * Validates user input values
    * @param  {req} req - Request object
    * @param {res} res - Request object
@@ -96,21 +77,68 @@ class ArticleValidator {
   static createCommentValidator(req, res, next) {
     const { body } = req.body;
     const { id } = req.params;
+    let message = ArticleValidator.validateId(id);
     if (Validator.isEmpty(body)) {
-      return res.status(400)
-        .json({
-          message: 'body field cannot be empty',
-          status: 'error'
-        });
+      message = 'body field cannot be empty';
     }
-    if (id && Number.isNaN(Number(id))) {
+    if (message) {
       return res.status(400)
         .json({
-          message: 'id must be a number',
-          status: 'error'
+          message,
+          status: 'error',
         });
     }
     return next();
+  }
+
+  /**
+   * Validates user input values
+   * @param  {req} req - Request object
+   * @param {res} res - Request object
+   * @param {next} next - calls next middleware
+   * @return {res} Returns response message
+   * @static
+   */
+  static idValidator(req, res, next) {
+    const id = req.params.id || req.body.id;
+    const message = ArticleValidator.validateId(id);
+    if (message) {
+      return next(new HttpError(message, 400));
+    }
+    return next();
+  }
+
+  /**
+   *
+   * @param {Array} tags
+   * @return {string} checks if a tag is valid. returns an error message
+   * if the tags field is not valid.
+   */
+  static validateTags(tags) {
+    let message = null;
+
+    if (tags && !(tags instanceof Array)) {
+      message = 'tags field must be an array';
+    }
+
+    if (tags && (tags instanceof Array)) {
+      message = ArticleValidator.containsValidStrings(tags);
+    }
+
+    return message;
+  }
+
+  /**
+   *
+   * @param {*}id
+   * @return {*} returns a message if the id is not a number.
+   */
+  static validateId(id) {
+    let message = null;
+    if (id && Number.isNaN(Number(id))) {
+      message = 'id must be a number';
+    }
+    return message;
   }
 
   /**
