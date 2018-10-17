@@ -1,6 +1,8 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import db from '../../models';
+
+import { AUTHORIZATION_HEADER, MAX_INT } from '../../helpers/constants';
 import {
   assertErrorResponse,
   assertResponseStatus,
@@ -9,7 +11,6 @@ import {
 } from '../testHelpers';
 import server from '../../index';
 import Authorization from '../../middlewares/Authorization';
-import { MAX_INT } from '../../helpers/constants';
 
 const {
   Comment, CommentReaction,
@@ -49,14 +50,14 @@ describe('Comment Reaction Test - POST /api/v1/articles/:slug/comments/:comment-
       const jwt = Authorization.generateToken(nonCommenter.id);
       let response = await chai.request(server)
         .post(baseUrl)
-        .set('Authorization', `Bearer: ${jwt}`)
+        .set(AUTHORIZATION_HEADER, `Bearer: ${jwt}`)
         .send({});
       assertResponseStatus(response, 400);
       assertErrorResponse(response);
 
       response = await chai.request(server)
         .post(baseUrl)
-        .set('Authorization', `Bearer: ${jwt}`)
+        .set(AUTHORIZATION_HEADER, `Bearer: ${jwt}`)
         .send({ reaction: '-like-' });
       assertResponseStatus(response, 400);
       assertErrorResponse(response);
@@ -67,7 +68,7 @@ describe('Comment Reaction Test - POST /api/v1/articles/:slug/comments/:comment-
       const user2Jwt = Authorization.generateToken(nonCommenter.id);
       let response = await chai.request(server)
         .post(baseUrl)
-        .set('Authorization', `Bearer: ${user1Jwt}`)
+        .set(AUTHORIZATION_HEADER, `Bearer: ${user1Jwt}`)
         .send({ reaction: 'like' });
       assertResponseStatus(response, 201);
       response.body.should.be.a('object');
@@ -77,7 +78,7 @@ describe('Comment Reaction Test - POST /api/v1/articles/:slug/comments/:comment-
 
       response = await chai.request(server)
         .post(baseUrl)
-        .set('Authorization', `Bearer: ${user2Jwt}`)
+        .set(AUTHORIZATION_HEADER, `Bearer: ${user2Jwt}`)
         .send({ reaction: 'dislike' });
       assertResponseStatus(response, 201);
       response.body.should.be.a('object');
@@ -96,7 +97,7 @@ describe('Comment Reaction Test - POST /api/v1/articles/:slug/comments/:comment-
       const jwt = Authorization.generateToken(userId);
       const response = await chai.request(server)
         .post(baseUrl)
-        .set('Authorization', `Bearer: ${jwt}`)
+        .set(AUTHORIZATION_HEADER, `Bearer: ${jwt}`)
         .send({ reaction: 'dislike' });
       assertResponseStatus(response, 200);
       response.body.should.be.a('object');
@@ -115,7 +116,7 @@ describe('Comment Reaction Test - POST /api/v1/articles/:slug/comments/:comment-
       const jwt = Authorization.generateToken(userId);
       const response = await chai.request(server)
         .post(baseUrl)
-        .set('Authorization', `Bearer: ${jwt}`)
+        .set(AUTHORIZATION_HEADER, `Bearer: ${jwt}`)
         .send({ reaction: 'neutral' });
       assertResponseStatus(response, 200);
       response.body.should.be.a('object');
@@ -128,7 +129,7 @@ describe('Comment Reaction Test - POST /api/v1/articles/:slug/comments/:comment-
       const jwt = Authorization.generateToken(commenter.id);
       const response = await chai.request(server)
         .post(baseUrl)
-        .set('Authorization', `Bearer: ${jwt}`)
+        .set(AUTHORIZATION_HEADER, `Bearer: ${jwt}`)
         .send({ reaction: 'neutral' });
       assertResponseStatus(response, 403);
       assertErrorResponse(response);
@@ -146,7 +147,7 @@ describe('Comment Reaction Test - POST /api/v1/articles/:slug/comments/:comment-
       const jwt = Authorization.generateToken(nonCommenter.id);
       const response = await chai.request(server)
         .post(`/api/v1/articles/${mainArticle.slug}/comments/${MAX_INT}/reactions`)
-        .set('Authorization', `Bearer: ${jwt}`)
+        .set(AUTHORIZATION_HEADER, `Bearer: ${jwt}`)
         .send({ reaction: 'like' });
       assertResponseStatus(response, 404);
       assertErrorResponse(response);

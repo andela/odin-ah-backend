@@ -14,15 +14,9 @@ const {
 
 describe('GET /search', () => {
   beforeEach(async () => {
-    const articleDestroyPromise = Article.destroy({
-      truncate: true,
-      cascade: true
-    });
-    const userDestroyPromise = User.destroy({
-      truncate: true,
-      cascade: true
-    });
-    await Promise.all([articleDestroyPromise, userDestroyPromise, deleteTable(Tag)]);
+    await Promise.all([
+      deleteTable(Article), deleteTable(User), deleteTable(Tag)
+    ]);
   });
 
   after(async () => {

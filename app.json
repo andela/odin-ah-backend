@@ -6,6 +6,54 @@
     "DATABASE_URL": {
       "required": true
     },
+    "GOOGLE_CLIENT_ID": {
+      "required": true
+    },
+    "GOOGLE_CLIENT_SECRET": {
+      "required": true
+    },
+    "TWITTER_API_KEY": {
+      "required": true
+    },
+    "TWITTER_API_SECRET": {
+      "required": true
+    },
+    "FACEBOOK_APP_ID": {
+      "required": true
+    },
+    "FACEBOOK_APP_SECRET": {
+      "required": true
+    },
+    "SESSION_SECRET": {
+      "required": true
+    },
+    "JWTSECRET": {
+      "required": true
+    },
+    "SENDGRID_API_KEY": {
+      "required": true
+    },
+    "HOST_EMAIL": {
+      "required": true
+    },
+    "BASE_URL": {
+      "required": true
+    },
+    "PASSWORD_RESET_EXPIRY": {
+      "required": true
+    },
+    "SERVICE_NAME_USERNAME": {
+      "required": true
+    },
+    "SERVICE_NAME_PASSWORD": {
+      "required": true
+    },
+    "SERVICE_NAME_API_KEY": {
+      "required": true
+    },
+    "SERVICE_NAME_URL": {
+      "required": true
+    },
     "NODE_ENV": {
       "required": true
     },
@@ -18,7 +66,9 @@
       "quantity": 1
     }
   },
-  "addons": ["heroku-postgresql"],
+  "addons": [
+    "heroku-postgresql"
+  ],
   "buildpacks": [
     {
       "url": "heroku/nodejs"

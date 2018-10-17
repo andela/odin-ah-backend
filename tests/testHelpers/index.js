@@ -42,12 +42,11 @@ export function assertTrue(match) {
 /**
  *  Assert the response status code
  * @param {res} response
- * @param {number} status
+ * @param {number} [status]
  * @return {void}
  */
-export function assertResponseStatus(response, status) {
-  const code = status || 200;
-  response.should.have.status(code);
+export function assertResponseStatus(response, status = 200) {
+  response.should.have.status(status);
   response.body.should.be.a('object');
 }
 
