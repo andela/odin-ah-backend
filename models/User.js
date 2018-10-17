@@ -32,7 +32,11 @@ export default (sequelize, Sequelize) => {
       },
       bio: Sequelize.STRING,
       imageUrl: Sequelize.STRING,
-      password: Sequelize.STRING
+      password: Sequelize.STRING,
+      role: {
+        type: Sequelize.ENUM(['user', 'admin', 'superadmin']),
+        defaultValue: 'user'
+      }
     }, {
       timestamps: true
     }
