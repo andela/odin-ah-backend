@@ -1,5 +1,7 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
+import sinon from 'sinon';
+import sgMail from '@sendgrid/mail';
 import db from '../../models';
 import Authorization from '../../middlewares/Authorization';
 import server from '../../index';
@@ -115,6 +117,20 @@ describe('Comment CRUD Test', () => {
     mainArticle = data.article;
     commenter = data.user1;
     nonCommenter = data.user2;
+  });
+
+  let mockSGMailSend;
+  before(() => {
+    mockSGMailSend = sinon.stub(sgMail, 'send')
+      .returns(Promise.resolve([
+        { statusCode: 202 },
+        {
+          status: 'success',
+        }
+      ]));
+  });
+  after(() => {
+    mockSGMailSend.restore();
   });
   describe('POST /api/v1/articles/:slug/comments', () => {
     beforeEach(async () => {

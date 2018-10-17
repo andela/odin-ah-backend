@@ -1,4 +1,6 @@
 import chai, { expect } from 'chai';
+import sinon from 'sinon';
+import sgMail from '@sendgrid/mail';
 import server from '../..';
 import db from '../../models';
 import {
@@ -16,6 +18,19 @@ let userId = null;
 let userId3 = null;
 let userId4 = null;
 describe('POST /profiles/:userId/follow', () => {
+  let mockSGMailSend;
+  before(() => {
+    mockSGMailSend = sinon.stub(sgMail, 'send')
+      .returns(Promise.resolve([
+        { statusCode: 202 },
+        {
+          status: 'success',
+        }
+      ]));
+  });
+  after(() => {
+    mockSGMailSend.restore();
+  });
   before('Register a user ', async () => {
     await User.create(sampleUser);
   });
@@ -91,7 +106,6 @@ describe('DELETE /profiles/:userId/follow', () => {
   });
 });
 
-// const dumm = '/api/v1/articles?page=1&size=3'
 describe('GET /profiles/following', () => {
   before('login a user and get the new token', async () => {
     const { body } = await chai.request(server)
@@ -147,8 +161,6 @@ describe('GET /profiles/follower', () => {
       .get('/api/v1/profiles/follower')
       .set('Authorization', `Bearer ${userToken}`);
     expect(response).to.have.status(200);
-    // expect(response.body.data).to.have.property('myFollowers')
-    //     .that.is.not.empty;
   });
   it('should return a 200 status code when user is not following anyone yet', async () => {
     const response = await chai.request(server)

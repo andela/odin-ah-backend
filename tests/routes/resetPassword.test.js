@@ -98,7 +98,7 @@ describe('Reset Password', () => {
           done();
         });
     });
-    it('should throw error to logger if Mail.sendPasswordReset receives error status', (done) => {
+    it('should throw error to logger if Mail.sendPasswordReset recieves error status', (done) => {
       const mockMail = sinon.stub(Mail, 'sendPasswordReset').returns(Promise.resolve([{
         status: 'error',
         message: 'error sending mail'

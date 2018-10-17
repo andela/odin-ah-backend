@@ -38,6 +38,15 @@ module.exports = {
     updatedAt: {
       type: Sequelize.DATE
     },
+    settings: {
+      type: Sequelize.JSONB,
+      defaultValue: {
+        newFollower: true,
+        newArticleFromUserFollowing: true,
+        articleComment: true,
+        articleLike: true
+      }
+    }
   }),
 
   down: queryInterface => queryInterface.dropTable('Users')

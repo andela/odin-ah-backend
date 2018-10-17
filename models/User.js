@@ -32,7 +32,17 @@ export default (sequelize, Sequelize) => {
       },
       bio: Sequelize.STRING,
       imageUrl: Sequelize.STRING,
-      password: Sequelize.STRING
+      password: Sequelize.STRING,
+      settings: {
+        type: Sequelize.JSONB,
+        defaultValue: {
+          newFollower: true,
+          newArticleFromUserFollowing: true,
+          articleComment: true,
+          articleLike: true,
+          emailSubcribe: true
+        }
+      }
     }, {
       timestamps: true
     }
@@ -54,6 +64,7 @@ export default (sequelize, Sequelize) => {
     User.hasMany(models.Comment, { as: 'Comments', foreignKey: 'userId' });
     User.hasMany(models.Bookmark, { as: 'Bookmarks', foreignKey: 'userId' });
 
+    User.hasMany(models.Notifications, { as: 'Notification', foreignKey: 'userId' });
     User.belongsToMany(models.Follows, {
       foreignKey: 'userId',
       through: 'UserFollows'

@@ -11,12 +11,12 @@ const { User } = db;
  * */
 class UserHelper {
   /**
-   * Find a particular user  by emial
-   * @async
-   * @param {string} email - the user email
-   * @return {object} Returns json object
-   * @static
-   */
+     * Find a particular user  by emial
+     * @async
+     * @param {string} email - the user email
+     * @return {object} Returns json object
+     * @static
+     */
   static async findByEmail(email) {
     try {
       const foundUser = await User.findOne({ where: { email } });
@@ -30,12 +30,12 @@ class UserHelper {
   }
 
   /**
-   * Find a particular user by id
-   * @async
-   * @param {number} id - the user email
-   * @return {object} Returns json object
-   * @static
-   */
+     * Find a particular user by id
+     * @async
+     * @param {number} id - the user email
+     * @return {object} Returns json object
+     * @static
+     */
   static async findById(id) {
     let data = null;
     try {
@@ -47,50 +47,70 @@ class UserHelper {
   }
 
   /**
-    *
-    * @param {request} request HTTP request
-    * @return {object} return user fields to update
-  */
+     *
+     * @param {request} request HTTP request
+     * @return {object} return user fields to update
+     */
   static getUpdateFields(request) {
-    return Util.extractFieldsFromObject(['username', 'email', 'firstName', 'lastName', 'bio', 'imageUrl'],
+    return Util.extractFieldsFromObject(['username', 'email', 'firstName', 'lastName', 'bio', 'imageUrl', 'settings'],
       request.body);
   }
 
   /**
-   *
-   * @param {User} user
-   * @return {object} return user's profile
-   */
+     *
+     * @param {User} user
+     * @return {object} return user's profile
+     */
   static getUserProfileData(user) {
     const {
-      id, firstName, lastName, username, email, bio, imageUrl
+      id,
+      firstName,
+      lastName,
+      username,
+      email,
+      bio,
+      imageUrl
     } = user.dataValues;
     return {
-      id, firstName, lastName, username, email, bio, imageUrl
+      id,
+      firstName,
+      lastName,
+      username,
+      email,
+      bio,
+      imageUrl
     };
   }
 
   /**
-   *
-   * @param {User} userResultById
-   * @param {User} userResultByEmail
-   * @return {boolean} Compare two users by ids
-   */
+     *
+     * @param {User} userResultById
+     * @param {User} userResultByEmail
+     * @return {boolean} Compare two users by ids
+     */
   static notSameUser(userResultById, userResultByEmail) {
     return userResultByEmail && userResultById
-      && userResultById.dataValues.id !== userResultByEmail.dataValues.id;
+            && userResultById.dataValues.id !== userResultByEmail.dataValues.id;
   }
 
   /**
-   *
-   *
-   * @static
-   * @param {object} { username, email, firsName , lastName }
-   * @returns {object} an object containing the attributes needed
-   * @memberof UserHelper
-   */
+     *
+     *
+     * @static
+     * @param {object} { username, email, firsName , lastName }
+     * @returns {object} an object containing the attributes needed
+     * @memberof UserHelper
+     */
   static profileListResponse({
-    id, username, email, firstName, lastName, bio, imageUrl, createdAt, updatedAt
+    id,
+    username,
+    email,
+    firstName,
+    lastName,
+    bio,
+    imageUrl,
+    createdAt,
+    updatedAt
   }) {
     return {
       id,
@@ -106,13 +126,13 @@ class UserHelper {
   }
 
   /**
-   *
-   *
-   * @static
-   * @param {array} profiles
-   * @returns {array} returns object containing required response
-   * @memberof UserHelper
-   */
+     *
+     *
+     * @static
+     * @param {array} profiles
+     * @returns {array} returns object containing required response
+     * @memberof UserHelper
+     */
   static profileListArrayResponse(profiles) {
     return profiles.map(profile => (
       UserHelper.profileListResponse(profile)

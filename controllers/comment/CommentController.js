@@ -4,6 +4,7 @@ import UserHelper from '../../helpers/UserHelper';
 import ArticleHelper from '../../helpers/ArticleHelper';
 import logger from '../../helpers/logger';
 import HttpError from '../../helpers/exceptionHandler/httpError';
+import eventBus from '../../helpers/eventBus';
 
 const { Comment, User } = db;
 
@@ -124,8 +125,17 @@ export default class CommentController {
         createdComment.setParent(parent),
         createdComment.setUser(user),
         createdComment.setArticle(article)]);
+
       const comment = CommentHelper.getCommentResponseData(user.dataValues,
         createdComment.dataValues);
+
+      eventBus.emit('onArticleInteractionEvent', {
+        toUser: article.dataValues.userId,
+        fromUser: createdComment.dataValues.userId,
+        articleId: article.dataValues.id,
+        type: 'comment'
+      });
+
       return res.status(201)
         .json({
           comment,
