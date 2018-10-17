@@ -70,8 +70,12 @@ export default class BookmarkController {
     });
 
     const article = allBookmarks.map((bookmark) => {
-      const { slug, description, body } = bookmark.article;
-      return { slug, description, body };
+      const {
+        slug, description, body, readingTime
+      } = bookmark.article;
+      return {
+        slug, description, body, readingTime
+      };
     });
 
     return res.status(200)

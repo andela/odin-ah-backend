@@ -102,7 +102,7 @@ class ArticleHelper {
    */
   static getArticleResponseData(user, article, tagList) {
     const {
-      title, body, description, slug
+      title, body, description, slug, readingTime
     } = article;
     const { username, bio, imageUrl } = user;
     let tags = [];
@@ -119,8 +119,9 @@ class ArticleHelper {
       title,
       body,
       description,
+      readingTime,
       tags,
-      author
+      author,
     };
   }
 
