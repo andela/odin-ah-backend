@@ -6,10 +6,11 @@ const { Article, User } = db;
 export const defaultArticle = {
   title: 'How to train your dragon',
   description: 'Ever wonder how?',
-  body: 'Nunc sed diam suscipit, lobortis eros nec, auctor nisl. Nunc ac magna\n'
+  body:
+    'Nunc sed diam suscipit, lobortis eros nec, auctor nisl. Nunc ac magna\n'
     + '          non justo varius rutrum sit amet feugiat elit. Pellentesque vehicula,\n'
     + '          ante rutrum condimentum tempor, purus metus vulputate ligula, et\n'
-    + '          commodo tortor massa eu tortor.',
+    + '          commodo tortor massa eu tortor.'
 };
 
 /**
@@ -23,17 +24,13 @@ export const defaultArticle = {
 export function assertArticleResponse(response, article, user, tags) {
   response.body.should.be.a('object');
   response.body.should.have.property('article');
-  response.body.article.should.have.property('title')
-    .eq(article.title);
-  response.body.article.should.have.property('body')
-    .eq(article.body);
-  response.body.article.should.have.property('description')
-    .eq(article.description);
+  response.body.article.should.have.property('title').eq(article.title);
+  response.body.article.should.have.property('body').eq(article.body);
+  response.body.article.should.have.property('description').eq(article.description);
   response.body.article.should.have.property('slug');
 
   response.body.article.should.have.property('author');
-  response.body.article.author.should.have.property('username')
-    .eq(user.username);
+  response.body.article.author.should.have.property('username').eq(user.username);
   response.body.article.author.should.have.property('bio');
   response.body.article.author.should.have.property('imageUrl');
 
@@ -52,69 +49,59 @@ export function assertArticleResponse(response, article, user, tags) {
  * @return {Promise<void>} return a Promise
  */
 export async function validateArticleInput(url, jwt, update) {
-  const response0 = await getRequest(url, jwt, update)
-    .send({
-      title: 'How to train your dragon',
-      description: 'Ever wonder how?'
-    });
-  const response1 = await getRequest(url, jwt, update)
-    .send({
-      description: 'Ever wonder how?',
-      body: 'It takes a Jacobian'
-    });
-  const response2 = await getRequest(url, jwt, update)
-    .send({
-      title: '            ',
-      description: 'Ever wonder how?',
-      body: 'It takes a Jacobian',
-    });
-  const response3 = await getRequest(url, jwt, update)
-    .send({
-      title: 'How to train your dragon',
-      description: 'Ever wonder how?',
-      body: '        ',
-    });
-  const response4 = await getRequest(url, jwt, update)
-    .send({
-      title: 'How to train your dragon',
-      body: 'body body',
-    });
-  const response5 = await getRequest(url, jwt, update)
-    .send({
-      title: 'How to train your dragon',
-      description: '               ',
-      body: 'body 6body',
-    });
+  const response0 = await getRequest(url, jwt, update).send({
+    title: 'How to train your dragon',
+    description: 'Ever wonder how?'
+  });
+  const response1 = await getRequest(url, jwt, update).send({
+    description: 'Ever wonder how?',
+    body: 'It takes a Jacobian'
+  });
+  const response2 = await getRequest(url, jwt, update).send({
+    title: '            ',
+    description: 'Ever wonder how?',
+    body: 'It takes a Jacobian'
+  });
+  const response3 = await getRequest(url, jwt, update).send({
+    title: 'How to train your dragon',
+    description: 'Ever wonder how?',
+    body: '        '
+  });
+  const response4 = await getRequest(url, jwt, update).send({
+    title: 'How to train your dragon',
+    body: 'body body'
+  });
+  const response5 = await getRequest(url, jwt, update).send({
+    title: 'How to train your dragon',
+    description: '               ',
+    body: 'body 6body'
+  });
 
-  const response6 = await getRequest(url, jwt, update)
-    .send({
-      title: 'How',
-      description: 'Ever wonder how?',
-      body: 'body body'
-    });
+  const response6 = await getRequest(url, jwt, update).send({
+    title: 'How',
+    description: 'Ever wonder how?',
+    body: 'body body'
+  });
 
-  const response7 = await getRequest(url, jwt, update)
-    .send({
-      title: 'How to train your dragon',
-      description: 'Ever wonder how?',
-      body: 'body body',
-      tags: 'eesff '
-    });
+  const response7 = await getRequest(url, jwt, update).send({
+    title: 'How to train your dragon',
+    description: 'Ever wonder how?',
+    body: 'body body',
+    tags: 'eesff '
+  });
 
-  const response8 = await getRequest(url, jwt, update)
-    .send({
-      title: 'How to train your dragon',
-      description: 'Ever wonder how?',
-      body: 'body body',
-      tags: ['eesff ', '            ']
-    });
-  const response9 = await getRequest(url, jwt, update)
-    .send({
-      title: defaultArticle.body,
-      description: 'Ever wonder how?',
-      body: 'body body',
-      tags: ['eesff ']
-    });
+  const response8 = await getRequest(url, jwt, update).send({
+    title: 'How to train your dragon',
+    description: 'Ever wonder how?',
+    body: 'body body',
+    tags: ['eesff ', '            ']
+  });
+  const response9 = await getRequest(url, jwt, update).send({
+    title: defaultArticle.body,
+    description: 'Ever wonder how?',
+    body: 'body body',
+    tags: ['eesff ']
+  });
 
   if (!update) {
     assertResponseStatus(response0, 400);
@@ -157,24 +144,23 @@ export function assertArrayResponse(response, length) {
 }
 
 /**
- *
+ * @param {Integer} userIndex index of user to be selected
  * @return {Promise<void>} Create 10 dummy articles
  */
-export async function createDummyArticles() {
+export async function createDummyArticles(userIndex = 0) {
   const slug = 'dummy-slug';
-
-  const articles = [];
-  for (let i = 1; i < 11; i += 1) {
-    articles.push({
+  const articleModels = [];
+  for (let count = 1; count < 11; count += 1) {
+    const newArticlePromise = Article.create({
       ...defaultArticle,
-      slug: `${slug}-${i}`
+      slug: `${slug}-${count + userIndex * 10}` // to avoid slug constraint error
     });
+    articleModels.push(newArticlePromise);
   }
-
-  const [users, articleModels] = await Promise.all([
-    User.findAll(),
-    Article.bulkCreate(articles, { individualHooks: true })
-  ]);
-  const addUserToArticlePromise = articleModels.map(articleData => (articleData.setUser(users[0])));
-  await Promise.all(addUserToArticlePromise);
+  const [users, ...articles] = await Promise.all([User.findAll(), ...articleModels]);
+  const articlesWithOwnersPromise = [];
+  articles.forEach((articleData) => {
+    articlesWithOwnersPromise.push(articleData.setUser(users[userIndex]));
+  });
+  await Promise.all(articlesWithOwnersPromise);
 }

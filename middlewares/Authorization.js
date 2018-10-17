@@ -22,12 +22,10 @@ class Authorization {
     const bearer = bearerHeader.substring(0, 6);
     let token;
     if (bearer.toLowerCase() === 'bearer') {
-      token = bearerHeader.substring(7)
-        .trim();
+      token = bearerHeader.substring(7).trim();
     }
     return token;
   }
-
 
   /**
    * Verifies the user token
@@ -46,7 +44,7 @@ class Authorization {
       } else {
         error = {
           status: 'error',
-          message: 'Token not provided',
+          message: 'Token not provided'
         };
       }
     } catch (err) {
@@ -70,7 +68,7 @@ class Authorization {
     }
     return {
       message,
-      status: 'error',
+      status: 'error'
     };
   }
 
@@ -81,12 +79,15 @@ class Authorization {
    * @static
    */
   static generateToken(userId) {
-    return jwt.sign({
-      userId
-    },
-    process.env.JWTSECRET, {
-      expiresIn: '24h',
-    });
+    return jwt.sign(
+      {
+        userId
+      },
+      process.env.JWTSECRET,
+      {
+        expiresIn: '24h'
+      }
+    );
   }
 
   /**
@@ -112,9 +113,12 @@ class Authorization {
    */
   static isAuthNotRequired(req) {
     const { url, method } = req;
-    return url.startsWith('/auth')
+    return (
+      url.startsWith('/auth')
       || (url.startsWith('/articles') && method.toUpperCase() === 'GET')
-      || url.startsWith('/users/reset-password/');
+      || url.startsWith('/users/reset-password/')
+      || url.startsWith('/search')
+    );
   }
 }
 
