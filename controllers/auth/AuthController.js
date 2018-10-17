@@ -45,7 +45,8 @@ class AuthController {
       username,
       bio,
       imageUrl,
-      isVerified
+      isVerified,
+      role
     } = user.dataValues;
     if (!isVerified) {
       return res.status(403).json({
@@ -53,7 +54,11 @@ class AuthController {
         message: 'Your email is not yet verified. Please check your email for further instructions.'
       });
     }
-    const token = Authorization.generateToken(id);
+    const jwtInfo = {
+      userId: id,
+      role
+    };
+    const token = Authorization.generateToken(jwtInfo);
     return res.status(200).json({
       user: {
         email,

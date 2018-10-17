@@ -40,5 +40,3 @@ app.use(passport.initialize());
 app.use(routes);
 
 export default app;
-
-// j
