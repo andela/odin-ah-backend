@@ -1,9 +1,13 @@
- import db from '../../models';
+import db from '../../models';
 import ArticleHelper from '../../helpers/ArticleHelper';
 import HttpError from '../../helpers/exceptionHandler/httpError';
+import eventBus from '../../helpers/eventBus';
 
 const {
-  Like, User, Comment, CommentReaction
+  Like,
+  User,
+  Comment,
+  CommentReaction
 } = db;
 /**
  *
@@ -13,12 +17,12 @@ const {
  */
 export default class LikeController {
   /**
-   * @static
-   * @param {object} req
-   * @param {object} res
-   * @memberof LikeController
-   * @return {json} Returns json object
-   */
+     * @static
+     * @param {object} req
+     * @param {object} res
+     * @memberof LikeController
+     * @return {json} Returns json object
+     */
   static async addLike(req, res) {
     const { slug, status } = req.params;
     const { userId } = req.authData;
@@ -38,10 +42,16 @@ export default class LikeController {
           message: 'successfully modified like status',
         });
     }
-    await Like.create({
+    const liked = await Like.create({
       userId,
       articleId,
       status
+    });
+    eventBus.emit('onArticleInteraction', {
+      toUser: article.dataValues.userId,
+      fromUser: liked.dataValues.userId,
+      articleId: article.dataValues.id,
+      type: 'like'
     });
     return res.status(201)
       .json({
@@ -51,13 +61,13 @@ export default class LikeController {
   }
 
   /**
-   *
-   * @param {request} req
-   * @param {response} res
-   * @param {next} next
-   * @return {Promise<*>} Create or update a reaction on a comment for the authenticated user.
-   * Returns a json response back to the user
-   */
+     *
+     * @param {request} req
+     * @param {response} res
+     * @param {next} next
+     * @return {Promise<*>} Create or update a reaction on a comment for the authenticated user.
+     * Returns a json response back to the user
+     */
   static async addCommentReaction(req, res, next) {
     try {
       const commentId = req.params.id;

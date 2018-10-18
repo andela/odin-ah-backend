@@ -1,6 +1,7 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import sinon from 'sinon';
+import sgMail from '@sendgrid/mail';
 import db from '../../models';
 import Authorization from '../../middlewares/Authorization';
 import server from '../../index';
@@ -14,7 +15,10 @@ import {
   validateArticleInput
 } from '../testHelpers/articleUtil';
 import {
-  assertErrorResponse, assertResponseStatus, assertTrue, deleteTable
+  assertErrorResponse,
+  assertResponseStatus,
+  assertTrue,
+  deleteTable
 } from '../testHelpers';
 
 const { Article, User, Tag } = db;
@@ -26,7 +30,21 @@ describe('Article CRUD Test', () => {
   before(async () => {
     await deleteTable(User);
     await Promise.all([User.create({ ...realUser, isVerified: true }),
-      User.create({ ...realUser1, isVerified: true })]);
+      User.create({ ...realUser1, isVerified: true })
+    ]);
+  });
+  let mockSGMailSend;
+  before(() => {
+    mockSGMailSend = sinon.stub(sgMail, 'send')
+      .returns(Promise.resolve([
+        { statusCode: 202 },
+        {
+          status: 'success',
+        }
+      ]));
+  });
+  after(() => {
+    mockSGMailSend.restore();
   });
   describe('POST /api/v1/articles', () => {
     beforeEach(async () => {
@@ -213,13 +231,13 @@ describe('Article CRUD Test', () => {
     it('should modify article I have authored', async () => {
       const users = await User.findAll();
       let user = users[0];
-      const tags = [
-        {
-          name: 'mocha-test',
-        },
-        {
-          name: 'reactjs',
-        }];
+      const tags = [{
+        name: 'mocha-test',
+      },
+      {
+        name: 'reactjs',
+      }
+      ];
 
       let article = await Article.create({
         ...defaultArticle,

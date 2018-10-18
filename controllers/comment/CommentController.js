@@ -4,6 +4,7 @@ import UserHelper from '../../helpers/UserHelper';
 import ArticleHelper from '../../helpers/ArticleHelper';
 import logger from '../../helpers/logger';
 import HttpError from '../../helpers/exceptionHandler/httpError';
+import eventBus from '../../helpers/eventBus';
 
 const { Comment, User } = db;
 
@@ -12,14 +13,14 @@ const { Comment, User } = db;
  */
 export default class CommentController {
   /**
-   *
-   * Method for creating Authors Comment
-   * Authentication Required
-   * @param {request} req
-   * @param {response} res
-   * @param {next} next
-   * @return {object} return create article for user.
-   */
+     *
+     * Method for creating Authors Comment
+     * Authentication Required
+     * @param {request} req
+     * @param {response} res
+     * @param {next} next
+     * @return {object} return create article for user.
+     */
   static async getComments(req, res, next) {
     try {
       const { slug } = req;
@@ -28,12 +29,10 @@ export default class CommentController {
 
       let comments = await Comment.findAll({
         where: { $and: [{ articleId: article.id }, { parentId: null }] },
-        include: [
-          {
-            model: User,
-            as: 'user'
-          }
-        ]
+        include: [{
+          model: User,
+          as: 'user'
+        }]
       });
 
       comments = CommentHelper.getCommentsResponseData(comments);
@@ -52,14 +51,14 @@ export default class CommentController {
   }
 
   /**
-   *
-   * Method for creating Authors Comment
-   * Authentication Required
-   * @param {request} req
-   * @param {response} res
-   * @param {next} next
-   * @return {object} return create article for user.
-   */
+     *
+     * Method for creating Authors Comment
+     * Authentication Required
+     * @param {request} req
+     * @param {response} res
+     * @param {next} next
+     * @return {object} return create article for user.
+     */
   static async getSubComments(req, res, next) {
     try {
       const { slug } = req;
@@ -85,14 +84,14 @@ export default class CommentController {
   }
 
   /**
-   *
-   * Method for creating Authors Comment
-   * Authentication Required
-   * @param {request} req
-   * @param {response} res
-   * @param {next} next
-   * @return {object} return create article for user.
-   */
+     *
+     * Method for creating Authors Comment
+     * Authentication Required
+     * @param {request} req
+     * @param {response} res
+     * @param {next} next
+     * @return {object} return create article for user.
+     */
   static async createComment(req, res, next) {
     const { slug } = req;
     const { body } = req.body;
@@ -118,14 +117,25 @@ export default class CommentController {
       }
 
       const [user, createdComment] = await Promise.all([UserHelper.findById(userId),
-        Comment.create({ body })]);
+        Comment.create({ body })
+      ]);
 
       await Promise.all([
         createdComment.setParent(parent),
         createdComment.setUser(user),
-        createdComment.setArticle(article)]);
+        createdComment.setArticle(article)
+      ]);
+
       const comment = CommentHelper.getCommentResponseData(user.dataValues,
         createdComment.dataValues);
+
+      eventBus.emit('onArticleInteraction', {
+        toUser: article.dataValues.userId,
+        fromUser: createdComment.dataValues.userId,
+        articleId: article.dataValues.id,
+        type: 'comment'
+      });
+
       return res.status(201)
         .json({
           comment,
@@ -138,14 +148,14 @@ export default class CommentController {
   }
 
   /**
-   *
-   * Method for deleting Authors Comment
-   * Authentication Required
-   * @param {request} req
-   * @param {response} res
-   * @param {next} next
-   * @return {object} return delete status.
-   */
+     *
+     * Method for deleting Authors Comment
+     * Authentication Required
+     * @param {request} req
+     * @param {response} res
+     * @param {next} next
+     * @return {object} return delete status.
+     */
   static async deleteComment(req, res, next) {
     try {
       const { id } = req.params;

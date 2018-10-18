@@ -1,7 +1,7 @@
-
-
 import chai from 'chai';
 import chaiHttp from 'chai-http';
+import sinon from 'sinon';
+import sgMail from '@sendgrid/mail';
 import server from '../../index';
 import db from '../../models/index';
 import Authorization from '../../middlewares/Authorization';
@@ -13,6 +13,19 @@ chai.should();
 
 const { User } = db;
 describe('Like or Dislike', () => {
+  let mockSGMailSend;
+  before(() => {
+    mockSGMailSend = sinon.stub(sgMail, 'send')
+      .returns(Promise.resolve([
+        { statusCode: 202 },
+        {
+          status: 'success',
+        }
+      ]));
+  });
+  after(() => {
+    mockSGMailSend.restore();
+  });
   before('Login a user', (done) => {
     User.create({ username: 'hammed', email: 'hammed.noibi@andela.com', password: 'password' }).then((user) => {
       accessToken = Authorization.generateToken(user.id);

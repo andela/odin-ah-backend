@@ -9,13 +9,13 @@ import ArticleValidator from './ArticleValidator';
  */
 export default class LikeValidator {
   /**
-   * @static
-   * @param {object} req
-   * @param {object} res
-   * @param {function} next
-   * @returns {function} Returns response message
-   * @memberof LikeValidator
-   */
+     * @static
+     * @param {object} req
+     * @param {object} res
+     * @param {function} next
+     * @returns {function} Returns response message
+     * @memberof LikeValidator
+     */
   static addLikeValidator(req, res, next) {
     const { status } = req.params;
     if (LikeValidator.isReactionValid(status)) {
@@ -25,12 +25,12 @@ export default class LikeValidator {
   }
 
   /**
-   *
-   * @param {request} req
-   * @param {response} res
-   * @param {next} next
-   * @return {*} validates reactions parameters
-   */
+     *
+     * @param {request} req
+     * @param {response} res
+     * @param {next} next
+     * @return {*} validates reactions parameters
+     */
   static commentReactionValidator(req, res, next) {
     const { reaction } = req.body;
     const { id } = req.params;
@@ -48,10 +48,10 @@ export default class LikeValidator {
   }
 
   /**
-   *
-   * @param { 'like' |'dislike' | 'neutral'  } reaction
-   * @return {boolean} checks if reaction is valid.
-   */
+     *
+     * @param { 'like' |'dislike' | 'neutral'  } reaction
+     * @return {boolean} checks if reaction is valid.
+     */
   static isReactionValid(reaction) {
     return reaction === 'like' || reaction === 'dislike' || reaction === 'neutral';
   }

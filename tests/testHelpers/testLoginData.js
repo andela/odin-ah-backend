@@ -72,6 +72,35 @@ const sampleUser4 = {
   isVerified: true,
   token: 'ykwh8ws31yiykwh8ws31yi',
 };
+const sampleUser5 = {
+  email: 'Nam.ac.nulla@malesuadafamesac.edu',
+  username: 'Amarachai',
+  password: 'PJB30UQF8RL',
+  isVerified: true,
+  token: 'ykwh8ws31yiykwh8ws31yi',
+};
+const sampleUser6 = {
+  email: 'Aliquam.erat@convallisdolorQuisque.ca',
+  username: 'Mesoma',
+  password: 'HBF51DQC2JU',
+  isVerified: true,
+  token: 'ykwh8ws31yiykwh8ws31yi',
+};
+const sampleUser7 = {
+  email: 'magna.tellus.faucibus@ac.org',
+  username: 'Karinatu',
+  password: 'HBF51DQC2JU',
+  isVerified: true,
+  token: 'ykwh8ws31yiykwh8ws31yi',
+};
+const fakeNotification = {
+  id: 20,
+  userId: 2,
+  isRead: true,
+  message: 'your village people started following you Wednesday, October 17, 2018 9:15 AM ago',
+  createdAt: '2018-10-17 09:15:23.791+01',
+  updatedAt: '2018-10-25 09:15:23.791+01'
+};
 export {
   realUser,
   realUser1,
@@ -86,4 +115,8 @@ export {
   sampleUser2,
   sampleUser3,
   sampleUser4,
+  sampleUser5,
+  sampleUser6,
+  sampleUser7,
+  fakeNotification
 };

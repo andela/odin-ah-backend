@@ -44,6 +44,9 @@ yarn.lock
 .nyc_output/
 yarn-error.log
 
+# Vscode
+.vscode
+
 # Intellij
 .idea/
 *.iml
