@@ -33,13 +33,12 @@ class Guard {
    */
   allow(role) {
     return (req, res, next) => {
-      console.log(role);
       if (!this.exists(role)) {
         const error = new Error('role doesn\'t exist');
         error.status = 400;
         return next(error);
       }
-      if (req.authData.role !== role) {
+      if (!req.authData || req.authData.role !== role) {
         const error = new Error('You are not authorized to access this resource');
         error.status = 401;
         return next(error);
