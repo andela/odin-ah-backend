@@ -657,6 +657,8 @@ paths:
             $ref: '#/definitions/Error'
       tags:
       - Articles
+      security:
+      - UserSecurity: []
   /users/reset-password/begin:
     post:
       summary: Start password reset process
@@ -954,7 +956,7 @@ paths:
             $ref: "#/definitions/SentimentError"
       tags:
       - Sentiment
-      securçity:
+      security:
         - UserSecurity: []
   /report/articles:
     get:
@@ -1020,6 +1022,68 @@ paths:
           description: Article not found
       tags:
         - Report 
+      security:
+        - UserSecurity: []
+      
+  '/articles/{slug}/disable':
+    put:
+      summary: 'Disable an article by {slug}.'
+      description: 'Disables and returns the disabled article. Only an Admin is allowed'
+      parameters:
+      - name: slug
+        in: path
+        required: true
+        description: The slug of the article to be disabled
+        type: string
+      responses:
+        '200':
+          description: 'Disabled article with the given {slug}'
+          schema:
+            $ref: '#/definitions/ArticleResult'
+        '401':
+          description: Unauthorizated access.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: 'No articles found with {slug}.'
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - Admin
+      security:
+      - UserSecurity: []
+  '/users/{id}/{role}':
+    put:
+      summary: "Update a user's role."
+      description: 'A super admin can change the role of a user'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the user whose role is to be changed
+          type: string
+        - name: role
+          in: path
+          required: true
+          description: The new role to be assigned.
+          type: string
+      responses:
+        '200':
+          description: 'Updated user details'
+          schema:
+            $ref: '#/definitions/ProfileResponse'
+        '401':
+          description: Unauthorizated access if not superadmin.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: 'User not found.'
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - Super Admin
+      security:
+      - UserSecurity: []
 
   /profiles/notification:
     get:
@@ -1119,7 +1183,7 @@ definitions:
     properties:
       email:
         type: string
-        example: victor@gmail.com
+        example: dummy-user@local.host
       password:
         type: string
         example: password
@@ -1444,6 +1508,9 @@ definitions:
         imageUrl:
           type: string
           example: 'http://www.url-to-some-image.com'
+        role: 
+          type: string
+          example: admin
         createdAt:
           type: date
           example: '2018-10-08T05:02:07.631Z'

@@ -74,17 +74,17 @@ class Authorization {
 
   /**
      * Generate a user Token
-     * @param  {string} userId - The user id
+     * @param  {object} data - The user id or data object to be signed
      * @return {string} Returns json object
      * @static
      */
-  static generateToken(userId) {
-    return jwt.sign({
-      userId
-    },
-    process.env.JWTSECRET, {
-      expiresIn: '24h'
-    });
+  static generateToken(data) {
+    const { role, id } = data;
+    const info = { role, userId: id };
+    return jwt.sign(info,
+      process.env.JWTSECRET, {
+        expiresIn: '24h',
+      });
   }
 
   /**

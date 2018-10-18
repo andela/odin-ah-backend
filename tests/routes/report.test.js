@@ -15,7 +15,7 @@ const { User } = db;
 describe('Report articles', () => {
   before('Login a user', (done) => {
     User.create({ username: 'lameda', email: 'hammed@andela.com', password: 'password' }).then((user) => {
-      accessToken = Authorization.generateToken(user.id);
+      accessToken = Authorization.generateToken(user);
       done();
     });
   });

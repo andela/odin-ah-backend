@@ -47,7 +47,7 @@ describe('Comment Reaction Test - POST /api/v1/articles/:slug/comments/:comment-
       await deleteTable(CommentReaction);
     });
     it('should provide valid request input', async () => {
-      const jwt = Authorization.generateToken(nonCommenter.id);
+      const jwt = Authorization.generateToken(nonCommenter);
       let response = await chai.request(server)
         .post(baseUrl)
         .set(AUTHORIZATION_HEADER, `Bearer: ${jwt}`)
@@ -64,8 +64,8 @@ describe('Comment Reaction Test - POST /api/v1/articles/:slug/comments/:comment-
     });
 
     it('should react to a comment when user is authenticated', async () => {
-      const user1Jwt = Authorization.generateToken(commenter.id);
-      const user2Jwt = Authorization.generateToken(nonCommenter.id);
+      const user1Jwt = Authorization.generateToken(commenter);
+      const user2Jwt = Authorization.generateToken(nonCommenter);
       let response = await chai.request(server)
         .post(baseUrl)
         .set(AUTHORIZATION_HEADER, `Bearer: ${user1Jwt}`)
@@ -94,7 +94,7 @@ describe('Comment Reaction Test - POST /api/v1/articles/:slug/comments/:comment-
         userId,
         commentId: comment.id,
       });
-      const jwt = Authorization.generateToken(userId);
+      const jwt = Authorization.generateToken(nonCommenter);
       const response = await chai.request(server)
         .post(baseUrl)
         .set(AUTHORIZATION_HEADER, `Bearer: ${jwt}`)
@@ -113,7 +113,7 @@ describe('Comment Reaction Test - POST /api/v1/articles/:slug/comments/:comment-
         userId,
         commentId: comment.id,
       });
-      const jwt = Authorization.generateToken(userId);
+      const jwt = Authorization.generateToken(commenter);
       const response = await chai.request(server)
         .post(baseUrl)
         .set(AUTHORIZATION_HEADER, `Bearer: ${jwt}`)
@@ -126,7 +126,7 @@ describe('Comment Reaction Test - POST /api/v1/articles/:slug/comments/:comment-
     });
 
     it('should not remove authors reaction from a comment, if authors hasn\'t reacted to the comment', async () => {
-      const jwt = Authorization.generateToken(commenter.id);
+      const jwt = Authorization.generateToken(commenter);
       const response = await chai.request(server)
         .post(baseUrl)
         .set(AUTHORIZATION_HEADER, `Bearer: ${jwt}`)
@@ -144,7 +144,7 @@ describe('Comment Reaction Test - POST /api/v1/articles/:slug/comments/:comment-
     });
 
     it('should not react to a comment that does not exists', async () => {
-      const jwt = Authorization.generateToken(nonCommenter.id);
+      const jwt = Authorization.generateToken(nonCommenter);
       const response = await chai.request(server)
         .post(`/api/v1/articles/${mainArticle.slug}/comments/${MAX_INT}/reactions`)
         .set(AUTHORIZATION_HEADER, `Bearer: ${jwt}`)

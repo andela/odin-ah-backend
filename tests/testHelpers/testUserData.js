@@ -2,7 +2,8 @@ const testUserData = [
   {
     username: 'Fuller',
     email: 'erat@enim.ca',
-    password: 'AGG82TFT0GR'
+    password: 'password',
+    role: 'superadmin'
   },
   {
     username: 'Arsenio',

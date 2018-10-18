@@ -27,10 +27,11 @@ describe('Like or Dislike', () => {
     mockSGMailSend.restore();
   });
   before('Login a user', (done) => {
-    User.create({ username: 'hammed', email: 'hammed.noibi@andela.com', password: 'password' }).then((user) => {
-      accessToken = Authorization.generateToken(user.id);
-      done();
-    });
+    User.create({ username: 'hammed', email: 'hammed.noibi@andela.com', password: 'password' })
+      .then((user) => {
+        accessToken = Authorization.generateToken(user);
+        done();
+      });
   });
   before('create article', (done) => {
     chai.request(server)

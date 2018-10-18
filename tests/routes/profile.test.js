@@ -5,16 +5,24 @@ import server from '../../index';
 import { realUser } from '../testHelpers/testLoginData';
 import testUserData from '../testHelpers/testUserData';
 import Authorization from '../../middlewares/Authorization';
+// import UserHelper from '../../helpers/UserHelper';
+import { deleteTable } from '../testHelpers';
 import db from '../../models';
 
 let accessToken;
+let superAdminAccessToken;
 
 chai.use(chaiHttp);
 chai.should();
 
 const { User } = db;
 
+let userId;
+
 describe('Profile', () => {
+  before('Destoy', async () => {
+    await deleteTable(User);
+  });
   before('Create a user Account', (done) => {
     chai
       .request(server)
@@ -32,8 +40,12 @@ describe('Profile', () => {
         done();
       });
   });
+  before('Get a user\'s id', async () => {
+    const [user] = await User.findAll();
+    userId = user.id;
+  });
   before('Verify user email', async () => {
-    await User.update({ isVerified: true }, { where: { email: realUser.email.toLowerCase() } });
+    await User.update({ isVerified: true }, { where: { email: { $not: null } } });
   });
   before('Login a user', (done) => {
     chai
@@ -47,8 +59,20 @@ describe('Profile', () => {
         done();
       });
   });
+  before('Login a superadmin', (done) => {
+    chai
+      .request(server)
+      .post('/api/v1/auth/login')
+      .send(testUserData[0])
+      .end((err, response) => {
+        const { user } = response.body;
+        const { token } = user;
+        superAdminAccessToken = token;
+        done();
+      });
+  });
   it('should return error for Profile that does not exist', (done) => {
-    const token = Authorization.generateToken(10000);
+    const token = Authorization.generateToken({ id: 10000, role: 'user' });
     chai
       .request(server)
       .get('/api/v1/users')
@@ -222,7 +246,7 @@ describe('Profile', () => {
       });
   });
   it('should return error for Profile that does not exist', (done) => {
-    const token = Authorization.generateToken(10000);
+    const token = Authorization.generateToken({ id: 10000, role: 'user' });
     chai.request(server)
       .put('/api/v1/users')
       .set('Authorization', `Bearer ${token}`)
@@ -245,7 +269,7 @@ describe('Profile', () => {
       .put('/api/v1/users')
       .set('Authorization', `Bearer ${accessToken}`)
       .send({
-        email: 'johndoe@gmail.com',
+        email: testUserData[0].email,
         username: 'much',
         firstName: 'First',
         lastName: 'Name',
@@ -308,6 +332,27 @@ describe('Profile', () => {
       .end((err, response) => {
         response.should.have.status(400);
         response.body.should.have.property('status').that.is.equal('error');
+        done();
+      });
+  });
+  it('should return 401 unauthorized if a non superadmin tries to change a user\'s role', (done) => {
+    const id = 5;
+    chai.request(server)
+      .put(`/api/v1/users/${id}/admin`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .end((err, response) => {
+        response.should.have.status(401);
+        response.body.should.have.property('status').that.is.equal('error');
+        done();
+      });
+  });
+  it('should return 200 success if a superadmin tries to change a user\'s role', (done) => {
+    chai.request(server)
+      .put(`/api/v1/users/${userId}/admin`)
+      .set('Authorization', `Bearer ${superAdminAccessToken}`)
+      .end((err, response) => {
+        response.should.have.status(200);
+        response.body.should.have.property('status').that.is.equal('success');
         done();
       });
   });
