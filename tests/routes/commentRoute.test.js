@@ -122,7 +122,7 @@ describe('Comment CRUD Test', () => {
     });
     it('should have a valid input', async () => {
       const invalidBody = '                 ';
-      const jwt = Authorization.generateToken(commenter.id);
+      const jwt = Authorization.generateToken(commenter);
       const url = `/api/v1/articles/${mainArticle.slug}/comments`;
 
       let response = await getRequest(url, jwt, false)
@@ -137,7 +137,7 @@ describe('Comment CRUD Test', () => {
     });
 
     it('should return 404 error when article does not exists', async () => {
-      const jwt = Authorization.generateToken(commenter.id);
+      const jwt = Authorization.generateToken(commenter);
       const url = '/api/v1/articles/does-not-exists/comments';
 
       const response = await getRequest(url, jwt, false)
@@ -148,7 +148,7 @@ describe('Comment CRUD Test', () => {
     it('should create new comment for logged in user', async () => {
       const user = commenter;
       const article = mainArticle;
-      const jwt = Authorization.generateToken(user.id);
+      const jwt = Authorization.generateToken(user);
 
       const url = `/api/v1/articles/${article.slug}/comments`;
       const response = await getRequest(url, jwt, false)
@@ -173,7 +173,7 @@ describe('Comment CRUD Test', () => {
     it('should have a valid input', async () => {
       const article = mainArticle;
       const invalidBody = '                 ';
-      const jwt = Authorization.generateToken(mainAuthor.id);
+      const jwt = Authorization.generateToken(mainAuthor);
 
       const url = `/api/v1/articles/${article.slug}/comments/${firstLevelComment.id}`;
       const badUrl = `/api/v1/articles/${article.slug}/comments/bad-id`;
@@ -194,7 +194,7 @@ describe('Comment CRUD Test', () => {
       assertErrorResponse(response);
     });
     it('should return 404 error when article does not exists', async () => {
-      const jwt = Authorization.generateToken(commenter.id);
+      const jwt = Authorization.generateToken(commenter);
       const url = `/api/v1/articles/does-not-exists/comments/${firstLevelComment.id}`;
       const response = await getRequest(url, jwt, false)
         .send({ body });
@@ -202,7 +202,7 @@ describe('Comment CRUD Test', () => {
       assertErrorResponse(response);
     });
     it('should return 404 error when comments does not exists', async () => {
-      const jwt = Authorization.generateToken(commenter.id);
+      const jwt = Authorization.generateToken(commenter);
       const url = `/api/v1/articles/${mainArticle.slug}/comments/${MAX_INT}`;
       const response = await getRequest(url, jwt, false)
         .send({ body });
@@ -212,7 +212,7 @@ describe('Comment CRUD Test', () => {
     it('should create comment of a comment for logged in user', async () => {
       const user = mainAuthor;
       const article = mainArticle;
-      const jwt = Authorization.generateToken(user.id);
+      const jwt = Authorization.generateToken(user);
 
       const url = `/api/v1/articles/${article.slug}/comments/${firstLevelComment.id}`;
       const response = await getRequest(url, jwt, false)
@@ -226,7 +226,7 @@ describe('Comment CRUD Test', () => {
       secondLevelComment.setParent(firstLevelComment);
       secondLevelComment.setArticle(mainArticle);
 
-      const jwt = Authorization.generateToken(commenter.id);
+      const jwt = Authorization.generateToken(commenter);
 
       const url = `/api/v1/articles/${mainArticle.slug}/comments/${secondLevelComment.id}`;
       const response = await getRequest(url, jwt, false)
@@ -327,7 +327,7 @@ describe('Comment CRUD Test', () => {
       await createDummyComments();
     });
     it('should delete comment author by user', async () => {
-      const jwt = Authorization.generateToken(commenter.id);
+      const jwt = Authorization.generateToken(commenter);
 
       const comment = await Comment.create(commentToSave);
       await comment.setParent(firstLevelComment);
@@ -350,7 +350,7 @@ describe('Comment CRUD Test', () => {
       assertTrue(comments === null);
     });
     it('should not delete comment not authored by user', async () => {
-      const jwt = Authorization.generateToken(nonCommenter.id);
+      const jwt = Authorization.generateToken(nonCommenter);
 
       const response = await chai.request(server)
         .delete(`/api/v1/articles/${mainArticle.slug}/comments/${firstLevelComment.id}`)
@@ -360,7 +360,7 @@ describe('Comment CRUD Test', () => {
       assertErrorResponse(response);
     });
     it('should return 404 when article does not exists', async () => {
-      const jwt = Authorization.generateToken(commenter.id);
+      const jwt = Authorization.generateToken(commenter);
       let url = `/api/v1/articles/does-not-exists/comments/${MAX_INT}`;
       let response = await chai.request(server)
         .delete(url)
@@ -378,7 +378,7 @@ describe('Comment CRUD Test', () => {
       assertErrorResponse(response);
     });
     it('should return 404 error when comments does not exists', async () => {
-      const jwt = Authorization.generateToken(commenter.id);
+      const jwt = Authorization.generateToken(commenter);
       let url = `/api/v1/articles/${mainArticle.slug}/comments/${MAX_INT}`;
       let response = await chai.request(server)
         .delete(url)
@@ -403,7 +403,7 @@ describe('Comment CRUD Test', () => {
       assertResponseStatus(response, 401);
     });
     it('should not get list if id is not valid', async () => {
-      const jwt = Authorization.generateToken(commenter.id);
+      const jwt = Authorization.generateToken(commenter);
       const url = `/api/v1/articles/${mainArticle.slug}/comments/67uhbn`;
       const response = await chai.request(server)
         .delete(url)
@@ -411,9 +411,6 @@ describe('Comment CRUD Test', () => {
         .send();
       assertResponseStatus(response, 400);
       assertErrorResponse(response);
-    });
-    it('should delete all associated reaction when a comment is deleted', async () => {
-
     });
   });
 });

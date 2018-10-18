@@ -92,7 +92,7 @@ describe('GET /search', () => {
     const usersPromise = User.findAll();
     const [users] = await Promise.all([usersPromise, dummyArticlesPromise1, dummyArticlesPromise2]);
     const user = users[1].dataValues;
-    const jwt = Authorization.generateToken(user.id);
+    const jwt = Authorization.generateToken(user);
     const tags = ['chai', 'promise'];
     const article = {
       ...defaultArticle,

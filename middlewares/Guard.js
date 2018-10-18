@@ -1,3 +1,4 @@
+import HttpError from '../helpers/exceptionHandler/httpError';
 
 /**
  *
@@ -34,13 +35,11 @@ class Guard {
   allow(role) {
     return (req, res, next) => {
       if (!this.exists(role)) {
-        const error = new Error('role doesn\'t exist');
-        error.status = 400;
+        const error = new HttpError('User role doesn\'t exist', 400);
         return next(error);
       }
       if (!req.authData || req.authData.role !== role) {
-        const error = new Error('You are not authorized to access this resource');
-        error.status = 401;
+        const error = new HttpError('You are not authorized to access this resource', 401);
         return next(error);
       }
       next();

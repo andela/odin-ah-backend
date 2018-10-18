@@ -657,6 +657,8 @@ paths:
             $ref: '#/definitions/Error'
       tags:
       - Articles
+      security:
+      - UserSecurity: []
   /users/reset-password/begin:
     post:
       summary: Start password reset process
@@ -996,7 +998,7 @@ definitions:
     properties:
       email:
         type: string
-        example: victor@gmail.com
+        example: dummy-user@local.host
       password:
         type: string
         example: password

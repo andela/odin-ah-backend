@@ -7,7 +7,7 @@ import Guard from '../../middlewares/Guard';
 
 const router = Router();
 
-router.put('/disable', Guard.allow('admin'), ArticleController.getArticles);
+router.put('/:slug/disable', Guard.allow('admin'), ArticleController.disArticle);
 
 router.put('/:slug', ArticleValidator.updateArticleValidator, ArticleController.updateArticles);
 

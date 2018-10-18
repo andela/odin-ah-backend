@@ -41,12 +41,10 @@ class AuthController {
       });
     }
     const {
-      id,
       username,
       bio,
       imageUrl,
       isVerified,
-      role
     } = user.dataValues;
     if (!isVerified) {
       return res.status(403).json({
@@ -54,11 +52,7 @@ class AuthController {
         message: 'Your email is not yet verified. Please check your email for further instructions.'
       });
     }
-    const jwtInfo = {
-      userId: id,
-      role
-    };
-    const token = Authorization.generateToken(jwtInfo);
+    const token = Authorization.generateToken(user.dataValues);
     return res.status(200).json({
       user: {
         email,
@@ -158,7 +152,7 @@ class AuthController {
       bio,
       imageUrl
     } = req.user;
-    const token = Authorization.generateToken(id);
+    const token = Authorization.generateToken({ id, role: 'user' });
     res.status(200).json({
       user: {
         email,
@@ -210,7 +204,6 @@ class AuthController {
      * @async
      * @param  {object} req - Request object
      * @param {object} res - Response object
-     * @param {function} next - next middleware
      * @return {json} Returns json object
      * @static
      */

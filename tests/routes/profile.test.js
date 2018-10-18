@@ -48,7 +48,7 @@ describe('Profile', () => {
       });
   });
   it('should return error for Profile that does not exist', (done) => {
-    const token = Authorization.generateToken(10000);
+    const token = Authorization.generateToken({ id: 10000, role: 'user' });
     chai
       .request(server)
       .get('/api/v1/users')
@@ -159,7 +159,7 @@ describe('Profile', () => {
       });
   });
   it('should return error for Profile that does not exist', (done) => {
-    const token = Authorization.generateToken(10000);
+    const token = Authorization.generateToken({ id: 10000, role: 'user' });
     chai.request(server)
       .put('/api/v1/users')
       .set('Authorization', `Bearer ${token}`)

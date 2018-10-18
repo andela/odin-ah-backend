@@ -131,13 +131,12 @@ class ArticleHelper {
    * @return {object} returns response data.
    */
   static getArticlesResponseData(allArticle) {
-    const articles = [];
-    allArticle.forEach((article) => {
-      const { user, tags } = article;
-      articles.push(ArticleHelper.getArticleResponseData(user,
-        article, tags));
-    });
-    return articles;
+    return allArticle.filter(article => !article.disabled)
+      .map((article) => {
+        const { user, tags } = article;
+        return ArticleHelper.getArticleResponseData(user,
+          article, tags);
+      });
   }
 
   /**

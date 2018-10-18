@@ -4,6 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     body: DataTypes.TEXT,
     title: DataTypes.STRING,
     description: DataTypes.STRING,
+    disabled: DataTypes.BOOLEAN,
     readingTime: DataTypes.STRING
   }, {});
   Article.hook('beforeCreate', (article) => {

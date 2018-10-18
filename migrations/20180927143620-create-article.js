@@ -23,6 +23,10 @@ module.exports = {
     readingTime: {
       type: Sequelize.STRING
     },
+    disabled: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false,
+    },
     createdAt: {
       allowNull: false,
       type: Sequelize.DATE
