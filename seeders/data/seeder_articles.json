@@ -6,6 +6,8 @@
     "description": "Nunc sed diam suscipit, lobortis eros nec, auctor nisl.",
     "createdAt": "2017-10-15 09:49:49.445000",
     "updatedAt": "2017-10-15 09:49:49.508000",
+    "readingTime": 10800,
+    "isPublished": true,
     "userId": 1
   },
   {
@@ -15,6 +17,8 @@
     "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
     "createdAt": "2018-01-24 18:12:18.878000",
     "updatedAt": "2018-01-24 18:12:18.943000",
+    "readingTime": 37200,
+    "isPublished": true,
     "userId": 1
   },
   {
@@ -24,6 +28,8 @@
     "description": "Mauris eu bibendum sem. Fusce finibus a nisl sit amet imperdiet.",
     "createdAt": "2018-03-05 10:46:04.944000",
     "updatedAt": "2018-03-05 10:46:04.990000",
+    "readingTime": 21600,
+    "isPublished": true,
     "userId": 1
   },
   {
@@ -33,6 +39,8 @@
     "description": "Ut at fermentum sem. Cras vitae pretium velit. In ultrices ante dolor, a efficitur dolor fermentum ut.",
     "createdAt": "2018-06-08 17:29:31.618000",
     "updatedAt": "2018-06-19 10:59:31.667000",
+    "readingTime": 34500,
+    "isPublished": false,
     "userId": 1
   },
   {
@@ -42,6 +50,8 @@
     "description": "Morbi et imperdiet lorem. Etiam convallis sollicitudin mi quis ornare.",
     "createdAt": "2018-10-15 16:58:43.330000",
     "updatedAt": "2018-10-15 16:58:43.412000",
+    "readingTime": 28200,
+    "isPublished": true,
     "userId": 2
   },
   {
@@ -51,6 +61,8 @@
     "description": "Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.",
     "createdAt": "2018-10-15 17:20:38.738000",
     "updatedAt": "2018-10-15 17:20:38.807000",
+    "readingTime": 22500,
+    "isPublished": false,
     "userId": 2
   },
   {
@@ -60,6 +72,8 @@
     "description": "Aliquam nec mattis odio. Proin augue mauris, posuere ut nisl eget, dapibus consectetur lacus.",
     "createdAt": "2018-10-15 17:04:08.846000",
     "updatedAt": "2018-10-15 17:04:08.904000",
+    "readingTime": 42900,
+    "isPublished": true,
     "userId": 2
   }
 ]

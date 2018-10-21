@@ -1,4 +1,4 @@
-## Pipline Design
+## Pipeline Design
 
 - Development > Review Apps > Staging > Production
 

@@ -18,11 +18,15 @@ describe('POST /share', () => {
     await Promise.all([deleteTable(User), deleteTable(Article)]);
     user = await User.create({ ...realUser1 });
     jwt = Authorization.generateToken(user.id);
-    const publicArticlePromise = Article.create({ ...defaultArticle, slug: 'my-custom-slug' });
+    const publicArticlePromise = Article.create({
+      ...defaultArticle,
+      slug: 'my-custom-slug',
+      isPublished: true
+    });
     const privateArticlePromise = Article.create({
       ...defaultArticle,
       slug: 'another-custom-slug',
-      private: true
+      isPrivate: true
     });
     const unpublishedArticlePromise = Article.create({
       ...defaultArticle,
@@ -36,13 +40,16 @@ describe('POST /share', () => {
     ] = await Promise.all([publicArticlePromise, privateArticlePromise, unpublishedArticlePromise]);
   });
 
-  it("should send a mail to an authenticated user's contact", async () => {
+  it('should send a mail to an authenticated user\'s contact', async () => {
     const response = await chai
       .request(server)
       .post(`/api/v1/articles/${publicArticleSlug}/mailto`)
       .set(AUTHORIZATION_HEADER, `Bearer: ${jwt}`)
       .send({ email: 'olusola.oguntimehin@andela.com' });
-    expect(response).to.have.status(200);
+    expect(response)
+      .to
+      .have
+      .status(200);
   });
 
   it('should return 400 if the user does not supply a valid email', async () => {
@@ -51,7 +58,10 @@ describe('POST /share', () => {
       .post(`/api/v1/articles/${publicArticleSlug}/mailto`)
       .set(AUTHORIZATION_HEADER, `Bearer: ${jwt}`)
       .send({});
-    expect(response).to.have.status(400);
+    expect(response)
+      .to
+      .have
+      .status(400);
   });
 
   it('should return 404 if the article shared does not exist', async () => {
@@ -60,7 +70,10 @@ describe('POST /share', () => {
       .post('/api/v1/articles/0/mailto')
       .set(AUTHORIZATION_HEADER, `Bearer: ${jwt}`)
       .send({ email: realUser1.email });
-    expect(response).to.have.status(404);
+    expect(response)
+      .to
+      .have
+      .status(404);
   });
 
   it('should return 403 forbidden if the article shared is private', async () => {
@@ -69,7 +82,10 @@ describe('POST /share', () => {
       .post(`/api/v1/articles/${privateArticleSlug}/mailto`)
       .set(AUTHORIZATION_HEADER, `Bearer: ${jwt}`)
       .send({ email: realUser1.email });
-    expect(response).to.have.status(403);
+    expect(response)
+      .to
+      .have
+      .status(403);
   });
 
   it('should return 403 forbidden if the article shared is not yet published', async () => {
@@ -78,17 +94,24 @@ describe('POST /share', () => {
       .post(`/api/v1/articles/${unpublishedArticleSlug}/mailto`)
       .set(AUTHORIZATION_HEADER, `Bearer: ${jwt}`)
       .send({ email: realUser1.email });
-    expect(response).to.have.status(403);
+    expect(response)
+      .to
+      .have
+      .status(403);
   });
 
   it('should return 500 internal error if a database error occurs', async () => {
-    const articleModelStub = sinon.stub(Article, 'findOne').rejects();
+    const articleModelStub = sinon.stub(Article, 'findOne')
+      .rejects();
     const response = await chai
       .request(server)
       .post(`/api/v1/articles/${publicArticleSlug}/mailto`)
       .set(AUTHORIZATION_HEADER, `Bearer: ${jwt}`)
       .send({ email: realUser1.email });
-    expect(response).to.have.status(500);
+    expect(response)
+      .to
+      .have
+      .status(500);
     articleModelStub.restore();
   });
 });

@@ -45,7 +45,7 @@ class ShareController {
       const senderPromise = User.findOne({ where: { id: userId } });
       const [article, sender] = await Promise.all([articlePromise, senderPromise]);
       HttpError.throwErrorIfNull(article, 'Article does not exist');
-      const { private: isPrivate, isPublished } = article;
+      const { isPrivate, isPublished } = article;
       if (isPrivate || !isPublished) {
         return next(new HttpError('This article is not available for sharing', 403));
       }

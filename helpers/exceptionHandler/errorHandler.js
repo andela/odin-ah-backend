@@ -11,7 +11,7 @@ import ValidationError from './ValidationError';
 
 const errorHandler = (error, req, res, next) => { // eslint-disable-line no-unused-vars
   let { errors } = error;
-  let errorCode = null;
+  let errorCode;
   if (error instanceof ValidationError) {
     errors = error.messages;
   }

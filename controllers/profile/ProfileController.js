@@ -6,6 +6,7 @@ import eventBus from '../../helpers/eventBus';
 
 
 const { Follows, User } = db;
+
 /**
  * @exports ProfileController
  * @class ProfileController
@@ -13,12 +14,11 @@ const { Follows, User } = db;
  * */
 class ProfileController {
   /**
-     *
-     * @param {request} request HTTP request
-     * @param {response} response HTTP response
-     * @param {response} next HTTP next response
-     * @return {object} return response to user
-     */
+   *
+   * @param {request} request HTTP request
+   * @param {response} response HTTP response
+   * @return {object} return response to user
+   */
   static async updateProfile(request, response) {
     // fetch user details from authData.
     const { userId } = request.authData;
@@ -35,6 +35,11 @@ class ProfileController {
         .json({ message: 'This Email already exists, choose another email' });
     }
     const updateFields = UserHelper.getUpdateFields(request);
+    if (updateFields.settings) {
+      const { settings } = userResultById;
+      updateFields.settings = { ...settings, ...updateFields.settings };
+    }
+
     const updatedUser = await userResultById.update(updateFields, {
       where: { id: userId }
     });
@@ -47,39 +52,40 @@ class ProfileController {
   }
 
   /**
-     *
-     *
-     * @static
-     * @param {request} req
-     * @param {response} res
-     * @param {function} next
-     * @returns {object} returns profile for a specific user
-     * @memberof UserProfile
-     */
+   *
+   *
+   * @static
+   * @param {request} req
+   * @param {response} res
+   * @param {function} next
+   * @returns {object} returns profile for a specific user
+   * @memberof UserProfile
+   */
   static async getProfileById(req, res, next) {
     const id = req.params.id || req.authData.userId;
     try {
       const user = await User.findById(id);
       HttpError.throwErrorIfNull(user, 'User not found');
       const profile = UserHelper.profileListResponse(user);
-      res.status(200).json({
-        status: 'success',
-        message: 'Successfully retrieved user profile!',
-        profile
-      });
+      res.status(200)
+        .json({
+          status: 'success',
+          message: 'Successfully retrieved user profile!',
+          profile
+        });
     } catch (error) {
       next(error);
     }
   }
 
   /**
-     * Follow  other users in the application
-     * @async
-     * @param  {object} req - Request object
-     * @param {object} res - Response object
-     * @return {json} Returns json object
-     * @static
-     */
+   * Follow  other users in the application
+   * @async
+   * @param  {object} req - Request object
+   * @param {object} res - Response object
+   * @return {json} Returns json object
+   * @static
+   */
   static async follow(req, res) {
     const { follower, id } = req.data;
     const { count } = await Follows.findAndCountAll({
@@ -89,77 +95,77 @@ class ProfileController {
       }
     });
     if (count) {
-      return res.status(409).json({
-        status: 'error',
-        message: `You are already following ${follower.username}`
-      });
+      return res.status(409)
+        .json({
+          status: 'error',
+          message: `You are already following ${follower.username}`
+        });
     }
     const response = await Follows.create({
       follower: id,
       following: follower.id,
     });
-    if (response) {
-      eventBus.emit('onFollowEvent', {
-        toUser: response.dataValues.follower,
-        fromUser: response.dataValues.following,
-        type: 'follow'
-      });
-      return res.status(200).json({
+    eventBus.emit('onFollowEvent', {
+      toUser: response.dataValues.following,
+      fromUser: response.dataValues.follower,
+      type: 'follow'
+    });
+    return res.status(200)
+      .json({
         status: 'success',
         message: `You are now following ${follower.username}`
       });
-    }
   }
 
   /**
-     * unfollow a users in the application
-     * @async
-     * @param  {object} req - Request object
-     * @param {object} res - Response object
-     * @return {json} Returns json object
-     * @static
-     */
+   * unfollow a users in the application
+   * @async
+   * @param  {object} req - Request object
+   * @param {object} res - Response object
+   * @return {json} Returns json object
+   * @static
+   */
   static async unfollow(req, res) {
     const { follower, id } = req.data;
-    const { count } = await Follows.findAndCountAll({
+    const follow = await Follows.findOne({
       where: {
         follower: id,
         following: follower.id
       }
     });
-    HttpError.throwErrorIfNull(count, `You were not following ${follower.username}`);
-    const response = await Follows.destroy({
-      where: {
-        follower: id,
-        following: follower.id
-      }
-    });
-    if (response) {
-      return res.status(200).json({
+    HttpError.throwErrorIfNull(follow, `You were not following ${follower.username}`);
+    await follow.destroy({ force: true });
+    return res.status(200)
+      .json({
         status: 'success',
-        message: `You have successfuly unfollowed   ${follower.username}`
+        message: `You have successfully unfollowed   ${follower.username}`
       });
-    }
   }
 
   /**
-     * Get the Users that I follow
-     * @async
-     * @param  {object} req - Request object
-     * @param {object} res - Response object
-     * @return {json} Returns json object
-     * @static
-     */
+   * Get the Users that I follow
+   * @async
+   * @param  {object} req - Request object
+   * @param {object} res - Response object
+   * @return {json} Returns json object
+   * @static
+   */
   static async getUsersIFollow(req, res) {
     const { userId } = req.authData;
     let users = await Follows.findAll({ where: { follower: userId } });
     if (users.length === 0) {
-      return res.status(200).json({ status: 'error', message: 'You are not following anyone yet' });
+      return res.status(200)
+        .json({
+          status: 'error',
+          message: 'You are not following anyone yet'
+        });
     }
     const id = users.map(user => user.following);
     const total = id.length;
     const pageInfo = Util.getPageInfo(req.query.page, req.query.size, total);
-    const { page, limit, offset } = pageInfo;
+    const {
+      page, limit, offset, totalPages
+    } = pageInfo;
     users = await User.findAll({
       limit,
       offset,
@@ -167,34 +173,46 @@ class ProfileController {
         id
       }
     });
-    const usersIFollow = users.map(user => ({ userId: user.id, username: user.username }));
-    return res.status(200).json({
-      data: {
-        usersIFollow,
-        page,
-        total,
-      }
-    });
+    const usersIFollow = users.map(user => ({
+      userId: user.id,
+      username: user.username
+    }));
+    return res.status(200)
+      .json({
+        data: {
+          usersIFollow,
+          page,
+          totalPages,
+          size: usersIFollow.length,
+          total,
+        }
+      });
   }
 
   /**
-     * Get users following me
-     * @async
-     * @param  {object} req - Request object
-     * @param {object} res - Response object
-     * @return {json} Returns json object
-     * @static
-     */
+   * Get users following me
+   * @async
+   * @param  {object} req - Request object
+   * @param {object} res - Response object
+   * @return {json} Returns json object
+   * @static
+   */
   static async getMyFollowers(req, res) {
     const { userId } = req.authData;
     let users = await Follows.findAll({ where: { following: userId } });
     if (users.length === 0) {
-      return res.status(200).json({ status: 'error', message: 'You do not have followers yet' });
+      return res.status(200)
+        .json({
+          status: 'error',
+          message: 'You do not have followers yet'
+        });
     }
     const id = users.map(user => user.follower);
     const total = id.length;
     const pageInfo = Util.getPageInfo(req.query.page, req.query.size, total);
-    const { page, limit, offset } = pageInfo;
+    const {
+      page, limit, offset, totalPages
+    } = pageInfo;
     users = await User.findAll({
       limit,
       offset,
@@ -202,26 +220,32 @@ class ProfileController {
         id
       }
     });
-    const myFollowers = users.map(user => ({ userId: user.id, username: user.username }));
-    return res.status(200).json({
-      data: {
-        myFollowers,
-        page,
-        total,
-      }
-    });
+    const myFollowers = users.map(user => ({
+      userId: user.id,
+      username: user.username
+    }));
+    return res.status(200)
+      .json({
+        data: {
+          myFollowers,
+          page,
+          totalPages,
+          size: myFollowers.length,
+          total,
+        }
+      });
   }
 
   /**
-     *
-     *
-     * @static
-     * @param {request} req
-     * @param {response} res
-     * @param {function} next
-     * @returns {object} return a json response
-     * @memberof UserProfile
-     */
+   *
+   *
+   * @static
+   * @param {request} req
+   * @param {response} res
+   * @param {function} next
+   * @returns {object} return a json response
+   * @memberof UserProfile
+   */
   static async getAllProfile(req, res, next) {
     try {
       const { userId } = req.authData;
@@ -233,9 +257,7 @@ class ProfileController {
         }
       });
       const {
-        page,
-        limit,
-        offset
+        page, limit, offset, totalPages
       } = Util.getPageInfo(req.query.page, req.query.size, profilesCount);
       const authorsData = await User.findAll({
         where: {
@@ -246,19 +268,19 @@ class ProfileController {
         limit,
         offset
       });
-      if (authorsData) {
-        const authors = UserHelper.profileListArrayResponse(authorsData);
-        return res.status(200).json({
+      const authors = UserHelper.profileListArrayResponse(authorsData);
+      return res.status(200)
+        .json({
           status: 'success',
           message: 'Successfully retrieved list of authors.',
           data: {
-            total: profilesCount,
-            size: authorsData.length,
-            page,
             authors,
+            page,
+            totalPages,
+            size: authors.length,
+            total: profilesCount,
           }
         });
-      }
     } catch (error) {
       next(error);
     }
@@ -291,4 +313,5 @@ class ProfileController {
       });
   }
 }
+
 export default ProfileController;

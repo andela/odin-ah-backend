@@ -10,7 +10,7 @@ const { Tag } = db;
 class TagHelper {
   /**
    *
-   * @param {Array<Tag>}tags
+   * @param {Array<string>}tags
    * @return {Promise<Array>} returns a Promise
    */
   static async findOrCreateTags(tags) {

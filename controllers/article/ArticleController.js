@@ -13,14 +13,14 @@ const { Article, User, Tag } = db;
  */
 export default class ArticleController {
   /**
-     *
-     * Method for creating Authors Article
-     * Authentication Required
-     * @param {request} req
-     * @param {response} res
-     * @param {next} next
-     * @return {object} return create article for user.
-     */
+   *
+   * Method for creating Authors Article
+   * Authentication Required
+   * @param {request} req
+   * @param {response} res
+   * @param {next} next
+   * @return {object} return create article for user.
+   */
   static async getArticle(req, res, next) {
     const { slug } = req.params;
     try {
@@ -52,19 +52,21 @@ export default class ArticleController {
   }
 
   /**
-     *
-     * Method for creating Authors Article
-     * Authentication Required
-     * @param {request} req
-     * @param {response} res
-     * @param {next} next
-     * @return {object} return create article for user.
-     */
+   *
+   * Method for creating Authors Article
+   * Authentication Required
+   * @param {request} req
+   * @param {response} res
+   * @param {next} next
+   * @return {object} return create article for user.
+   */
   static async getArticles(req, res, next) {
     try {
       const total = await Article.count();
       const pageInfo = Util.getPageInfo(req.query.page, req.query.size, total);
-      const { page, limit, offset } = pageInfo;
+      const {
+        page, limit, offset, totalPages
+      } = pageInfo;
 
       const allArticle = await Article.findAll({
         limit,
@@ -76,8 +78,7 @@ export default class ArticleController {
         {
           model: User,
           as: 'user'
-        }
-        ]
+        }]
       });
       const articles = ArticleHelper.getArticlesResponseData(allArticle);
       return res.status(200)
@@ -85,6 +86,7 @@ export default class ArticleController {
           data: {
             articles,
             page,
+            totalPages,
             size: allArticle.length,
             total,
           },
@@ -97,14 +99,13 @@ export default class ArticleController {
   }
 
   /**
-     *
-     * Method for getting all created Articles created by an authenticated user
-     * Authentication Required
-     * @param {request} req
-     * @param {response} res
-     * @param {next} next
-     * @return {object} return all articles
-     */
+   *
+   * Method for getting all created Articles created by an authenticated user
+   * Authentication Required
+   * @param {request} req
+   * @param {response} res
+   * @return {object} return all articles
+   */
   static async getAuthUserArticles(req, res) {
     const { userId } = req.authData;
     const total = await Article.count({ where: { userId } });
@@ -118,23 +119,24 @@ export default class ArticleController {
         ['createdAt', 'DESC']
       ]
     });
-    return res.status(200).json({
-      status: 'success',
-      articles,
-      page,
-      total
-    });
+    return res.status(200)
+      .json({
+        status: 'success',
+        articles,
+        page,
+        total
+      });
   }
 
   /**
-     *
-     * Method for creating Authors Article
-     * Authentication Required
-     * @param {request} req
-     * @param {response} res
-     * @param {next} next
-     * @return {object} return create article for user.
-     */
+   *
+   * Method for creating Authors Article
+   * Authentication Required
+   * @param {request} req
+   * @param {response} res
+   * @param {next} next
+   * @return {object} return create article for user.
+   */
   static async createArticle(req, res, next) {
     let response = null;
     let status = 0;
@@ -147,7 +149,7 @@ export default class ArticleController {
       status = 201;
       response = {
         article,
-        message: 'Successfully created user article',
+        message: 'Article created successfully',
         status: 'success',
       };
     } catch (e) {
@@ -159,14 +161,14 @@ export default class ArticleController {
   }
 
   /**
-     *
-     * Method for deleting Authors Article
-     * Authentication Required
-     * @param {request} req
-     * @param {response} res
-     * @param {next} next
-     * @return {object} return delete status.
-     */
+   *
+   * Method for deleting Authors Article
+   * Authentication Required
+   * @param {request} req
+   * @param {response} res
+   * @param {next} next
+   * @return {object} return delete status.
+   */
   static async deleteArticle(req, res, next) {
     const { userId } = req.authData;
     const { slug } = req.params;
@@ -175,31 +177,28 @@ export default class ArticleController {
       HttpError.throwErrorIfNull(article, 'Article not found');
 
       if (article.dataValues.userId === userId) {
-        await ArticleHelper.unLinkTags(article).then(() => article.destroy({ force: true }));
+        await ArticleHelper.unLinkTags(article)
+          .then(() => article.destroy({ force: true }));
         return res.status(200)
           .json({
             message: 'deleted article successfully',
             status: 'success',
           });
       }
-      return res.status(403)
-        .json({
-          message: 'You cannot perform this operation',
-          status: 'error',
-        });
+      return next(new HttpError('You cannot perform this operation', 403));
     } catch (e) {
       next(e);
     }
   }
 
   /**
-     * Method for updating Authors Article
-     * Authentication Required
-     * @param {request} req
-     * @param {response} res
-     * @param {next} next
-     * @return {object} return update article for user.
-     */
+   * Method for updating Authors Article
+   * Authentication Required
+   * @param {request} req
+   * @param {response} res
+   * @param {next} next
+   * @return {object} return update article for user.
+   */
   static async updateArticles(req, res, next) {
     const { userId } = req.authData;
     const { slug } = req.params;
@@ -215,11 +214,7 @@ export default class ArticleController {
             status: 'success',
           });
       } else {
-        res.status(403)
-          .json({
-            message: 'You cannot perform this operation',
-            status: 'error',
-          });
+        next(new HttpError('You cannot perform this operation', 403));
       }
     } catch (e) {
       next(e);

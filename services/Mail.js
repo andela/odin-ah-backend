@@ -110,6 +110,25 @@ class Mail {
   }
 
   /**
+     * Method to send notification when user has a new follower
+     * @static
+     * @param {object} eventInfo
+     * @return {json} Returns json object
+     * @memberof Mail
+     */
+  static async newFollowSeriesNotification(eventInfo) {
+    const {
+      recipientEmail,
+      fromUsername
+    } = eventInfo;
+    const subject = 'New Follow Notification';
+    const { message } = mailMessages
+      .newFollowSeriesNotification(recipientEmail, fromUsername);
+    const messageInfo = MailHelper.buildMessage(recipientEmail, subject, message);
+    return Mail.sendMail(messageInfo);
+  }
+
+  /**
    * Method to send notification when user has a new follower
    * @static
    * @param {object} eventInfo
@@ -144,19 +163,23 @@ class Mail {
    * @memberof Mail
    */
   static async shareArticle(articleShareData) {
-    const {
-      article: { slug, title },
-      recipient,
-      sender: { username }
-    } = articleShareData;
-    const baseUrl = process.env.BASE_URL;
-    const url = `${baseUrl}/articles/${slug}`;
-    const subject = title;
-    const { message } = mailMessages.newArticleShare(username, url, title);
-    const messageInfo = MailHelper.buildMessage(recipient, subject, message);
-    const result = await Mail.sendMail(messageInfo);
-    logger.info(result);
-    return result;
+    try {
+      const {
+        article: { slug, title },
+        recipient,
+        sender: { username }
+      } = articleShareData;
+      const baseUrl = process.env.BASE_URL;
+      const url = `${baseUrl}/articles/${slug}`;
+      const subject = title;
+      const { message } = mailMessages.newArticleShare(username, url, title);
+      const messageInfo = MailHelper.buildMessage(recipient, subject, message);
+      const result = await Mail.sendMail(messageInfo);
+      logger.info(result);
+      return result;
+    } catch (e) {
+      logger.error(e);
+    }
   }
 
   /**

@@ -8,12 +8,12 @@ import ValidatorHelper from '../helpers/ValidatorHelper';
  *  */
 class Authorization {
   /**
-     * Get the token from the request
-     * @param  {object} req - Request object
-     * @return {string} Returns the user token
-     * @static
-     *
-     */
+   * Get the token from the request
+   * @param  {object} req - Request object
+   * @return {string} Returns the user token
+   * @static
+   *
+   */
   static getToken(req) {
     if (ValidatorHelper.isEmpty(req.headers.authorization)) {
       return null;
@@ -22,19 +22,20 @@ class Authorization {
     const bearer = bearerHeader.substring(0, 6);
     let token;
     if (bearer.toLowerCase() === 'bearer') {
-      token = bearerHeader.substring(7).trim();
+      token = bearerHeader.substring(7)
+        .trim();
     }
     return token;
   }
 
   /**
-     * Verifies the user token
-     * @param  {object} req - Request object
-     * @param {object} res - Response object
-     * @param {function} next - calls the next middleware
-     * @return {json} Returns json object
-     * @static
-     */
+   * Verifies the user token
+   * @param  {object} req - Request object
+   * @param {object} res - Response object
+   * @param {function} next - calls the next middleware
+   * @return {json} Returns json object
+   * @static
+   */
   static verifyToken(req, res, next) {
     const token = Authorization.getToken(req);
     let error = null;
@@ -53,7 +54,8 @@ class Authorization {
     if (!error) {
       return next();
     }
-    return res.status(401).json(error);
+    return res.status(401)
+      .json(error);
   }
 
   /**
@@ -73,10 +75,10 @@ class Authorization {
   }
 
   /**
-     *
-     * @param {error} err JWT error
-     * @return {{message: string, status: string}} returns formatted error
-     */
+   *
+   * @param {error} err JWT error
+   * @return {{message: string, status: string}} returns formatted error
+   */
   static getError(err) {
     let message = 'Invalid token';
     if (err instanceof TokenExpiredError) {
@@ -89,14 +91,17 @@ class Authorization {
   }
 
   /**
-     * Generate a user Token
-     * @param  {object} data - The user id or data object to be signed
-     * @return {string} Returns json object
-     * @static
-     */
+   * Generate a user Token
+   * @param  {object} data - The user id or data object to be signed
+   * @return {string} Returns json object
+   * @static
+   */
   static generateToken(data) {
     const { role, id } = data;
-    const info = { role, userId: id };
+    const info = {
+      role,
+      userId: id
+    };
     return jwt.sign(info,
       process.env.JWTSECRET, {
         expiresIn: '24h',
@@ -104,13 +109,13 @@ class Authorization {
   }
 
   /**
-     * Verifies the user token
-     * @param  {object} req - Request object
-     * @param {object} res - Response object
-     * @param {function} next - calls the next middleware
-     * @return {object} return an object
-     * @static
-     */
+   * Verifies the user token
+   * @param  {object} req - Request object
+   * @param {object} res - Response object
+   * @param {function} next - calls the next middleware
+   * @return {object} return an object
+   * @static
+   */
   static secureRoutes(req, res, next) {
     if (Authorization.isAuthNotRequired(req)) {
       return next();
@@ -120,17 +125,18 @@ class Authorization {
   }
 
   /**
-     *
-     * @param {request} req
-     * @return {boolean} checks if authentication is not required for the request.
-     */
+   *
+   * @param {request} req
+   * @return {boolean} checks if authentication is not required for the request.
+   */
   static isAuthNotRequired(req) {
     const { url, method } = req;
     return (
       url.startsWith('/auth')
-            || (url.startsWith('/articles') && method.toUpperCase() === 'GET')
-            || url.startsWith('/users/reset-password/')
-            || url.startsWith('/search')
+      || (url.startsWith('/articles') && method.toUpperCase() === 'GET')
+      || (url.startsWith('/series') && method.toUpperCase() === 'GET')
+      || url.startsWith('/users/reset-password/')
+      || url.startsWith('/search')
     );
   }
 }

@@ -14,103 +14,26 @@ import {
   getRequest,
   initCommentTest
 } from '../testHelpers';
+import {
+  assertCommentArrayResponse, assertCommentResponse,
+  assertCommentWithSubCommentResponse, body,
+  commentToSave,
+  createComments,
+  createDummyCommentWithSubComments
+} from '../testHelpers/commentUtil';
 
 const { Comment } = db;
 
 chai.use(chaiHttp);
 chai.should();
 
-let mainAuthor = null;
-let mainArticle = null;
-let commenter = null;
-let nonCommenter = null;
-let firstLevelComment = null;
-
-/**
- *
- * @param {response} response
- * @param {string} body
- * @param {User} user
- * @return {void}
- */
-function assertCommentResponse(response, body, user) {
-  response.body.should.be.a('object');
-  response.body.should.have.property('comment');
-  response.body.comment.should.have.property('body')
-    .eq(body);
-
-  response.body.comment.should.have.property('author');
-  response.body.comment.author.should.have.property('username')
-    .eq(user.username);
-  response.body.comment.author.should.have.property('bio');
-  response.body.comment.author.should.have.property('imageUrl');
-}
-
-const body = 'Nunc sed diam suscipit, lobortis eros nec, auctor nisl. Nunc ac magna\n'
-  + '          non justo varius rutrum sit amet feugiat elit. Pellentesque vehicula,\n'
-  + '          ante rutrum condimentum tempor, purus metus vulputate ligula, et\n'
-  + '          commodo tortor massa eu tortor.';
-
-const commentToSave = { body };
-
-/**
- * @return {Promise<void>} create dummy comments
- */
-async function createDummyComments() {
-  const [parentComment1, parentComment2, ...comments] = await Promise.all([
-    Comment.create(commentToSave),
-    Comment.create(commentToSave),
-
-    Comment.create(commentToSave),
-    Comment.create(commentToSave),
-    Comment.create(commentToSave),
-    Comment.create(commentToSave),
-    Comment.create(commentToSave),
-  ]);
-
-  const article = mainArticle;
-  const author = mainAuthor;
-  const bulkUpdates = [];
-  firstLevelComment = parentComment1;
-  bulkUpdates.push(parentComment1.setUser(commenter));
-  bulkUpdates.push(parentComment1.setArticle(article));
-
-  bulkUpdates.push(parentComment2.setUser(commenter));
-  bulkUpdates.push(parentComment2.setArticle(article));
-
-  comments.forEach((comment) => {
-    bulkUpdates.push(comment.setUser(author));
-    bulkUpdates.push(comment.setArticle(article));
-    bulkUpdates.push(comment.setParent(parentComment1));
-  });
-
-  await Promise.all(bulkUpdates);
-}
-
-/**
- *
- * @param {response}response
- * @param {number}length
- * @return {void} Assert the body of response
- */
-function assertCommentArrayResponse(response, length) {
-  response.body.data.should.be.a('object');
-  response.body.should.have.property('data');
-  response.body.should.have.property('message');
-  response.body.should.have.property('status');
-  response.body.data.should.have.property('comments');
-  response.body.data.should.have.property('count');
-  response.body.data.comments.should.be.a('Array');
-  response.body.data.comments.length.should.be.eql(length);
-  if (length > 0) {
-    response.body.data.comments[0].should.have.property('id');
-    response.body.data.comments[0].should.have.property('body');
-    response.body.data.comments[0].should.have.property('createdAt');
-    response.body.data.comments[0].should.have.property('author');
-  }
-}
-
 describe('Comment CRUD Test', () => {
+  let mainAuthor = null;
+  let mainArticle = null;
+  let commenter = null;
+  let nonCommenter = null;
+  let firstLevelComment = null;
+  let firstLevelComment2 = null;
   before(async () => {
     const data = await initCommentTest();
     mainAuthor = data.author;
@@ -184,7 +107,10 @@ describe('Comment CRUD Test', () => {
   describe('POST /api/v1/articles/:slug/comments/:id', () => {
     beforeEach(async () => {
       await deleteTable(Comment);
-      await createDummyComments();
+      [firstLevelComment, firstLevelComment2] = await Promise.all([
+        createDummyCommentWithSubComments(commenter, mainArticle, mainAuthor, 5),
+        createComments(commenter, mainArticle, 1)
+      ]);
     });
     it('should have a valid input', async () => {
       const article = mainArticle;
@@ -254,16 +180,25 @@ describe('Comment CRUD Test', () => {
   describe('GET /api/v1/articles/:slug/comments', () => {
     before(async () => {
       await deleteTable(Comment);
-      await createDummyComments();
+      [firstLevelComment, firstLevelComment2] = await Promise.all([
+        createDummyCommentWithSubComments(commenter, mainArticle, mainAuthor, 5),
+        createComments(commenter, mainArticle, 12)
+      ]);
     });
     it('should get a list of comment for a given article, without sub-comments. No authentication required',
       async () => {
-        const url = `/api/v1/articles/${mainArticle.slug}/comments`;
-        const response = await chai.request(server)
+        let url = `/api/v1/articles/${mainArticle.slug}/comments`;
+        let response = await chai.request(server)
           .get(url)
           .send();
         assertResponseStatus(response, 200);
-        assertCommentArrayResponse(response, 2);
+        assertCommentArrayResponse(response, 13);
+        url = `${url}?page=2&size=10`;
+        response = await chai.request(server)
+          .get(url)
+          .send();
+        assertResponseStatus(response, 200);
+        assertCommentArrayResponse(response, 3);
       });
     it('should return empty list of comments', async () => {
       await deleteTable(Comment);
@@ -287,29 +222,45 @@ describe('Comment CRUD Test', () => {
   describe('GET /api/v1/articles/:slug/comments/:id', () => {
     before(async () => {
       await deleteTable(Comment);
-      await createDummyComments();
+      [firstLevelComment, [firstLevelComment2]] = await Promise.all([
+        createDummyCommentWithSubComments(commenter, mainArticle, mainAuthor, 10),
+        createComments(commenter, mainArticle, 1)
+      ]);
     });
     it('should get a list of comment for a given comment. No authentication required',
       async () => {
-        const url = `/api/v1/articles/${mainArticle.slug}/comments/${firstLevelComment.id}`;
+        let url = `/api/v1/articles/${mainArticle.slug}/comments/${firstLevelComment.id}`;
+        let response = await chai.request(server)
+          .get(url)
+          .send();
+        assertResponseStatus(response, 200);
+        response.body.should.have.property('message');
+        response.body.should.have.property('status');
+        assertCommentResponse(response, firstLevelComment.body, commenter);
+        assertCommentWithSubCommentResponse(response, 10);
+
+        url = `${url}?page=3&size=1`;
+        response = await chai.request(server)
+          .get(url)
+          .send();
+        assertResponseStatus(response, 200);
+        response.body.should.have.property('message');
+        response.body.should.have.property('status');
+        assertCommentResponse(response, firstLevelComment.body, commenter);
+        assertCommentWithSubCommentResponse(response, 1);
+      });
+    it('should get a list of comment for a given comment. No authentication required',
+      async () => {
+        const url = `/api/v1/articles/${mainArticle.slug}/comments/${firstLevelComment2.id}`;
         const response = await chai.request(server)
           .get(url)
           .send();
         assertResponseStatus(response, 200);
-
-        response.body.comment.should.be.a('object');
-        response.body.should.have.property('comment');
-        assertCommentResponse(response, firstLevelComment.body, commenter);
         response.body.should.have.property('message');
         response.body.should.have.property('status');
-        response.body.comment.should.have.property('comments');
-        response.body.comment.should.have.property('count');
-        response.body.comment.comments.should.be.a('Array');
-        response.body.comment.comments.length.should.be.eql(5);
-        response.body.comment.comments[0].should.have.property('id');
-        response.body.comment.comments[0].should.have.property('body');
-        response.body.comment.comments[0].should.have.property('createdAt');
-        response.body.comment.comments[0].should.have.property('author');
+
+        assertCommentResponse(response, firstLevelComment2.body, commenter);
+        assertCommentWithSubCommentResponse(response, 0);
       });
     it('should return 404 error when article does not exists', async () => {
       const url = '/api/v1/articles/does-not-exists/comments';
@@ -340,9 +291,12 @@ describe('Comment CRUD Test', () => {
   describe('DELETE /api/v1/articles/:slug/comments/id', () => {
     beforeEach(async () => {
       await deleteTable(Comment);
-      await createDummyComments();
+      [firstLevelComment, [firstLevelComment2]] = await Promise.all([
+        createDummyCommentWithSubComments(commenter, mainArticle, mainAuthor, 5),
+        createComments(commenter, mainArticle, 1)
+      ]);
     });
-    it('should delete comment author by user', async () => {
+    it('should delete comment and its child comment author by user', async () => {
       const jwt = Authorization.generateToken(commenter);
 
       const comment = await Comment.create(commentToSave);
@@ -362,6 +316,23 @@ describe('Comment CRUD Test', () => {
       assertTrue(comments === null);
       comments = await Comment.findOne({
         where: { id: comment.id },
+      });
+      assertTrue(comments === null);
+    });
+    it('should delete comment with no child comment author by user', async () => {
+      const jwt = Authorization.generateToken(commenter);
+
+      const response = await chai.request(server)
+        .delete(`/api/v1/articles/${mainArticle.slug}/comments/${firstLevelComment2.id}`)
+        .set(AUTHORIZATION_HEADER, `Bearer ${jwt}`)
+        .send({});
+      assertResponseStatus(response, 200);
+      let comments = await Comment.findAll({
+        where: { parentId: firstLevelComment2.id }
+      });
+      assertTrue(comments.length === 0);
+      comments = await Comment.findOne({
+        where: { id: firstLevelComment2.id },
       });
       assertTrue(comments === null);
     });

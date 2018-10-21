@@ -11,11 +11,11 @@ export default class Util {
   /**
    *
    * @param {string}title
-   * @return {string} Return a slug value of the provided username and tite
+   * @return {string} Return a slug value of the provided title
    */
   static createSlug(title) {
     const suffix = Util.generateRandomString(8);
-    return `${urlSlug(title)}-${suffix}`;
+    return `${urlSlug(title).toLowerCase()}-${suffix}`;
   }
 
   /**
@@ -35,7 +35,7 @@ export default class Util {
 
     const sizeNumber = Number(size);
     if (!Number.isNaN(sizeNumber) && sizeNumber > 0) {
-      limit = size || DEFAULT_LIMIT;
+      limit = size;
     } else {
       limit = DEFAULT_LIMIT;
     }
@@ -45,7 +45,7 @@ export default class Util {
 
     const offset = (page - 1) * limit;
     return {
-      page, limit, offset
+      page, limit, offset, totalPages
     };
   }
 

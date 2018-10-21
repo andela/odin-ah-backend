@@ -1,4 +1,5 @@
 import Sequelize from 'sequelize';
+import cls from 'continuation-local-storage';
 import fs from 'fs';
 import path from 'path';
 import config from '../config/config';
@@ -7,6 +8,9 @@ const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
 const isDev = env === 'development';
 const configEnv = config[env];
+
+const namespace = cls.createNamespace('authors_haven');
+Sequelize.useCLS(namespace);
 
 const db = {};
 

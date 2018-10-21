@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import Bookmark from './router';
+import report from './router';
 
 const router = Router();
 
-router.use('/report/', Bookmark);
+router.use('/report/', report);
 
 export default router;

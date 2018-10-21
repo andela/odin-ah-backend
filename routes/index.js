@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import auth from './auth';
 import users from './users';
-import errorhandler from '../helpers/exceptionHandler/errorHandler';
+import errorHandler from '../helpers/exceptionHandler/errorHandler';
 import Authorization from '../middlewares/Authorization';
 import articles from './article';
 import like from './like';
@@ -9,8 +9,9 @@ import profiles from './profiles';
 import bookmark from './bookmark';
 import searchRouter from './search';
 import sentiment from './sentiment';
-import report from './report';
+import series from './series';
 import me from './me';
+import report from './report';
 
 const router = Router();
 
@@ -26,8 +27,10 @@ router.use(
   profiles,
   bookmark,
   sentiment,
+  series,
+  me,
   report,
-  errorhandler
+  errorHandler
 );
 
 export default router;

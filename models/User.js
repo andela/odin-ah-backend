@@ -40,7 +40,8 @@ export default (sequelize, Sequelize) => {
           newArticleFromUserFollowing: true,
           articleComment: true,
           articleLike: true,
-          emailSubscribe: true
+          emailSubscribe: true,
+          newFollowerOnSeries: true
         }
       },
       role: {
@@ -64,15 +65,16 @@ export default (sequelize, Sequelize) => {
   });
 
   User.associate = (models) => {
-    User.hasMany(models.Article, { as: 'Articles', foreignKey: 'userId' });
-    User.hasMany(models.Comment, { as: 'Comments', foreignKey: 'userId' });
-    User.hasMany(models.Bookmark, { as: 'Bookmarks', foreignKey: 'userId' });
+    User.hasMany(models.Article, { as: 'articles', foreignKey: 'userId' });
+    User.hasMany(models.Comment, { as: 'comments', foreignKey: 'userId' });
+    User.hasMany(models.Bookmark, { as: 'bookmarks', foreignKey: 'userId' });
 
     User.hasMany(models.Notifications, { as: 'Notification', foreignKey: 'userId' });
     User.belongsToMany(models.Follows, {
       foreignKey: 'userId',
       through: 'UserFollows'
     });
+    User.belongsToMany(models.Series, { through: 'FollowSeries', foreignKey: 'userId' });
   };
   return User;
 };

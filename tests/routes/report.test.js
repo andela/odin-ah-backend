@@ -49,7 +49,7 @@ describe('Report articles', () => {
           done();
         });
     });
-    it('should not able to report an article already reported by the sam author', (done) => {
+    it('should not able to report an article already reported by the same author', (done) => {
       chai.request(server)
         .post(`/api/v1/report/articles/${Slug}`)
         .set('Authorization', `Bearer: ${accessToken}`)
@@ -58,7 +58,7 @@ describe('Report articles', () => {
           description: 'gsgsgsgsgsgggssgsgsggsgsgsgsg'
         })
         .end((err, res) => {
-          res.should.have.status(200);
+          res.should.have.status(409);
           res.body.should.have.property('status');
           res.body.should.have.property('message');
           done();

@@ -5,8 +5,8 @@ import ReportValidator from '../../middlewares/validators/reportValidator';
 
 const router = Router();
 
-router.post('/articles/:slug', ReportValidator.reportArticleValidator, asyncCatchErrors(ReportController.reportArticle)); router.post('/articles/:slug', ReportValidator.reportArticleValidator, asyncCatchErrors(ReportController.reportArticle));
-router.get('/articles', asyncCatchErrors(ReportController.getAllReportededArticles));
+router.post('/articles/:slug', ReportValidator.reportArticleValidator, asyncCatchErrors(ReportController.reportArticle));
+router.get('/articles', asyncCatchErrors(ReportController.getAllReportedArticles));
 
 
 export default router;

@@ -18,7 +18,9 @@ class SearchEngine {
       where: {
         title: {
           [Op.iLike]: `%${query}%`
-        }
+        },
+        isPrivate: false,
+        isPublished: true
       }
     };
     this.pagination = { limit: 10, offset: 0 };
@@ -69,7 +71,7 @@ class SearchEngine {
   /**
    *
    *
-   * @param {SequelizeModel} [model=Article]
+   * @param {Model} [model=Article]
    * @returns {Promise<Object>} A promise that resolves into total count and rows
    * @memberof SearchEngine
    */

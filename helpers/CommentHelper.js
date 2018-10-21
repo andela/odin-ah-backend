@@ -1,8 +1,8 @@
-import ArticleHelper from './ArticleHelper';
 import db from '../models';
 import HttpError from './exceptionHandler/httpError';
 
 const { User, Comment } = db;
+
 /**
  * Helper class for Comment Controller
  */
@@ -19,11 +19,17 @@ class CommentHelper {
     } = comment;
     const { username, bio, imageUrl } = user;
     const author = {
-      username, bio, imageUrl
+      username,
+      bio,
+      imageUrl
     };
 
     return {
-      id, body, type, createdAt, author
+      id,
+      body,
+      type,
+      createdAt,
+      author
     };
   }
 
@@ -33,38 +39,33 @@ class CommentHelper {
    * @return {object} returns response data.
    */
   static getCommentsResponseData(comments) {
-    const result = [];
-    comments.forEach((item) => {
-      result.push(CommentHelper.getCommentResponseData(item.user, item.dataValues));
-    });
-    return result;
+    return comments.map(item => CommentHelper.getCommentResponseData(item.user, item.dataValues));
   }
 
   /**
    *
    * @param {number} id
-   * @param {string} slug
+   * @param {Array} include
    * @return {Promise<Model>} finds a comment by its id and get list of sub-comments
    */
-  static async findCommentBy(id, slug) {
-    const includeUser = {
-      model: User,
-      as: 'user'
-    };
-    const [article, comment] = await Promise.all([ArticleHelper.findArticleBySlug(slug),
-      Comment.findOne({
-        where: { id },
-        include: [
-          includeUser,
-          {
-            model: Comment,
-            as: 'comments',
-            include: [{ ...includeUser }]
-          }]
-      })]);
-    if (!article) {
-      throw new HttpError('article not found', 404);
+  static async findCommentBy(id, include = null) {
+    if (!include) {
+      const includeUser = {
+        model: User,
+        as: 'user'
+      };
+      include = [
+        includeUser,
+        {
+          model: Comment,
+          as: 'comments',
+          include: [{ ...includeUser }]
+        }];
     }
+    const comment = await Comment.findOne({
+      where: { id },
+      include
+    });
     if (!comment) {
       throw new HttpError('comment not found', 404);
     }
@@ -77,14 +78,9 @@ class CommentHelper {
    * @return {Promise<void>} Delete all comment and its sub-comments
    */
   static async deleteComments(comment) {
-    const toDelete = [];
     const { comments } = comment;
+    const toDelete = comments.map(item => (item.destroy({ force: true })));
     toDelete.push(comment.destroy({ force: true, }));
-    if (comments) {
-      comments.forEach((item) => {
-        toDelete.push(item.destroy({ force: true }));
-      });
-    }
     await Promise.all(toDelete);
   }
 }

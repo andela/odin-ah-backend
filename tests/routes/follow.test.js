@@ -156,7 +156,7 @@ describe('GET /profiles/follower', () => {
       .post(`/api/v1/profiles/${userId4}/follow`)
       .set('Authorization', `Bearer ${userToken}`);
   });
-  it('should return a 200 status code and a list of users folling me ', async () => {
+  it('should return a 200 status code and a list of users following me ', async () => {
     const response = await chai.request(server)
       .get('/api/v1/profiles/follower')
       .set('Authorization', `Bearer ${userToken}`);

@@ -18,7 +18,7 @@ class Guard {
    *
    *
    * @param {string} role
-   * @returns {function} calls next funtion if action is allowed
+   * @returns {function} calls next function if action is allowed
    * @memberof Guard
    */
   allow(role) {

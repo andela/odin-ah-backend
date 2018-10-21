@@ -58,7 +58,6 @@ export default class UserController {
    * @static
    * @param {object} req
    * @param {object} res
-   * @param {function} next
    * @returns {object} a response object
    * @memberof UserController
    */

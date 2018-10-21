@@ -41,7 +41,7 @@ class ProfileValidator {
     }
     if (settings) {
       // Checks if all settings properties are boolean
-      const settingsObject = JSON.parse(settings);
+      const settingsObject = settings;
       const settingsIsAllBoolean = Object.values(settingsObject).every(
         item => typeof (item) === 'boolean'
       );
@@ -52,13 +52,13 @@ class ProfileValidator {
       }
 
       // Checks that all the properties in settings object are valid
-      const validSettingsProps = ['articleLike', 'newFollower', 'articleComment', 'newArticleFromUserFollowing', 'emailSubscribe'];
+      const validSettingsProps = ['articleLike', 'newFollower', 'articleComment', 'newArticleFromUserFollowing', 'emailSubscribe', 'newFollowerOnSeries'];
       const settingsProps = Object.keys(settingsObject).every(
         item => validSettingsProps.includes(item)
       );
       if (!settingsProps) {
         return response.status(400).json({
-          message: 'Invalid Properties'
+          message: `Invalid Settings Properties. Settings must any of these values: ${validSettingsProps.join(', ')}`
         });
       }
     }
@@ -104,7 +104,7 @@ class ProfileValidator {
      * @param {response} res
      * @param {function} next
      * @returns {object} returns error object if validation error
-     * @memberof ProfileValidator
+     * @memberof ProfileValidator numericality
      */
   static validateId(req, res, next) {
     req.params.id = Number(req.params.id);
