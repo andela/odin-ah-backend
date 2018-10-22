@@ -6,11 +6,10 @@ const { Article, User } = db;
 export const defaultArticle = {
   title: 'How to train your dragon',
   description: 'Ever wonder how?',
-  body:
-    'Nunc sed diam suscipit, lobortis eros nec, auctor nisl. Nunc ac magna\n'
-    + '          non justo varius rutrum sit amet feugiat elit. Pellentesque vehicula,\n'
-    + '          ante rutrum condimentum tempor, purus metus vulputate ligula, et\n'
-    + '          commodo tortor massa eu tortor.'
+  body: 'Nunc sed diam suscipit, lobortis eros nec, auctor nisl. Nunc ac magna\n'
+        + '          non justo varius rutrum sit amet feugiat elit. Pellentesque vehicula,\n'
+        + '          ante rutrum condimentum tempor, purus metus vulputate ligula, et\n'
+        + '          commodo tortor massa eu tortor.',
 };
 
 /**

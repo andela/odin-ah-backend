@@ -12,14 +12,14 @@ const { Article, User, Tag } = db;
  */
 export default class ArticleController {
   /**
-   *
-   * Method for creating Authors Article
-   * Authentication Required
-   * @param {request} req
-   * @param {response} res
-   * @param {next} next
-   * @return {object} return create article for user.
-   */
+     *
+     * Method for creating Authors Article
+     * Authentication Required
+     * @param {request} req
+     * @param {response} res
+     * @param {next} next
+     * @return {object} return create article for user.
+     */
   static async getArticle(req, res, next) {
     const { slug } = req.params;
     try {
@@ -42,14 +42,14 @@ export default class ArticleController {
   }
 
   /**
-   *
-   * Method for creating Authors Article
-   * Authentication Required
-   * @param {request} req
-   * @param {response} res
-   * @param {next} next
-   * @return {object} return create article for user.
-   */
+     *
+     * Method for creating Authors Article
+     * Authentication Required
+     * @param {request} req
+     * @param {response} res
+     * @param {next} next
+     * @return {object} return create article for user.
+     */
   static async getArticles(req, res, next) {
     try {
       const total = await Article.count();
@@ -59,15 +59,15 @@ export default class ArticleController {
       const allArticle = await Article.findAll({
         limit,
         offset,
-        include: [
-          {
-            model: Tag,
-            as: 'tags'
-          },
-          {
-            model: User,
-            as: 'user'
-          }]
+        include: [{
+          model: Tag,
+          as: 'tags'
+        },
+        {
+          model: User,
+          as: 'user'
+        }
+        ]
       });
       const articles = ArticleHelper.getArticlesResponseData(allArticle);
       return res.status(200)
@@ -87,14 +87,14 @@ export default class ArticleController {
   }
 
   /**
-   *
-   * Method for creating Authors Article
-   * Authentication Required
-   * @param {request} req
-   * @param {response} res
-   * @param {next} next
-   * @return {object} return create article for user.
-   */
+     *
+     * Method for creating Authors Article
+     * Authentication Required
+     * @param {request} req
+     * @param {response} res
+     * @param {next} next
+     * @return {object} return create article for user.
+     */
   static async createArticle(req, res, next) {
     let response = null;
     let status = 0;
@@ -103,7 +103,6 @@ export default class ArticleController {
       const id = req.authData.userId;
       const userData = await UserHelper.findById(id);
       const slug = Util.createSlug(title);
-      await ArticleHelper.throwErrorIfArticleExists(slug);
       const article = await ArticleHelper.saveArticle(req, slug, userData);
       status = 201;
       response = {
@@ -120,14 +119,14 @@ export default class ArticleController {
   }
 
   /**
-   *
-   * Method for deleting Authors Article
-   * Authentication Required
-   * @param {request} req
-   * @param {response} res
-   * @param {next} next
-   * @return {object} return delete status.
-   */
+     *
+     * Method for deleting Authors Article
+     * Authentication Required
+     * @param {request} req
+     * @param {response} res
+     * @param {next} next
+     * @return {object} return delete status.
+     */
   static async deleteArticle(req, res, next) {
     const { userId } = req.authData;
     const { slug } = req.params;
@@ -154,13 +153,13 @@ export default class ArticleController {
   }
 
   /**
-   * Method for updating Authors Article
-   * Authentication Required
-   * @param {request} req
-   * @param {response} res
-   * @param {next} next
-   * @return {object} return update article for user.
-   */
+     * Method for updating Authors Article
+     * Authentication Required
+     * @param {request} req
+     * @param {response} res
+     * @param {next} next
+     * @return {object} return update article for user.
+     */
   static async updateArticles(req, res, next) {
     const { userId } = req.authData;
     const { slug } = req.params;

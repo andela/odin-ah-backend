@@ -20,7 +20,8 @@ class ProfileValidator {
   static validation(request, response, next) {
     const {
       username,
-      email
+      email,
+      settings
     } = request.body;
 
     if (validator.isEmpty(username)) {
@@ -38,17 +39,40 @@ class ProfileValidator {
         message: 'Please enter a valid email'
       });
     }
+    if (settings) {
+      // Checks if all settings properties are boolean
+      const settingsObject = JSON.parse(settings);
+      const settingsIsAllBoolean = Object.values(settingsObject).every(
+        item => typeof (item) === 'boolean'
+      );
+      if (!settingsIsAllBoolean) {
+        return response.status(400).json({
+          message: 'Invalid type! Must be a boolean'
+        });
+      }
+
+      // Checks that all the properties in settings object are valid
+      const validSettingsProps = ['articleLike', 'newFollower', 'articleComment', 'newArticleFromUserFollowing', 'emailSubscribe'];
+      const settingsProps = Object.keys(settingsObject).every(
+        item => validSettingsProps.includes(item)
+      );
+      if (!settingsProps) {
+        return response.status(400).json({
+          message: 'Invalid Properties'
+        });
+      }
+    }
     next();
   }
 
   /**
-   * Validates Follows functionality
-   * @async
-   * @param  {request} request - Request object
-   * @param {response} response - Request object
-   * @param {next} next - calls next middleware
-   * @return {response} Returns response message
-   */
+     * Validates Follows functionality
+     * @async
+     * @param  {request} request - Request object
+     * @param {response} response - Request object
+     * @param {next} next - calls next middleware
+     * @return {response} Returns response message
+     */
   static async validateFollow(request, response, next) {
     const { userId } = request.params;
     const id = request.authData.userId;
@@ -74,14 +98,14 @@ class ProfileValidator {
   }
 
   /**
-   *
-   * @static
-   * @param {request} req
-   * @param {response} res
-   * @param {function} next
-   * @returns {object} returns error object if validation error
-   * @memberof ProfileValidator
-   */
+     *
+     * @static
+     * @param {request} req
+     * @param {response} res
+     * @param {function} next
+     * @returns {object} returns error object if validation error
+     * @memberof ProfileValidator
+     */
   static validateId(req, res, next) {
     req.params.id = Number(req.params.id);
     const errors = validate(req.params, { id: { numericality: { noStrings: true } } });

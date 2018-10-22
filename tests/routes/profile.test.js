@@ -78,7 +78,14 @@ describe('Profile', () => {
       firstName: 'First',
       lastName: 'Name',
       bio: 'Some description about the user',
-      imageUrl: 'http://www.url-to-an-image.com'
+      imageUrl: 'http://www.url-to-an-image.com',
+      settings: JSON.stringify({
+        articleLike: true,
+        newFollower: true,
+        articleComment: true,
+        emailSubscribe: true,
+        newArticleFromUserFollowing: true
+      })
     };
     chai
       .request(server)
@@ -101,6 +108,62 @@ describe('Profile', () => {
         done();
       });
   });
+  it('should return 400 status if settings object is a boolean', (done) => {
+    chai
+      .request(server)
+      .put('/api/v1/users')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        email: 'Johnwilli@gmail.com',
+        username: 'blackshady',
+        firstName: 'First',
+        lastName: 'Name',
+        bio: 'Some description about the user',
+        imageUrl: 'http://www.url-to-an-image.com',
+        settings: JSON.stringify({
+          articleLike: 'true',
+          newFollower: 'true',
+          articleComment: 'true',
+          emailSubscribe: 'true',
+          newArticleFromUserFollowing: 'true'
+        })
+      })
+      .end((err, response) => {
+        response.should.have.status(400);
+        response.body.should.have.property('message');
+        response.body.should.have.property('message').equal('Invalid type! Must be a boolean');
+        done();
+      });
+  });
+  it('should return 400 status if settings properties are not valid', (done) => {
+    const userData = {
+      email: 'Johnwilli@gmail.com',
+      username: 'blackshady',
+      firstName: 'First',
+      lastName: 'Name',
+      bio: 'Some description about the user',
+      imageUrl: 'http://www.url-to-an-image.com',
+      settings: JSON.stringify({
+        articleLikes: true,
+        newFollowers: true,
+        articleComments: true,
+        emailSubscribes: true,
+        newArticleFromUserFollowings: true
+      })
+    };
+    chai
+      .request(server)
+      .put('/api/v1/users')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send(userData)
+      .end((err, response) => {
+        response.should.have.status(400);
+        response.body.should.have.property('message');
+        response.body.should.have.property('message').equal('Invalid Properties');
+        done();
+      });
+  });
+
   it('should return 400 status if username is empty', (done) => {
     chai
       .request(server)

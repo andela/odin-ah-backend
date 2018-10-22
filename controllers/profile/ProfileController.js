@@ -2,6 +2,8 @@ import db from '../../models';
 import UserHelper from '../../helpers/UserHelper';
 import Util from '../../helpers/Util';
 import HttpError from '../../helpers/exceptionHandler/httpError';
+import eventBus from '../../helpers/eventBus';
+
 
 const { Follows, User } = db;
 /**
@@ -45,15 +47,15 @@ class ProfileController {
   }
 
   /**
-   *
-   *
-   * @static
-   * @param {request} req
-   * @param {response} res
-   * @param {function} next
-   * @returns {object} returns profile for a specific user
-   * @memberof UserProfile
-   */
+     *
+     *
+     * @static
+     * @param {request} req
+     * @param {response} res
+     * @param {function} next
+     * @returns {object} returns profile for a specific user
+     * @memberof UserProfile
+     */
   static async getProfileById(req, res, next) {
     const id = req.params.id || req.authData.userId;
     try {
@@ -97,6 +99,11 @@ class ProfileController {
       following: follower.id,
     });
     if (response) {
+      eventBus.emit('onFollowEvent', {
+        toUser: response.dataValues.follower,
+        fromUser: response.dataValues.following,
+        type: 'follow'
+      });
       return res.status(200).json({
         status: 'success',
         message: `You are now following ${follower.username}`
@@ -130,7 +137,7 @@ class ProfileController {
     if (response) {
       return res.status(200).json({
         status: 'success',
-        message: `You have unfollowing ${follower.username}`
+        message: `You have successfuly unfollowed   ${follower.username}`
       });
     }
   }
@@ -206,15 +213,15 @@ class ProfileController {
   }
 
   /**
-   *
-   *
-   * @static
-   * @param {request} req
-   * @param {response} res
-   * @param {function} next
-   * @returns {object} return a json response
-   * @memberof UserProfile
-   */
+     *
+     *
+     * @static
+     * @param {request} req
+     * @param {response} res
+     * @param {function} next
+     * @returns {object} return a json response
+     * @memberof UserProfile
+     */
   static async getAllProfile(req, res, next) {
     try {
       const { userId } = req.authData;

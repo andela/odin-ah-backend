@@ -11,6 +11,10 @@ import routes from './routes';
 import googleStrategy from './config/passport/google';
 import facebookStrategy from './config/passport/facebook';
 import twitterStrategy from './config/passport/twitter';
+import initServices from './services';
+
+
+initServices();
 
 const swaggerDocument = YAML.load('./swagger.yaml');
 
@@ -40,5 +44,3 @@ app.use(passport.initialize());
 app.use(routes);
 
 export default app;
-
-// j

@@ -30,6 +30,7 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'articleId',
       as: 'likes',
     });
+
     Article.belongsToMany(models.Tag, {
       as: 'tags',
       through: 'ArticleTags',
