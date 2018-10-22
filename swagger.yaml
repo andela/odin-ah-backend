@@ -954,8 +954,72 @@ paths:
             $ref: "#/definitions/SentimentError"
       tags:
       - Sentiment
+      securçity:
+        - UserSecurity: []
+  /report/articles:
+    get:
+      summary: Get list of reported articles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: 'Returns a list of reported article with the provided {slug}.'
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            description: Page number.
+        - in: query
+          name: size
+          required: false
+          schema:
+            type: integer
+            description: The number of reports to retrieve.
+      tags:
+        - Report
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ReportsResult'
+        '400':
+          description: Bad Request.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: No articles found.
+          schema:
+            $ref: '#/definitions/Error'
+        tags:
+          - Report 
       security:
-      - UserSecurity: []
+        - UserSecurity: []
+  '/report/articles/{slug}':
+    post:
+      summary: report an article by inserting the article's slug as request query
+      description: The route allows Authenticated users report an article
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: article unique slug
+        - name: request
+          in: body
+          required: true
+          description: Report can be either plagiarism, spam, harassment or others
+          schema:
+            $ref: '#/definitions/ReportRequest'   
+      responses:
+        '200':
+          description: This article is already reported this article
+        '201':
+          description: successfully reported an article
+        '404':
+          description: Article not found
+      tags:
+        - Report 
 
   /profiles/notification:
     get:
@@ -1611,23 +1675,72 @@ definitions:
         example: 1
 
   NotificationResult:
-
     properties:
       status:
         type: string
         example: success
-      userNotification:
+      notifications:
+       type: object
+       properties:
+          id:
+           type: number
+           example: 13
+          isRead:
+           type: boolean
+           example: false
+          message:
+           type: string
+           example: 'victorbk started following you Thursday, October 18, 2018 10:44 AM ago'
+          createdAt:
+           type: date
+           example: '018-11-18T09:44:37.777Z'
+
+  ReportsResult:
+    properties:
+      data:
         type: object
         properties:
-          id:
-          type: number
-          example: 13
-          isRead:
-          type: boolean
-          example: false
-          message:
-          type: string
-          example: 'victorbk started following you Thursday, October 18, 2018 10:44 AM ago'
-          createdAt:
-          type: date
-          example: '018-11-18T09:44:37.777Z'
+          reports:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  example: 2
+                articleId:
+                  type: integer
+                  example: 23  
+                reportType:
+                  type: string
+                  example: plagiarism 
+                description:
+                  type: string
+                  example: copyright issue 
+          page:
+            type: number
+            example: 2
+          size:
+            type: number
+            example: 2
+          total:
+            type: number
+            example: 70
+      status:
+        type: string
+        example: success
+      message:
+        type: string
+        example: Successfully fetch  all reported articles.
+  ReportRequest:
+    required:
+      - reportType
+      - description
+    properties:
+      reportType:
+        type: string
+        example: spam
+      description:
+        type: string
+        example: 'sed diam suscipit, lobortis eros nec, auctor nisl.'
+ 
