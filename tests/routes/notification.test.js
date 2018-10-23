@@ -7,19 +7,17 @@ import Authorization from '../../middlewares/Authorization';
 const { User } = db;
 let userToken1 = '';
 let userToken2 = '';
-let userId1 = '';
 let userId2 = '';
 let notificationId = '';
 describe('GET /profiles/notifications', () => {
   before('Register a user', async () => {
     const response = await User.create(sampleUser5);
-    userId1 = response.dataValues.id;
-    userToken1 = Authorization.generateToken(userId1);
+    userToken1 = Authorization.generateToken(response.dataValues);
   });
   before('Register a the second user ', async () => {
     const response = await User.create(sampleUser6);
     userId2 = response.dataValues.id;
-    userToken2 = Authorization.generateToken(userId2);
+    userToken2 = Authorization.generateToken(response.dataValues);
   });
 
   before('Follow a user', async () => {

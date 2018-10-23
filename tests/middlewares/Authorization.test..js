@@ -9,10 +9,10 @@ chai.use(sinonChai);
 
 describe('Authorization', () => {
   const res = mockRes();
-  const userId = 1;
-  const token = Authorization.generateToken(userId);
+  const data = { id: 1, role: 'user' };
+  const token = Authorization.generateToken(data);
   const expiredToken = jwt.sign({
-    userId
+    ...data
   },
   process.env.JWTSECRET, {
     expiresIn: '0s',

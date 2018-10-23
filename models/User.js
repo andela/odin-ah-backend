@@ -42,6 +42,10 @@ export default (sequelize, Sequelize) => {
           articleLike: true,
           emailSubscribe: true
         }
+      },
+      role: {
+        type: Sequelize.ENUM(['user', 'admin', 'superadmin']),
+        defaultValue: 'user'
       }
     }, {
       timestamps: true

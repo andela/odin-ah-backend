@@ -185,4 +185,28 @@ export default class ArticleController {
       next(e);
     }
   }
+
+  /**
+   *
+   * @param {request} req
+   * @param {response} res
+   * @param  {next} next
+   * @return {object} return update article for user.
+   */
+  static async disableArticle(req, res, next) {
+    const { slug } = req.params;
+    try {
+      const articleData = await ArticleHelper.findArticleBySlug(slug);
+      HttpError.throwErrorIfNull(articleData, 'Article not found');
+      const article = await articleData.update({ disabled: true });
+      res.status(200)
+        .json({
+          article,
+          message: 'Successfully disabled article',
+          status: 'success',
+        });
+    } catch (e) {
+      next(e);
+    }
+  }
 }

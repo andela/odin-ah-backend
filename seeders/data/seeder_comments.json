@@ -1,0 +1,29 @@
+[
+  {
+    "body": "Cras venenatis pellentesque finibus. Cras eu orci at diam auctor fringilla. Proin quis hendrerit felis. In feugiat, dui eu porttitor vulputate, arcu orci blandit felis, nec accumsan risus nisl quis ipsum. Morbi eu lectus tempor, interdum sem et, blandit justo. Mauris elit dolor, sollicitudin eu congue vitae, tincidunt sit amet metus. Donec in nibh pharetra, mollis risus ut, porta diam.",
+    "type": null,
+    "createdAt": "2018-10-15 19:14:57.361000",
+    "updatedAt": "2018-10-15 19:14:57.377000",
+    "userId": 2,
+    "articleId": 1,
+    "parentId": null
+  },
+  {
+    "body": "Cras venenatis pellentesque finibus. Cras eu orci at diam auctor fringilla. Proin quis hendrerit felis. In feugiat, dui eu porttitor vulputate, arcu orci blandit felis, nec accumsan risus nisl quis ipsum. Morbi eu lectus tempor, interdum sem et, blandit justo. Mauris elit dolor, sollicitudin eu congue vitae, tincidunt sit amet metus. Donec in nibh pharetra, mollis risus ut, porta diam.",
+    "type": null,
+    "createdAt": "2018-10-15 19:14:57.361000",
+    "updatedAt": "2018-10-15 19:14:57.377000",
+    "userId": 1,
+    "articleId": 1,
+    "parentId": 1
+  },
+  {
+    "body": "Cras venenatis pellentesque finibus. Cras eu orci at diam auctor fringilla. Proin quis hendrerit felis. In feugiat, dui eu porttitor vulputate, arcu orci blandit felis, nec accumsan risus nisl quis ipsum. Morbi eu lectus tempor, interdum sem et, blandit justo. Mauris elit dolor, sollicitudin eu congue vitae, tincidunt sit amet metus. Donec in nibh pharetra, mollis risus ut, porta diam.",
+    "type": null,
+    "createdAt": "2018-10-15 19:14:57.361000",
+    "updatedAt": "2018-10-15 19:14:57.377000",
+    "userId": 3,
+    "articleId": 1,
+    "parentId": null
+  }
+]

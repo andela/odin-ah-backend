@@ -1,0 +1,72 @@
+[
+  {
+    "username": "macphilips",
+    "email": "dummy-user@local.host",
+    "isVerified": true,
+    "token": "lGhHnrKHYJ8lM0PCBnPjxGtazwBlQoxL",
+    "firstName": "John",
+    "lastName": "Doe",
+    "bio": null,
+    "imageUrl": null,
+    "role": "user",
+    "password": "$2b$10$ahuHbkaVw1ZBaWLhu09UJ.bptZP.cf9om5d.1YuP7BJXyUpk1CC8i",
+    "createdAt": "2018-10-15 17:01:24.917000",
+    "updatedAt": "2018-10-15 17:01:24.917000"
+  },
+  {
+    "username": "hammed",
+    "email": "dummy-user-2@local.host",
+    "isVerified": true,
+    "token": "tibln9o8EqeINMfciY2DaoM3P2KWrwZX",
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "bio": null,
+    "imageUrl": null,
+    "role": "user",
+    "password": "$2b$10$ahuHbkaVw1ZBaWLhu09UJ.bptZP.cf9om5d.1YuP7BJXyUpk1CC8i",
+    "createdAt": "2018-10-15 16:57:01.209000",
+    "updatedAt": "2018-10-15 16:57:01.209000"
+  },
+  {
+    "username": "dummyUser",
+    "email": "dummy-user-3@local.host",
+    "isVerified": true,
+    "token": "hobln9o8EqeINMfciY2DaoM3P2KTrwZX",
+    "firstName": "Dummy",
+    "lastName": "User",
+    "bio": null,
+    "imageUrl": null,
+    "role": "user",
+    "password": "$2b$10$ahuHbkaVw1ZBaWLhu09UJ.bptZP.cf9om5d.1YuP7BJXyUpk1CC8i",
+    "createdAt": "2018-10-15 16:57:01.209000",
+    "updatedAt": "2018-10-15 16:57:01.209000"
+  },
+  {
+    "username": "admin",
+    "email": "admin@local.host",
+    "isVerified": true,
+    "token": "lGhHnrKHYJ8lM0PCBnPjxGtazwBlQoxL",
+    "firstName": "Admin",
+    "lastName": "Admin",
+    "bio": null,
+    "imageUrl": null,
+    "role": "admin",
+    "password": "$2b$10$SV.sieiJ1mvbqHKMaH7j4uuSTzgwEP5EqQy19w5elD7n9wL0eBq/K",
+    "createdAt": "2018-10-15 17:01:24.917000",
+    "updatedAt": "2018-10-15 17:01:24.917000"
+  },
+  {
+    "username": "superuser",
+    "email": "superadmin@local.host",
+    "isVerified": true,
+    "token": "lGhHnrKHYJ8lM0PCBnPjxGtazwBlQoxL",
+    "firstName": "User",
+    "lastName": "Super",
+    "bio": null,
+    "imageUrl": null,
+    "role": "superadmin",
+    "password": "$2b$10$SV.sieiJ1mvbqHKMaH7j4uuSTzgwEP5EqQy19w5elD7n9wL0eBq/K",
+    "createdAt": "2018-10-15 17:01:24.917000",
+    "updatedAt": "2018-10-15 17:01:24.917000"
+  }
+]

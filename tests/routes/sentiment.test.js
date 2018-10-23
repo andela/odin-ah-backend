@@ -56,7 +56,7 @@ describe('Sentiment Analysis Test', () => {
     user = await User.create({ ...realUser1 });
   });
   it('should provide validate request input', async () => {
-    const jwt = Authorization.generateToken(user.id);
+    const jwt = Authorization.generateToken(user);
     let response = await chai.request(server)
       .post(baseUrl)
       .set(AUTHORIZATION_HEADER, `Bearer: ${jwt}`)
@@ -73,7 +73,7 @@ describe('Sentiment Analysis Test', () => {
   });
 
   it('should analyze the text', async () => {
-    const jwt = Authorization.generateToken(user.id);
+    const jwt = Authorization.generateToken(user);
     const tone = sinon.stub(sentiment.toneAnalyzer, 'tone')
       .callsArgWith(1, null, dummySentiment);
     const response = await chai.request(server)
@@ -96,7 +96,7 @@ describe('Sentiment Analysis Test', () => {
     tone.restore();
   });
   it('should return error message', async () => {
-    const jwt = Authorization.generateToken(user.id);
+    const jwt = Authorization.generateToken(user);
     const err = new Error('Payload too large');
     err.code = 413;
     const tone = sinon.stub(sentiment.toneAnalyzer, 'tone')

@@ -263,5 +263,32 @@ class ProfileController {
       next(error);
     }
   }
+
+  /**
+   *
+   *
+   * @static
+   * @param {object} request
+   * @param {object} response
+   * @returns {object} returns json response
+   * @memberof ProfileController
+   */
+  static async updateRole(request, response) {
+    const { id, role } = request.params;
+    const user = await UserHelper.findById(id);
+
+    HttpError.throwErrorIfNull(user, 'User not found!');
+
+    const updatedUser = await user.update({ role }, {
+      where: { id }
+    });
+    const data = UserHelper.getUserProfileData(updatedUser);
+    return response.status(200)
+      .json({
+        status: 'success',
+        message: 'User role updated successfully!',
+        data
+      });
+  }
 }
 export default ProfileController;
