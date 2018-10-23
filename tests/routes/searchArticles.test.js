@@ -14,14 +14,12 @@ const {
 
 describe('GET /search', () => {
   beforeEach(async () => {
-    await Promise.all([
-      deleteTable(Article), deleteTable(User), deleteTable(Tag)
-    ]);
+    await Promise.all([deleteTable(Article), deleteTable(User), deleteTable(Tag)]);
   });
 
-  after(async () => {
-    await Promise.all([deleteTable(Tag), deleteTable(Article)]);
-  });
+  // after(async () => {
+  //   await Promise.all([deleteTable(Tag), deleteTable(Article)]);
+  // });
 
   it('should return 400 bad request if no query is specified', async () => {
     const response = await chai.request(server).get('/api/v1/search');
@@ -44,7 +42,7 @@ describe('GET /search', () => {
   it("should return a non-empty array when there's a match for the search query", async () => {
     const article = await Article.create({ ...defaultArticle, slug: 'some-article-slug' });
     const { id: articleIdInDb } = article;
-    const response = await chai.request(server).get('/api/v1/search?q=train+dragon');
+    const response = await chai.request(server).get('/api/v1/search?q=dragon');
     expect(response).to.have.status(200);
     expect(response.body).to.be.an('Object');
     expect(response.body.results).to.be.an('Array');
@@ -55,7 +53,7 @@ describe('GET /search', () => {
 
   it('should return a paginated list of matching articles', async () => {
     await createDummyArticles(); // creates 10 articles
-    const response = await chai.request(server).get('/api/v1/search?q=train+dragon&limit=2&page=1');
+    const response = await chai.request(server).get('/api/v1/search?q=dragon&limit=2&page=1');
     expect(response).to.have.status(200);
     expect(response.body).to.be.an('Object');
     expect(response.body.results).to.be.an('Array');
@@ -73,7 +71,7 @@ describe('GET /search', () => {
     const { id: authorId } = expectedArticleOwner;
     const response = await chai
       .request(server)
-      .get(`/api/v1/search?q=train+dragon&limit=10&page=1&author=${authorId}`);
+      .get(`/api/v1/search?q=dragon&limit=10&page=1&author=${authorId}`);
     expect(response).to.have.status(200);
     expect(response.body).to.be.an('Object');
     expect(response.body.results).to.be.an('Array');
@@ -108,7 +106,7 @@ describe('GET /search', () => {
     const { id: tagId } = dbTags[0].dataValues;
     const response = await chai
       .request(server)
-      .get(`/api/v1/search?q=train+dragon&limit=10&page=1&tag=${tagId}`);
+      .get(`/api/v1/search?q=dragon&limit=10&page=1&tag=${tagId}`);
     expect(response).to.have.status(200);
     expect(response.body).to.be.an('Object');
     expect(response.body.results).to.be.an('Array');
@@ -117,7 +115,7 @@ describe('GET /search', () => {
 
   it('should return 500 internal error when a database error occurs', async () => {
     const sequelizeQueryStub = sinon.stub(sequelize, 'query').rejects();
-    const response = await chai.request(server).get('/api/v1/search?q=train+dragon');
+    const response = await chai.request(server).get('/api/v1/search?q=dragon');
     expect(response).to.have.status(500);
     expect(response.body).to.be.an('Object');
     sequelizeQueryStub.restore();
