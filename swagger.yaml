@@ -1018,7 +1018,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
         tags:
-          - Report 
+          - Report
       security:
         - UserSecurity: []
   '/report/articles/{slug}':
@@ -1035,7 +1035,7 @@ paths:
           required: true
           description: Report can be either plagiarism, spam, harassment or others
           schema:
-            $ref: '#/definitions/ReportRequest'   
+            $ref: '#/definitions/ReportRequest'
       responses:
         '200':
           description: This article is already reported this article
@@ -1044,10 +1044,10 @@ paths:
         '404':
           description: Article not found
       tags:
-        - Report 
+        - Report
       security:
         - UserSecurity: []
-      
+
   '/articles/{slug}/disable':
     put:
       summary: 'Disable an article by {slug}.'
@@ -1165,6 +1165,34 @@ paths:
             $ref: '#/definitions/Error'
       tags:
       - Notifications
+      security:
+      - UserSecurity: []
+
+  /users/statistics:
+    get:
+      summary: Get summary of user reading statistics
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      description: >-
+        Returns reading statistics by Id
+      parameters:
+      - in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          description: The number of notifications to retrieve.
+          schema:
+            $ref: '#/definitions/StatisticsRequest'
+      responses:
+        200:
+          description: Successful Operation
+          schema:
+            $ref: '#/definitions/StatisticsResult'
+      tags:
+      - Reading Statistics
       security:
       - UserSecurity: []
 
@@ -1800,13 +1828,13 @@ definitions:
                   example: 2
                 articleId:
                   type: integer
-                  example: 23  
+                  example: 23
                 reportType:
                   type: string
-                  example: plagiarism 
+                  example: plagiarism
                 description:
                   type: string
-                  example: copyright issue 
+                  example: copyright issue
           page:
             type: number
             example: 2
@@ -1833,4 +1861,29 @@ definitions:
       description:
         type: string
         example: 'sed diam suscipit, lobortis eros nec, auctor nisl.'
- 
+
+        StatisticsRequest:
+    required:
+    - userId
+    properties:
+      notificationId:
+        type: number
+        example: 1
+
+  StatisticsResult:
+    properties:
+      totalArticles:
+        type: object
+        properties:
+          count:
+            type: integer
+            example: 19
+      unique:
+        type: integer
+        example: 13
+      allViews:
+        type: integer
+        example: 79
+      message:
+          type: string
+          example: 'Reading statistics retrieved Successfully'

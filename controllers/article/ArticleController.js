@@ -4,6 +4,7 @@ import logger from '../../helpers/logger';
 import Util from '../../helpers/Util';
 import ArticleHelper from '../../helpers/ArticleHelper';
 import HttpError from '../../helpers/exceptionHandler/httpError';
+import eventBus from '../../helpers/eventBus';
 
 const { Article, User, Tag } = db;
 
@@ -27,8 +28,17 @@ export default class ArticleController {
       HttpError.throwErrorIfNull(article, 'Article not found');
 
       const { user, tags } = article;
-
+      let userId = null;
       article = ArticleHelper.getArticleResponseData(user, article, tags);
+      if (req.authData) {
+        ({ userId } = req.authData);
+      }
+      eventBus.emit('onNewArticleView', {
+        authorId: user.dataValues.id,
+        readerId: userId,
+        articleSlug: article.slug
+      });
+
 
       return res.status(200)
         .json({

@@ -6,12 +6,14 @@ import Validator from '../../middlewares/validators';
 import asyncCatchErrors from '../../middlewares/asyncCatchErrors';
 import Guard from '../../middlewares/Guard';
 import Roles from '../../config/role/index';
+import ReadingStats from '../../controllers/user/ReadingStats';
 
 const router = Router();
 
 
 router.put('/', profileValidator.validation, asyncCatchErrors(profileController.updateProfile));
 router.get('/', asyncCatchErrors(profileController.getProfileById));
+router.get('/statistics', Validator.User.readingStats, asyncCatchErrors(ReadingStats.getReadingStats));
 
 router.get('/list', asyncCatchErrors(profileController.getAllProfile));
 router.get('/:id', profileValidator.validateId, asyncCatchErrors(profileController.getProfileById));
