@@ -1,40 +1,16 @@
-import db from '../../models/index';
-import {
-  searchArticleWithTagFilter,
-  searchArticleWithAuthorFilter,
-  searchArticleNoFilter
-} from '../../helpers/rawSqlHelpers';
-
-const { sequelize } = db;
+import SearchEngine from '../../helpers/SearchEngine';
 
 const searchController = async (req, res, next) => {
   try {
-    const { q: queryText } = req.query;
+    const { q: query } = req.query;
     const {
       page, limit, author, tag
     } = req.sanitizedQuery;
 
-    let searchResults = [];
-
-    const queryConfig = {
-      model: db.Article,
-      replacements: {
-        query: queryText,
-        author,
-        tag,
-        limit,
-        offset: (page - 1) * limit
-      }
-    };
-
-    if (tag) {
-      searchResults = await sequelize.query(searchArticleWithTagFilter(), queryConfig);
-    } else if (author) {
-      searchResults = await sequelize.query(searchArticleWithAuthorFilter(), queryConfig);
-    } else {
-      searchResults = await sequelize.query(searchArticleNoFilter(), queryConfig);
-    }
-
+    const searchEngine = new SearchEngine(query);
+    searchEngine.setPagination({ limit, page });
+    searchEngine.setFilters({ tag, author });
+    const { count: totalCount, rows: searchResults } = await searchEngine.execute();
     const cleanResults = searchResults.map(result => ({
       slug: result.slug,
       id: result.id,
@@ -43,18 +19,15 @@ const searchController = async (req, res, next) => {
       authorId: result.userId
     }));
 
-    const formattedResults = {
+    res.status(200).json({
       results: cleanResults,
       meta: {
-        totalCount: searchResults.length
-          ? parseInt(searchResults[0].dataValues.total_count, 10)
-          : 0,
+        totalCount,
         page,
         limit,
-        query: queryText
+        query
       }
-    };
-    res.status(200).json(formattedResults);
+    });
   } catch (err) {
     next(err);
   }
