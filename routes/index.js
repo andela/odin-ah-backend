@@ -10,6 +10,7 @@ import bookmark from './bookmark';
 import searchRouter from './search';
 import sentiment from './sentiment';
 import report from './report';
+import me from './me';
 
 
 const router = Router();
@@ -20,6 +21,7 @@ router.use(
   searchRouter,
   auth,
   users,
+  me,
   articles,
   like,
   profiles,

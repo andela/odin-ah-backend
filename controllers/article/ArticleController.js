@@ -88,6 +88,36 @@ export default class ArticleController {
 
   /**
      *
+     * Method for getting all created Articles created by an authenticated user
+     * Authentication Required
+     * @param {request} req
+     * @param {response} res
+     * @param {next} next
+     * @return {object} return all articles
+     */
+  static async getAuthUserArticles(req, res) {
+    const { userId } = req.authData;
+    const total = await Article.count({ where: { userId } });
+    const pageInfo = Util.getPageInfo(req.query.page, req.query.size, total);
+    const { page, limit, offset } = pageInfo;
+    const articles = await Article.findAll({
+      limit,
+      offset,
+      where: { userId },
+      order: [
+        ['createdAt', 'DESC']
+      ]
+    });
+    return res.status(200).json({
+      status: 'success',
+      articles,
+      page,
+      total
+    });
+  }
+
+  /**
+     *
      * Method for creating Authors Article
      * Authentication Required
      * @param {request} req

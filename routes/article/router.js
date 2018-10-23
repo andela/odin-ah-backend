@@ -20,4 +20,5 @@ router.post('/', ArticleValidator.createArticleValidator, ArticleController.crea
 
 router.get('/', PageValidator.validate, ArticleController.getArticles);
 
+
 export default router;
