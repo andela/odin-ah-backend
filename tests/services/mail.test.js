@@ -22,147 +22,126 @@ describe('Mail', () => {
 
   describe('sendVerification', () => {
     it('should return a successful status when email has been sent.', async () => {
-      const mockSGMailSend = sinon.stub(sgMail, 'send')
-        .returns(Promise.resolve([
+      const mockSGMailSend = sinon.stub(sgMail, 'send').returns(
+        Promise.resolve([
           { statusCode: 202 },
           {
-            status: 'success',
+            status: 'success'
           }
-        ]));
+        ])
+      );
       const res = await Mail.sendVerification(user);
+      expect(res).to.be.a('object');
       expect(res)
-        .to
-        .be
-        .a('object');
-      expect(res)
-        .to
-        .have
-        .property('status')
-        .that
-        .is
-        .equal('success');
+        .to.have.property('status')
+        .that.is.equal('success');
       mockSGMailSend.restore();
     });
     it('should return an error status when sending email fails', async () => {
-      const mockSGMailSend = sinon.stub(sgMail, 'send')
-        .returns(Promise.resolve([
+      const mockSGMailSend = sinon.stub(sgMail, 'send').returns(
+        Promise.resolve([
           { statusCode: 203 },
           {
-            status: 'error',
+            status: 'error'
           }
-        ]));
+        ])
+      );
       const res = await Mail.sendVerification(user);
+      expect(res).to.be.a('object');
       expect(res)
-        .to
-        .be
-        .a('object');
+        .to.have.property('status')
+        .that.is.equal('error');
+      expect(res).to.have.property('message');
+      mockSGMailSend.restore();
+    });
+    it('should return error if share email is not sent', async () => {
+      const mockSGMailSend = sinon.stub(sgMail, 'send').returns(
+        Promise.resolve([
+          { statusCode: 203 },
+          {
+            status: 'error'
+          }
+        ])
+      );
+      const res = await Mail.shareArticle({
+        article: { slug: 'slug', title: 'title' },
+        recipient: 'recipient',
+        sender: { username: 'username' }
+      });
+      expect(res).to.be.a('object');
       expect(res)
-        .to
-        .have
-        .property('status')
-        .that
-        .is
-        .equal('error');
-      expect(res)
-        .to
-        .have
-        .property('message');
+        .to.have.property('status')
+        .that.is.equal('error');
+      expect(res).to.have.property('message');
       mockSGMailSend.restore();
     });
     it('should handle unexpected errors and return an error message', async () => {
-      const mockSGMailSend = sinon.stub(sgMail, 'send')
+      const mockSGMailSend = sinon
+        .stub(sgMail, 'send')
         .returns(Promise.reject(new Error('mock reject')));
       const res = await Mail.sendVerification(user);
+      expect(res).to.be.a('object');
       expect(res)
-        .to
-        .be
-        .a('object');
-      expect(res)
-        .to
-        .have
-        .property('status')
-        .that
-        .is
-        .equal('error');
-      expect(res)
-        .to
-        .have
-        .property('message');
+        .to.have.property('status')
+        .that.is.equal('error');
+      expect(res).to.have.property('message');
       mockSGMailSend.restore();
     });
   });
 
   describe('sendPasswordReset', () => {
     it('should return a successful status when email has been sent.', async () => {
-      const mockSGMailSend = sinon.stub(sgMail, 'send')
-        .returns(Promise.resolve([
+      const mockSGMailSend = sinon.stub(sgMail, 'send').returns(
+        Promise.resolve([
           { statusCode: 202 },
           {
-            status: 'success',
+            status: 'success'
           }
-        ]));
-      const res = await Mail.sendPasswordReset('testingurl@authorshavenand.com',
-        'http://localhost:3000/api/v1/users/reset-password/complete/{token_here}');
+        ])
+      );
+      const res = await Mail.sendPasswordReset(
+        'testingurl@authorshavenand.com',
+        'http://localhost:3000/api/v1/users/reset-password/complete/{token_here}'
+      );
+      expect(res).to.be.a('object');
       expect(res)
-        .to
-        .be
-        .a('object');
-      expect(res)
-        .to
-        .have
-        .property('status')
-        .that
-        .is
-        .equal('success');
+        .to.have.property('status')
+        .that.is.equal('success');
       mockSGMailSend.restore();
     });
     it('should return an error status when sending email fails', async () => {
-      const mockSGMailSend = sinon.stub(sgMail, 'send')
-        .returns(Promise.resolve([
+      const mockSGMailSend = sinon.stub(sgMail, 'send').returns(
+        Promise.resolve([
           { statusCode: 203 },
           {
-            status: 'error',
+            status: 'error'
           }
-        ]));
-      const res = await Mail.sendPasswordReset('testingurl@authorshavenand.com',
-        'http://localhost:3000/api/v1/users/reset-password/complete/{token_here}');
+        ])
+      );
+      const res = await Mail.sendPasswordReset(
+        'testingurl@authorshavenand.com',
+        'http://localhost:3000/api/v1/users/reset-password/complete/{token_here}'
+      );
+      expect(res).to.be.a('object');
       expect(res)
-        .to
-        .be
-        .a('object');
-      expect(res)
-        .to
-        .have
-        .property('status')
-        .that
-        .is
-        .equal('error');
-      expect(res)
-        .to
-        .have
-        .property('message');
+        .to.have.property('status')
+        .that.is.equal('error');
+      expect(res).to.have.property('message');
       mockSGMailSend.restore();
     });
     it('should handle unexpected errors and return an error message', async () => {
-      const mockSGMailSend = sinon.stub(sgMail, 'send')
+      const mockSGMailSend = sinon
+        .stub(sgMail, 'send')
         .returns(Promise.reject(new Error('mock reject')));
-      const res = await Mail.sendPasswordReset('testingurl@authorshavenand.com',
-        'http://localhost:3000/api/v1/users/reset-password/complete/{token_here}');
+      const res = await Mail.sendPasswordReset(
+        'testingurl@authorshavenand.com',
+        'http://localhost:3000/api/v1/users/reset-password/complete/{token_here}'
+      );
+      expect(res).to.be.a('object');
       expect(res)
-        .to
-        .be
-        .a('object');
-      expect(res)
-        .to
-        .have
-        .property('status')
-        .that
-        .is
-        .equal('error');
-      expect(res)
-        .to
-        .have
-        .property('message');
+        .to.have.property('status')
+        .that.is.equal('error');
+      expect(res).to.have.property('message');
       mockSGMailSend.restore();
     });
   });

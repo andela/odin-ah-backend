@@ -19,5 +19,8 @@ Please follow this link <a href="${url}"> ${url} </a> to confrim your registrati
   followArticleNotification: (email, fromUsername, articleTitle, articleSlug) => ({
     message: `<b>To ${email}, <br><b>${fromUsername} </b>just published a new Article: ${articleTitle}. <br>Click <a href="${articleSlug}">HERE</a> to read.`
   }),
+  newArticleShare: (username, url, title) => ({
+    message: `<b>${username} shared this article with you via Authors Haven: <br><a href='${url}'>${title}</a><br></b>`
+  })
 };
 export default mailMessages;
