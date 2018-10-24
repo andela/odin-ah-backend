@@ -657,6 +657,29 @@ paths:
             $ref: '#/definitions/Error'
       tags:
       - Articles
+      /me/articles/:
+    get:
+      summary: Get all articles of an authenticated user
+      description: >-
+        The route allows Authenticated users to get all their articles
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            description: Page number.
+        - in: query
+          name: size
+          required: false
+          schema:
+            type: integer
+            description: The number of reports to retrieve.      
+      responses:
+      '200':
+        description: successfully 
+      tags:
+      - Articles
       security:
       - UserSecurity: []
   /users/reset-password/begin:

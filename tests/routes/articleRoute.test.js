@@ -1,4 +1,4 @@
-import chai from 'chai';
+import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
 import sinon from 'sinon';
 import sgMail from '@sendgrid/mail';
@@ -359,6 +359,43 @@ describe('Article CRUD Test', () => {
         .delete('/api/v1/articles')
         .send(defaultArticle);
       assertResponseStatus(response, 401);
+    });
+  });
+  describe('GET /api/v1/me/articles', () => {
+    it('should get all articles created by the user', async () => {
+      const users = await User.findAll();
+      const user = users[0].dataValues;
+      const slug = 'how-to-slugged-article';
+      const jwt = Authorization.generateToken(user);
+      await Article.create({
+        ...defaultArticle,
+        slug,
+        userId: user.id
+      });
+      const response = await chai.request(server)
+        .get('/api/v1/me/articles')
+        .set(AUTHORIZATION_HEADER, `Bearer ${jwt}`);
+      expect(response).to.have.status(200);
+      expect(response.body).to.have.property('articles').that.is.an('Array');
+      expect(response.body.articles[0]).to.have.property('id').that.is.a('number');
+      expect(response.body.articles[0]).to.have.property('slug').that.is.not.empty;
+      expect(response.body.articles[0]).to.have.property('body').that.is.not.empty;
+      expect(response.body.articles[0]).to.have.property('title').that.is.not.empty;
+      expect(response.body.articles[0]).to.have.property('description').that.is.not.empty;
+      expect(response.body.articles[0]).to.have.property('readingTime').that.is.not.empty;
+      expect(response.body.articles[0]).to.have.property('userId').that.is.a('number');
+      expect(response.body).to.have.property('total').that.is.a('number');
+      expect(response.body).to.have.property('page').that.is.a('number');
+    });
+    it('should return an empty array if the user does not have an article', async () => {
+      const users = await User.findAll();
+      const user = users[1].dataValues;
+      const jwt = Authorization.generateToken(user);
+      const response = await chai.request(server)
+        .get('/api/v1/me/articles')
+        .set(AUTHORIZATION_HEADER, `Bearer ${jwt}`);
+      expect(response).to.have.status(200);
+      expect(response.body).to.have.property('articles').that.is.an('Array');
     });
   });
   describe('GET /api/v1/articles/:slug', () => {
