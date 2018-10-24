@@ -57,6 +57,22 @@ class Authorization {
   }
 
   /**
+     * Verifies the user token
+     * @param  {object} req - Request object
+     * @param {object} res - Response object
+     * @param {function} next - calls the next middleware
+     * @return {json} Returns json object
+     * @static
+     */
+  static passAuthUser(req, res, next) {
+    const token = Authorization.getToken(req);
+    if (token) {
+      req.authData = jwt.verify(token, process.env.JWTSECRET);
+    }
+    return next();
+  }
+
+  /**
      *
      * @param {error} err JWT error
      * @return {{message: string, status: string}} returns formatted error

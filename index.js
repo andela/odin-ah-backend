@@ -13,7 +13,6 @@ import facebookStrategy from './config/passport/facebook';
 import twitterStrategy from './config/passport/twitter';
 import initServices from './services';
 
-
 initServices();
 
 const swaggerDocument = YAML.load('./swagger.yaml');

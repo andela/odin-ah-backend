@@ -45,6 +45,13 @@ describe('Authorization', () => {
     // eslint-disable-next-line no-unused-expressions
     expect(next).to.have.been.called;
   });
+  it('should call the next middleware when passAuthUser is called with a token', async () => {
+    const next = sinon.spy();
+    await Authorization.passAuthUser(realReq, res, next);
+    expect(realReq.authData).to.not.equal('undefined');
+    // eslint-disable-next-line no-unused-expressions
+    expect(next).to.have.been.called;
+  });
   it('should return a 401 status code  and a message', async () => {
     const next = sinon.spy();
     await Authorization.verifyToken(badReq, res, next);
