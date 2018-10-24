@@ -1,25 +1,38 @@
 module.exports = (sequelize, DataTypes) => {
-  const Article = sequelize.define('Article', {
-    slug: DataTypes.STRING,
-    body: DataTypes.TEXT,
-    title: DataTypes.STRING,
-    description: DataTypes.STRING,
-    disabled: DataTypes.BOOLEAN,
-    readingTime: DataTypes.STRING
-  }, {});
+  const Article = sequelize.define(
+    'Article',
+    {
+      slug: DataTypes.STRING,
+      body: DataTypes.TEXT,
+      title: DataTypes.STRING,
+      description: DataTypes.STRING,
+      readingTime: DataTypes.STRING,
+      private: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: true
+      },
+      isPublished: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
+        allowNull: false
+      }
+    },
+    {}
+  );
   Article.hook('beforeCreate', (article) => {
-    const wordLength = (article.body).split(' ').length,
+    const wordLength = article.body.split(' ').length,
       minute = wordLength / 200;
     article.readingTime = minute * 60 * 1000;
   });
   Article.hook('beforeUpdate', (article) => {
-    const wordLength = (article.body).split(' ').length,
+    const wordLength = article.body.split(' ').length,
       minute = wordLength / 200;
     article.readingTime = minute * 60 * 1000;
   });
   Article.associate = (models) => {
     Article.belongsTo(models.User, {
-      as: 'user',
+      as: 'user'
     });
 
     Article.hasMany(models.Comment, {
@@ -29,7 +42,7 @@ module.exports = (sequelize, DataTypes) => {
 
     Article.hasMany(models.Like, {
       foreignKey: 'articleId',
-      as: 'likes',
+      as: 'likes'
     });
 
     Article.belongsToMany(models.Tag, {
