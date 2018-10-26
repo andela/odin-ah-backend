@@ -7,6 +7,7 @@ const initServices = () => {
   eventBus.on('onArticleInteraction', MailNotificationService.onArticleInteraction);
   eventBus.on('onFollowEvent', MailNotificationService.onFollowEvent);
   eventBus.on('onNewPostEvent', MailNotificationService.onNewPostEvent);
+  eventBus.on('onFollowSeriesEvent', MailNotificationService.onFollowSeriesEvent);
   eventBus.on('onNewArticleView', ReadingStats.articleViewHandler);
   eventBus.on('articleShare', articleShareService);
 };

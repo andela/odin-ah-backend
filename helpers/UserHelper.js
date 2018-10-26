@@ -11,7 +11,7 @@ const { User } = db;
  * */
 class UserHelper {
   /**
-     * Find a particular user  by emial
+     * Find a particular user  by email
      * @async
      * @param {string} email - the user email
      * @return {object} Returns json object

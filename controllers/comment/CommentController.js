@@ -5,6 +5,7 @@ import ArticleHelper from '../../helpers/ArticleHelper';
 import logger from '../../helpers/logger';
 import HttpError from '../../helpers/exceptionHandler/httpError';
 import eventBus from '../../helpers/eventBus';
+import Util from '../../helpers/Util';
 
 const { Comment, User } = db;
 
@@ -13,22 +14,32 @@ const { Comment, User } = db;
  */
 export default class CommentController {
   /**
-     *
-     * Method for creating Authors Comment
-     * Authentication Required
-     * @param {request} req
-     * @param {response} res
-     * @param {next} next
-     * @return {object} return create article for user.
-     */
+   *
+   * Method for creating Authors Comment
+   * Authentication Required
+   * @param {request} req
+   * @param {response} res
+   * @param {next} next
+   * @return {object} return create article for user.
+   */
   static async getComments(req, res, next) {
     try {
       const { slug } = req;
-      const article = await ArticleHelper.findArticleBySlug(slug);
+      const article = await ArticleHelper.findArticleBySlug(slug, []);
       HttpError.throwErrorIfNull(article, 'Article not found');
+      const where = { $and: [{ articleId: article.id }, { parentId: null }] };
+      const total = await Comment.count({
+        where
+      });
+      const pageInfo = Util.getPageInfo(req.query.page, req.query.size, total);
+      const {
+        page, limit, offset, totalPages
+      } = pageInfo;
 
       let comments = await Comment.findAll({
-        where: { $and: [{ articleId: article.id }, { parentId: null }] },
+        limit,
+        offset,
+        where,
         include: [{
           model: User,
           as: 'user'
@@ -40,7 +51,10 @@ export default class CommentController {
         .json({
           data: {
             comments,
-            count: comments.length
+            page,
+            totalPages,
+            size: comments.length,
+            total,
           },
           status: 'success',
           message: 'Successfully fetch articles.'
@@ -51,19 +65,42 @@ export default class CommentController {
   }
 
   /**
-     *
-     * Method for creating Authors Comment
-     * Authentication Required
-     * @param {request} req
-     * @param {response} res
-     * @param {next} next
-     * @return {object} return create article for user.
-     */
+   *
+   * Method for creating Authors Comment
+   * Authentication Required
+   * @param {request} req
+   * @param {response} res
+   * @param {next} next
+   * @return {object} return create article for user.
+   */
   static async getSubComments(req, res, next) {
     try {
       const { slug } = req;
       const { id } = req.params;
-      let comment = await CommentHelper.findCommentBy(id, slug);
+      const article = await ArticleHelper.findArticleBySlug(slug, []);
+      HttpError.throwErrorIfNull(article, 'Article not found');
+      const where = { $and: [{ articleId: article.id }, { parentId: id }] };
+      const total = await Comment.count({
+        where
+      });
+      const pageInfo = Util.getPageInfo(req.query.page, req.query.size, total);
+      const {
+        page, limit, offset, totalPages
+      } = pageInfo;
+      const includeUser = {
+        model: User,
+        as: 'user'
+      };
+      const include = [
+        includeUser,
+        {
+          limit,
+          offset,
+          model: Comment,
+          as: 'comments',
+          include: [{ ...includeUser }]
+        }];
+      let comment = await CommentHelper.findCommentBy(id, include);
       const { user } = comment;
       const comments = CommentHelper.getCommentsResponseData(comment.comments);
       comment = CommentHelper.getCommentResponseData(user, comment.dataValues);
@@ -71,8 +108,14 @@ export default class CommentController {
         .json({
           comment: {
             ...comment,
-            comments,
-            count: comments.length
+            comments: {
+              data: comments,
+              page,
+              totalPages,
+              size: comments.length,
+              total,
+
+            },
           },
           status: 'success',
           message: 'Successfully fetch articles.'
@@ -84,14 +127,14 @@ export default class CommentController {
   }
 
   /**
-     *
-     * Method for creating Authors Comment
-     * Authentication Required
-     * @param {request} req
-     * @param {response} res
-     * @param {next} next
-     * @return {object} return create article for user.
-     */
+   *
+   * Method for creating Authors Comment
+   * Authentication Required
+   * @param {request} req
+   * @param {response} res
+   * @param {next} next
+   * @return {object} return create article for user.
+   */
   static async createComment(req, res, next) {
     const { slug } = req;
     const { body } = req.body;
@@ -148,20 +191,22 @@ export default class CommentController {
   }
 
   /**
-     *
-     * Method for deleting Authors Comment
-     * Authentication Required
-     * @param {request} req
-     * @param {response} res
-     * @param {next} next
-     * @return {object} return delete status.
-     */
+   *
+   * Method for deleting Authors Comment
+   * Authentication Required
+   * @param {request} req
+   * @param {response} res
+   * @param {next} next
+   * @return {object} return delete status.
+   */
   static async deleteComment(req, res, next) {
     try {
       const { id } = req.params;
       const { slug } = req;
       const { userId } = req.authData;
-      const comment = await CommentHelper.findCommentBy(id, slug);
+      const article = await ArticleHelper.findArticleBySlug(slug, []);
+      HttpError.throwErrorIfNull(article, 'Article not found');
+      const comment = await CommentHelper.findCommentBy(id);
       if (comment.dataValues.userId === userId) {
         await CommentHelper.deleteComments(comment);
         return res.status(200)

@@ -30,20 +30,25 @@ export default class ReportController {
       where: { $and: [{ articleId }, { userId }] }
     });
     if (existingReport) {
-      return res.status(200).json({
-        status: 'error',
-        message: 'This article has already been reported',
-      });
+      return res.status(409)
+        .json({
+          status: 'error',
+          message: 'This article has already been reported',
+        });
     }
 
     Report.create({
-      userId, articleId, reportType, description
+      userId,
+      articleId,
+      reportType,
+      description
     });
-    return res.status(201).json({
-      status: 'success',
-      message: 'successfully reported an article',
+    return res.status(201)
+      .json({
+        status: 'success',
+        message: 'successfully reported an article',
 
-    });
+      });
   }
 
   /**
@@ -55,12 +60,14 @@ export default class ReportController {
    * @returns {res} Returns response message
    * @memberof ReportController
    */
-  static async getAllReportededArticles(req, res) {
+  static async getAllReportedArticles(req, res) {
     const total = await Report.count();
     const pageInfo = Util.getPageInfo(req.query.page, req.query.size, total);
     const { userId } = req.authData;
 
-    const { page, limit, offset } = pageInfo;
+    const {
+      page, limit, offset, totalPages
+    } = pageInfo;
     const allReports = await Report.findAll({
       limit,
       offset,
@@ -72,7 +79,10 @@ export default class ReportController {
         id, articleId, reportType, description
       } = report;
       return {
-        id, articleId, reportType, description
+        id,
+        articleId,
+        reportType,
+        description
       };
     });
 
@@ -81,6 +91,7 @@ export default class ReportController {
         data: {
           reports,
           page,
+          totalPages,
           size: allReports.length,
           total,
         },

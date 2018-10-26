@@ -3,8 +3,11 @@ import db from '../models';
 import Mail from './Mail';
 import logger from '../helpers/logger';
 import Notification from '../controllers/user/Notification';
+import SeriesHelper from '../helpers/SeriesHelper';
 
-const { User, Article, Follows } = db;
+const {
+  User, Article, Follows,
+} = db;
 
 /**
  *
@@ -13,12 +16,11 @@ const { User, Article, Follows } = db;
  */
 class MailNotificationService {
   /**
-     * Method to be triggered to send notification email when an article has a new comment
-     * @param {object} eventInfo
-     * @memberof MailNotificationService
-     * @returns {null} Does not return
-     * @param {next} next
-     */
+   * Method to be triggered to send notification email when an article has a new comment
+   * @param {object} eventInfo
+   * @memberof MailNotificationService
+   * @returns {null} Does not return
+   */
   static async onArticleInteraction(eventInfo) {
     try {
       const {
@@ -54,7 +56,8 @@ class MailNotificationService {
       if (settings.articleLike && type === 'like') {
         const notificationInfo = {
           userId: toUserInfo.id,
-          message: `${username} liked your Article: ${title}. Date: ${moment().format('LLLL')} ago`,
+          message: `${username} liked your Article: ${title}. Date: ${moment()
+            .format('LLLL')} ago`,
           isRead: false,
           type: 'like'
         };
@@ -64,7 +67,8 @@ class MailNotificationService {
       if (settings.articleComment && type === 'comment') {
         const notificationInfo = {
           userId: toUserInfo.id,
-          message: `${username} commented on your Article: ${title}. Date:  ${moment().format('LLLL')} ago`,
+          message: `${username} commented on your Article: ${title}. Date:  ${moment()
+            .format('LLLL')} ago`,
           isRead: false,
           type: 'comment'
         };
@@ -76,12 +80,11 @@ class MailNotificationService {
   }
 
   /**
-     * Method to be triggered to send notification email a user gets a new follower
-     * @param {object} eventInfo
-     * @memberof MailNotificationService
-     * @returns {null} Does not return
-     * @param {next} next
-     */
+   * Method to be triggered to send notification email when a user gets a new follower
+   * @param {object} eventInfo
+   * @memberof MailNotificationService
+   * @returns {null} Does not return
+   */
   static async onFollowEvent(eventInfo) {
     try {
       const { toUser, fromUser } = eventInfo;
@@ -98,8 +101,9 @@ class MailNotificationService {
         fromUsername: username
       };
       const notificationInfo = {
-        userId: fromUserInfo.id,
-        message: `${toUserInfo.username} started following you ${moment().format('LLLL')} ago`,
+        userId: toUserInfo.id, // ID of the user that is to receive the notification
+        message: `${username} started following you ${moment()
+          .format('LLLL')} ago`,
         type: 'follow',
         isRead: false
       };
@@ -117,27 +121,35 @@ class MailNotificationService {
   }
 
   /**
-     * Method to be triggered to send a notification email
-     * when a user I follow publish a new article
-     * @param {object} eventInfo
-     * @memberof MailNotificationService
-     * @returns {null} Does not return
-     * @param {next} next
-     */
+   * Method to be triggered to send a notification email
+   * when a user I follow publish a new article
+   * @param {object} eventInfo
+   * @memberof MailNotificationService
+   * @returns {null} Does not return
+   */
   static async onNewPostEvent(eventInfo) {
     try {
-      const { authorId, articleId } = eventInfo;
+      const { authorId, articleId, seriesId } = eventInfo;
       const authorInfoPromise = User.findOne({ where: { id: authorId } });
       const articleInfoPromise = Article.findOne({ where: { id: articleId } });
       const authorsFollowersPromise = Follows.findAll({ where: { following: authorId } });
+      const seriesPromise = SeriesHelper.getSeriesWithFollowers(seriesId);
 
-      const [authorInfo, articleInfo, authorsFollowers] = await Promise.all([
+      const [authorInfo, articleInfo, authorsFollowers, series] = await Promise.all([
         authorInfoPromise,
         articleInfoPromise,
-        authorsFollowersPromise
+        authorsFollowersPromise,
+        seriesPromise
       ]);
 
-      const followersIdArray = authorsFollowers.map(user => user.follower);
+      let followersIdArray = authorsFollowers.map(user => user.follower);
+      if (series) {
+        const seriesFollowersId = series.followers.map(user => user.id);
+        followersIdArray = new Set([
+          ...followersIdArray, ...seriesFollowersId
+        ]); // to remove duplicate IDs
+        followersIdArray = [...followersIdArray];
+      }
       const users = await User.findAll({
         where: {
           id: followersIdArray,
@@ -158,13 +170,55 @@ class MailNotificationService {
       users.forEach(async (user) => {
         const notificationInfo = {
           userId: user.id,
-          message: `${username} created a new Airticle: ${title} ${moment().format('LLLL')} ago`,
-          type: 'newAirticle',
+          message: `${username} created a new Article: ${title} ${moment()
+            .format('LLLL')} ago`,
+          type: 'newArticle',
           isRead: false,
         };
         await Notification.create(notificationInfo);
       });
       return Mail.followArticleNotification(info);
+    } catch (error) {
+      logger.error(error);
+    }
+  }
+
+  /**
+   * Method to be triggered to send notification to the author when a user follows their series
+   * @param {object} eventInfo
+   * @memberof MailNotificationService
+   * @returns {null} Does not return
+   */
+  static async onFollowSeriesEvent(eventInfo) {
+    try {
+      const { fromUser, slug } = eventInfo;
+      const findSeriesPromise = SeriesHelper.findSeriesBySlug(slug);
+      const fromUserInfoPromise = User.findOne({ where: { id: fromUser } });
+      const [series, fromUserInfo] = await Promise.all([
+        findSeriesPromise,
+        fromUserInfoPromise
+      ]);
+      const { username } = fromUserInfo;
+      const { email, settings, id } = series.user;
+      const info = {
+        recipientEmail: email,
+        fromUsername: username
+      };
+      const notificationInfo = {
+        userId: id, // ID of the user that will receive the notification
+        message: `${username} started following your series: ${series.title} ${moment()
+          .format('LLLL')} ago`,
+        type: 'follow',
+        isRead: false
+      };
+      let res;
+      if (settings.newFollowerOnSeries) {
+        res = await Notification.create(notificationInfo);
+      }
+      if (settings.emailSubscribe) {
+        res = Mail.newFollowSeriesNotification(info);
+      }
+      return res;
     } catch (error) {
       logger.error(error);
     }

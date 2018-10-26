@@ -22,7 +22,7 @@ const app = express();
 
 app.use(cors());
 
-// Swagger api documentaion
+// Swagger api documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Normal express config defaults

@@ -24,7 +24,7 @@ module.exports = {
       readingTime: {
         type: Sequelize.STRING
       },
-      private: {
+      isPrivate: {
         type: Sequelize.BOOLEAN,
         allowNull: true,
         defaultValue: false

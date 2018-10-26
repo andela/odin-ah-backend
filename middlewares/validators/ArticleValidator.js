@@ -8,19 +8,16 @@ import HttpError from '../../helpers/exceptionHandler/httpError';
  * */
 class ArticleValidator {
   /**
-     * Validates user input values
-     * @param  {req} req - Request object
-     * @param {res} res - Request object
-     * @param {next} next - calls next middleware
-     * @return {res} Returns response message
-     * @static
-     */
+   * Validates user input values
+   * @param  {req} req - Request object
+   * @param {res} res - Request object
+   * @param {next} next - calls next middleware
+   * @return {res} Returns response message
+   * @static
+   */
   static createArticleValidator(req, res, next) {
     const {
-      body,
-      title,
-      description,
-      tags
+      body, title, description, tags,
     } = req.body;
     let message = null;
     if (Validator.isEmpty(body) || Validator.isEmpty(title) || Validator.isEmpty(description)) {
@@ -28,7 +25,8 @@ class ArticleValidator {
     }
 
     message = message || ArticleValidator.validateTitleLength(title)
-            || ArticleValidator.validateTags(tags);
+      || ArticleValidator.validateTags(tags)
+      || ArticleValidator.validatePublishAndPrivateField(req);
     if (message) {
       return next(new HttpError(message, 400));
     }
@@ -37,19 +35,37 @@ class ArticleValidator {
   }
 
   /**
-     * Validates user input values
-     * @param  {req} req - Request object
-     * @param {res} res - Request object
-     * @param {next} next - calls next middleware
-     * @return {res} Returns response message
-     * @static
-     */
+   *
+   * @param {request} req
+   * @return {string} returns a message if the fields 'private' and 'publish' are valid
+   */
+  static validatePublishAndPrivateField(req) {
+    const {
+      private: isPrivate, published: isPublished
+    } = req.body;
+
+    let message = null;
+    if (isPrivate && typeof isPrivate !== 'boolean') {
+      message = '\'private\' field must be a boolean';
+    }
+
+    if (isPublished && typeof isPublished !== 'boolean') {
+      message = '\'publish\' field must be a boolean';
+    }
+    return message;
+  }
+
+  /**
+   * Validates user input values
+   * @param  {req} req - Request object
+   * @param {res} res - Request object
+   * @param {next} next - calls next middleware
+   * @return {res} Returns response message
+   * @static
+   */
   static updateArticleValidator(req, res, next) {
     const {
-      body,
-      title,
-      description,
-      tags
+      body, title, description, tags, seriesId
     } = req.body;
     let message = null;
 
@@ -62,9 +78,14 @@ class ArticleValidator {
     if (title && Validator.isEmpty(title)) {
       message = 'title field cannot be empty';
     }
+    const seriesID = Number(seriesId);
+    if (seriesId && Number.isNaN(seriesID)) {
+      message = 'seriesId must be a number';
+    }
 
     message = message || ArticleValidator.validateTitleLength(title)
-            || ArticleValidator.validateTags(tags);
+      || ArticleValidator.validateTags(tags)
+      || ArticleValidator.validatePublishAndPrivateField(req);
 
     if (message) {
       return next(new HttpError(message, 400));
@@ -73,13 +94,13 @@ class ArticleValidator {
   }
 
   /**
-     * Validates user input values
-     * @param  {req} req - Request object
-     * @param {res} res - Request object
-     * @param {next} next - calls next middleware
-     * @return {res} Returns response message
-     * @static
-     */
+   * Validates user input values
+   * @param  {req} req - Request object
+   * @param {res} res - Request object
+   * @param {next} next - calls next middleware
+   * @return {res} Returns response message
+   * @static
+   */
   static createCommentValidator(req, res, next) {
     const { body } = req.body;
     const { id } = req.params;
@@ -98,15 +119,15 @@ class ArticleValidator {
   }
 
   /**
-     * Validates user input values
-     * @param  {req} req - Request object
-     * @param {res} res - Request object
-     * @param {next} next - calls next middleware
-     * @return {res} Returns response message
-     * @static
-     */
+   * Validates user input values
+   * @param  {req} req - Request object
+   * @param {res} res - Request object
+   * @param {next} next - calls next middleware
+   * @return {res} Returns response message
+   * @static
+   */
   static idValidator(req, res, next) {
-    const id = req.params.id || req.body.id;
+    const { id } = req.params;
     const message = ArticleValidator.validateId(id);
     if (message) {
       return next(new HttpError(message, 400));
@@ -115,11 +136,11 @@ class ArticleValidator {
   }
 
   /**
-     *
-     * @param {Array} tags
-     * @return {string} checks if a tag is valid. returns an error message
-     * if the tags field is not valid.
-     */
+   *
+   * @param {Array} tags
+   * @return {string} checks if a tag is valid. returns an error message
+   * if the tags field is not valid.
+   */
   static validateTags(tags) {
     let message = null;
 
@@ -135,10 +156,10 @@ class ArticleValidator {
   }
 
   /**
-     *
-     * @param {*}id
-     * @return {*} returns a message if the id is not a number.
-     */
+   *
+   * @param {*} id
+   * @return {*} returns a message if the id is not a number.
+   */
   static validateId(id) {
     let message = null;
     if (id && Number.isNaN(Number(id))) {
@@ -148,10 +169,10 @@ class ArticleValidator {
   }
 
   /**
-     *
-     * @param {string} tags
-     * @return {string} return a message if the array of tags contain an invalid tag.
-     */
+   *
+   * @param {string} tags
+   * @return {string} return a message if the array of tags contain an invalid tag.
+   */
   static containsValidStrings(tags) {
     const invalidStrings = tags.filter(tag => Validator.isEmpty(tag));
     if (invalidStrings.length) {
@@ -161,11 +182,11 @@ class ArticleValidator {
   }
 
   /**
-     *
-     * @param {string} title
-     * @return {string} checks if the length of the title is valid.
-     * It return an error message if title is invalid.
-     */
+   *
+   * @param {string} title
+   * @return {string} checks if the length of the title is valid.
+   * It return an error message if title is invalid.
+   */
   static validateTitleLength(title) {
     let message = null;
     if (title && title.length < 5) {

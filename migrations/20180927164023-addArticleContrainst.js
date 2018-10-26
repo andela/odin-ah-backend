@@ -11,7 +11,21 @@ module.exports = {
       onUpdate: 'CASCADE',
       onDelete: 'SET NULL',
     }
-  ),
+  )
+    .then(() => queryInterface.addColumn(
+      'Articles',
+      'seriesId',
+      {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Series',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL',
+      }
+    )),
 
   down: queryInterface => queryInterface.removeColumn('Articles', 'userId')
+    .then(() => queryInterface.removeColumn('Articles', 'seriesId'))
 };

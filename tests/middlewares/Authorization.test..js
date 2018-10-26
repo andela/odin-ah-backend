@@ -35,6 +35,11 @@ describe('Authorization', () => {
       authorization: `Bearer: ${expiredToken}`
     }
   });
+  const nonBearerTokenRequest = mockReq({
+    headers: {
+      authorization: `Beareer: ${expiredToken}`
+    }
+  });
   it('should return a token', () => {
     expect(token).to.be.a('string');
   });
@@ -52,7 +57,7 @@ describe('Authorization', () => {
     // eslint-disable-next-line no-unused-expressions
     expect(next).to.have.been.called;
   });
-  it('should return a 401 status code  and a message', async () => {
+  it('should return a 401 status code and a message', async () => {
     const next = sinon.spy();
     await Authorization.verifyToken(badReq, res, next);
     expect(res.status).to.be.calledWith(401);
@@ -69,13 +74,22 @@ describe('Authorization', () => {
     const result = await Authorization.getToken(noReq);
     expect(result).to.be.equal(null);
   });
-  it('should return a 401 status code  and a message', async () => {
+  it('should return a 401 status code and a message', async () => {
     const next = sinon.spy();
     await Authorization.verifyToken(expiredTokenRequest, res, next);
     expect(res.status).to.be.calledWith(401);
     expect(res.json).to.be.calledWith({
       status: 'error',
       message: 'Access Token has Expired.',
+    });
+  });
+  it('should return a 401 status code and a message for invalid token', async () => {
+    const next = sinon.spy();
+    await Authorization.verifyToken(nonBearerTokenRequest, res, next);
+    expect(res.status).to.be.calledWith(401);
+    expect(res.json).to.be.calledWith({
+      status: 'error',
+      message: 'Token not provided',
     });
   });
 });

@@ -5,7 +5,6 @@ import server from '../../index';
 import { realUser } from '../testHelpers/testLoginData';
 import testUserData from '../testHelpers/testUserData';
 import Authorization from '../../middlewares/Authorization';
-// import UserHelper from '../../helpers/UserHelper';
 import { deleteTable } from '../testHelpers';
 import db from '../../models';
 
@@ -20,25 +19,15 @@ const { User } = db;
 let userId;
 
 describe('Profile', () => {
-  before('Destoy', async () => {
+  before('Destroy', async () => {
     await deleteTable(User);
+    await User.create({
+      ...realUser,
+      isVerified: true
+    });
   });
-  before('Create a user Account', (done) => {
-    chai
-      .request(server)
-      .post('/api/v1/auth/signup')
-      .send(realUser)
-      .end(() => {
-        done();
-      });
-  });
-  before('Create a number of users', (done) => {
-    User.bulkCreate(testUserData)
-      .then(() => {
-        done();
-      }).catch(() => {
-        done();
-      });
+  before('Create a number of users', async () => {
+    await User.bulkCreate(testUserData);
   });
   before('Get a user\'s id', async () => {
     const [user] = await User.findAll();
@@ -47,39 +36,39 @@ describe('Profile', () => {
   before('Verify user email', async () => {
     await User.update({ isVerified: true }, { where: { email: { $not: null } } });
   });
-  before('Login a user', (done) => {
-    chai
+  before('Login a user', async () => {
+    const response = await chai
       .request(server)
       .post('/api/v1/auth/login')
-      .send(realUser)
-      .end((err, response) => {
-        const { user } = response.body;
-        const { token } = user;
-        accessToken = token;
-        done();
-      });
+      .send(realUser);
+
+    const { user } = response.body;
+    const { token } = user;
+    accessToken = token;
   });
-  before('Login a superadmin', (done) => {
-    chai
+  before('Login a superadmin', async () => {
+    const response = await chai
       .request(server)
       .post('/api/v1/auth/login')
-      .send(testUserData[0])
-      .end((err, response) => {
-        const { user } = response.body;
-        const { token } = user;
-        superAdminAccessToken = token;
-        done();
-      });
+      .send(testUserData[0]);
+
+    const { user } = response.body;
+    const { token } = user;
+    superAdminAccessToken = token;
   });
   it('should return error for Profile that does not exist', (done) => {
-    const token = Authorization.generateToken({ id: 10000, role: 'user' });
+    const token = Authorization.generateToken({
+      id: 10000,
+      role: 'user'
+    });
     chai
       .request(server)
       .get('/api/v1/users')
       .set('Authorization', `Bearer ${token}`)
       .end((err, response) => {
         response.should.have.status(404);
-        response.body.should.have.property('message').equal('User not found');
+        response.body.should.have.property('message')
+          .equal('User not found');
         done();
       });
   });
@@ -90,27 +79,67 @@ describe('Profile', () => {
       .set('Authorization', `Bearer ${accessToken}`)
       .end((err, response) => {
         response.should.have.status(200);
-        response.body.should.have.property('message').equal('Successfully retrieved user profile!');
+        response.body.should.have.property('message')
+          .equal('Successfully retrieved user profile!');
         done();
       });
   });
+  const settings = {
+    articleLike: true,
+    newFollower: true,
+    articleComment: false,
+    emailSubscribe: true,
+    newArticleFromUserFollowing: true
+  };
+  const userData = {
+    email: 'Johnwilli@gmail.com',
+    username: 'blackshady',
+    firstName: 'First',
+    lastName: 'Name',
+    bio: 'Some description about the user',
+    imageUrl: 'http://www.url-to-an-image.com'
+  };
 
-  it('should allow user add Firstname, Lastname Bio and imageURL ', (done) => {
-    const userData = {
-      email: 'Johnwilli@gmail.com',
-      username: 'blackshady',
-      firstName: 'First',
-      lastName: 'Name',
-      bio: 'Some description about the user',
-      imageUrl: 'http://www.url-to-an-image.com',
-      settings: JSON.stringify({
-        articleLike: true,
-        newFollower: true,
-        articleComment: true,
-        emailSubscribe: true,
-        newArticleFromUserFollowing: true
+  it('should allow users update their first name, last name bio, imageURL, and settings', (done) => {
+    chai
+      .request(server)
+      .put('/api/v1/users')
+      .send({
+        ...userData,
+        settings
       })
-    };
+      .set('Authorization', `Bearer: ${accessToken}`)
+      .end((err, response) => {
+        response.should.have.status(200);
+        response.body.should.be.a('object');
+        response.body.should.have.property('data');
+        response.body.data.should.have.property('firstName')
+          .eq(userData.firstName);
+        response.body.data.should.have.property('lastName')
+          .eq(userData.lastName);
+        response.body.data.should.have.property('bio')
+          .eq(userData.bio);
+        response.body.data.should.have.property('imageUrl')
+          .eq(userData.imageUrl);
+        response.body.data.should.have.property('username')
+          .eq(userData.username);
+        response.body.data.should.have.property('email')
+          .eq(userData.email);
+        response.body.data.should.have.property('settings');
+        response.body.data.settings.should.have.property('articleLike').eq(true);
+        response.body.data.settings.should.have.property('newFollower').eq(true);
+        response.body.data.settings.should.have.property('articleComment').eq(false);
+        response.body.data.settings.should.have.property('newArticleFromUserFollowing').eq(true);
+        response.body.data.settings.should.have.property('emailSubscribe').eq(true);
+
+        response.body.data.should.not.have.property('password');
+        response.body.data.should.not.have.property('token');
+        response.body.should.have.property('message')
+          .equal('Profile Updated Successfully!');
+        done();
+      });
+  });
+  it('should allow user add first name, last name bio and imageURL, without settings field', (done) => {
     chai
       .request(server)
       .put('/api/v1/users')
@@ -120,70 +149,69 @@ describe('Profile', () => {
         response.should.have.status(200);
         response.body.should.be.a('object');
         response.body.should.have.property('data');
-        response.body.data.should.have.property('firstName').eq(userData.firstName);
-        response.body.data.should.have.property('lastName').eq(userData.lastName);
-        response.body.data.should.have.property('bio').eq(userData.bio);
-        response.body.data.should.have.property('imageUrl').eq(userData.imageUrl);
-        response.body.data.should.have.property('username').eq(userData.username);
-        response.body.data.should.have.property('email').eq(userData.email);
+        response.body.data.should.have.property('firstName')
+          .eq(userData.firstName);
+        response.body.data.should.have.property('lastName')
+          .eq(userData.lastName);
+        response.body.data.should.have.property('bio')
+          .eq(userData.bio);
+        response.body.data.should.have.property('imageUrl')
+          .eq(userData.imageUrl);
+        response.body.data.should.have.property('username')
+          .eq(userData.username);
+        response.body.data.should.have.property('email')
+          .eq(userData.email);
         response.body.data.should.not.have.property('password');
         response.body.data.should.not.have.property('token');
-        response.body.should.have.property('message').equal('Profile Updated Successfully!');
+        response.body.should.have.property('message')
+          .equal('Profile Updated Successfully!');
         done();
       });
   });
   it('should return 400 status if settings object is a boolean', (done) => {
-    chai
-      .request(server)
-      .put('/api/v1/users')
-      .set('Authorization', `Bearer ${accessToken}`)
-      .send({
-        email: 'Johnwilli@gmail.com',
-        username: 'blackshady',
-        firstName: 'First',
-        lastName: 'Name',
-        bio: 'Some description about the user',
-        imageUrl: 'http://www.url-to-an-image.com',
-        settings: JSON.stringify({
-          articleLike: 'true',
-          newFollower: 'true',
-          articleComment: 'true',
-          emailSubscribe: 'true',
-          newArticleFromUserFollowing: 'true'
-        })
-      })
-      .end((err, response) => {
-        response.should.have.status(400);
-        response.body.should.have.property('message');
-        response.body.should.have.property('message').equal('Invalid type! Must be a boolean');
-        done();
-      });
-  });
-  it('should return 400 status if settings properties are not valid', (done) => {
-    const userData = {
-      email: 'Johnwilli@gmail.com',
-      username: 'blackshady',
-      firstName: 'First',
-      lastName: 'Name',
-      bio: 'Some description about the user',
-      imageUrl: 'http://www.url-to-an-image.com',
-      settings: JSON.stringify({
-        articleLikes: true,
-        newFollowers: true,
-        articleComments: true,
-        emailSubscribes: true,
-        newArticleFromUserFollowings: true
-      })
+    const invalidSettings = {
+      articleLike: 'true',
+      newFollower: 'true',
+      articleComment: 'true',
+      emailSubscribe: 'true',
+      newArticleFromUserFollowing: 'true'
     };
     chai
       .request(server)
       .put('/api/v1/users')
       .set('Authorization', `Bearer ${accessToken}`)
-      .send(userData)
+      .send({
+        ...userData,
+        settings: invalidSettings
+      })
       .end((err, response) => {
         response.should.have.status(400);
         response.body.should.have.property('message');
-        response.body.should.have.property('message').equal('Invalid Properties');
+        response.body.should.have.property('message')
+          .equal('Invalid type! Must be a boolean');
+        done();
+      });
+  });
+  it('should return 400 status if settings properties are not valid', (done) => {
+    const invalidSettings = {
+      articleLikes: true,
+      newFollowers: true,
+      articleComments: true,
+      emailSubscribes: true,
+      newArticleFromUserFollowings: true
+    };
+
+    chai
+      .request(server)
+      .put('/api/v1/users')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        ...userData,
+        settings: invalidSettings
+      })
+      .end((err, response) => {
+        response.should.have.status(400);
+        response.body.should.have.property('message');
         done();
       });
   });
@@ -203,7 +231,8 @@ describe('Profile', () => {
       })
       .end((err, response) => {
         response.should.have.status(400);
-        response.body.should.have.property('message').equal('Username cannot be empty');
+        response.body.should.have.property('message')
+          .equal('Username cannot be empty');
         done();
       });
   });
@@ -241,12 +270,16 @@ describe('Profile', () => {
       .end((err, response) => {
         response.should.have.status(400);
         response.body.should.have.property('message');
-        response.body.should.have.property('message').equal('Please enter a valid email');
+        response.body.should.have.property('message')
+          .equal('Please enter a valid email');
         done();
       });
   });
   it('should return error for Profile that does not exist', (done) => {
-    const token = Authorization.generateToken({ id: 10000, role: 'user' });
+    const token = Authorization.generateToken({
+      id: 10000,
+      role: 'user'
+    });
     chai.request(server)
       .put('/api/v1/users')
       .set('Authorization', `Bearer ${token}`)
@@ -260,7 +293,8 @@ describe('Profile', () => {
       })
       .end((err, response) => {
         response.should.have.status(404);
-        response.body.should.have.property('message').equal('User not found!');
+        response.body.should.have.property('message')
+          .equal('User not found!');
         done();
       });
   });
@@ -302,26 +336,34 @@ describe('Profile', () => {
       });
   });
   it('should return 500 status if there was an error finding all users', (done) => {
-    const userStub = sinon.stub(User, 'findAll').rejects();
+    const userStub = sinon.stub(User, 'findAll')
+      .rejects();
     chai.request(server)
       .get('/api/v1/users/list?page=1&size=2')
       .set('Authorization', `Bearer ${accessToken}`)
       .end((err, response) => {
         userStub.restore();
         response.should.have.status(500);
-        response.body.should.have.property('status').that.is.equal('error');
+        response.body.should.have.property('status')
+          .that
+          .is
+          .equal('error');
         done();
       });
   });
   it('should return 500 status if there was an error getting user by id', (done) => {
-    const userStub = sinon.stub(User, 'findById').rejects();
+    const userStub = sinon.stub(User, 'findById')
+      .rejects();
     chai.request(server)
       .get('/api/v1/users/2')
       .set('Authorization', `Bearer ${accessToken}`)
       .end((err, response) => {
         userStub.restore();
         response.should.have.status(500);
-        response.body.should.have.property('status').that.is.equal('error');
+        response.body.should.have.property('status')
+          .that
+          .is
+          .equal('error');
         done();
       });
   });
@@ -331,7 +373,10 @@ describe('Profile', () => {
       .set('Authorization', `Bearer ${accessToken}`)
       .end((err, response) => {
         response.should.have.status(400);
-        response.body.should.have.property('status').that.is.equal('error');
+        response.body.should.have.property('status')
+          .that
+          .is
+          .equal('error');
         done();
       });
   });
@@ -342,7 +387,10 @@ describe('Profile', () => {
       .set('Authorization', `Bearer ${accessToken}`)
       .end((err, response) => {
         response.should.have.status(401);
-        response.body.should.have.property('status').that.is.equal('error');
+        response.body.should.have.property('status')
+          .that
+          .is
+          .equal('error');
         done();
       });
   });
@@ -352,7 +400,10 @@ describe('Profile', () => {
       .set('Authorization', `Bearer ${superAdminAccessToken}`)
       .end((err, response) => {
         response.should.have.status(200);
-        response.body.should.have.property('status').that.is.equal('success');
+        response.body.should.have.property('status')
+          .that
+          .is
+          .equal('success');
         done();
       });
   });

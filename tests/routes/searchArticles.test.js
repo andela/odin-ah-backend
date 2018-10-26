@@ -17,10 +17,6 @@ describe('GET /search', () => {
     await Promise.all([deleteTable(Article), deleteTable(User), deleteTable(Tag)]);
   });
 
-  // after(async () => {
-  //   await Promise.all([deleteTable(Tag), deleteTable(Article)]);
-  // });
-
   it('should return 400 bad request if no query is specified', async () => {
     const response = await chai.request(server).get('/api/v1/search');
     expect(response).to.have.status(400);
@@ -40,7 +36,12 @@ describe('GET /search', () => {
   });
 
   it("should return a non-empty array when there's a match for the search query", async () => {
-    const article = await Article.create({ ...defaultArticle, slug: 'some-article-slug' });
+    const article = await Article.create({
+      ...defaultArticle,
+      slug: 'some-article-slug',
+      isPublished: true,
+      isPrivate: false,
+    });
     const { id: articleIdInDb } = article;
     const response = await chai.request(server).get('/api/v1/search?q=dragon');
     expect(response).to.have.status(200);
@@ -84,9 +85,10 @@ describe('GET /search', () => {
   it('should return a list of articles with specific tags', async () => {
     const firstAuthorPromise = User.create({ ...realUser1, isVerified: true });
     const secondAuthorPromise = User.create({ ...realUser2, isVerified: true });
-    await Promise.all([firstAuthorPromise, secondAuthorPromise]);
-    const dummyArticlesPromise1 = createDummyArticles(0);
-    const dummyArticlesPromise2 = createDummyArticles(1);
+    const [firstAuthor, secondAuthor] = await Promise.all([
+      firstAuthorPromise, secondAuthorPromise]);
+    const dummyArticlesPromise1 = createDummyArticles(firstAuthor);
+    const dummyArticlesPromise2 = createDummyArticles(secondAuthor);
     const usersPromise = User.findAll();
     const [users] = await Promise.all([usersPromise, dummyArticlesPromise1, dummyArticlesPromise2]);
     const user = users[1].dataValues;
@@ -95,6 +97,8 @@ describe('GET /search', () => {
     const article = {
       ...defaultArticle,
       slug: 'some-crappy-article',
+      published: true,
+      private: false,
       tags
     };
     await chai

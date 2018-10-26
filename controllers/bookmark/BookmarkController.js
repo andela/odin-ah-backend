@@ -56,7 +56,9 @@ export default class BookmarkController {
     const pageInfo = Util.getPageInfo(req.query.page, req.query.size, total);
     const { userId } = req.authData;
 
-    const { page, limit, offset } = pageInfo;
+    const {
+      page, limit, offset, totalPages
+    } = pageInfo;
     const allBookmarks = await Bookmark.findAll({
       limit,
       offset,
@@ -85,6 +87,7 @@ export default class BookmarkController {
             article,
           },
           page,
+          totalPages,
           size: allBookmarks.length,
           total,
         },
@@ -97,7 +100,7 @@ export default class BookmarkController {
    * @static
    * @param {object} req
    * @param {object} res
-   * @returns {json}success message on  delecting a bookmark
+   * @returns {json}success message on  deleting a bookmark
    * @memberof BookmarkController
    */
   static async removeBookmark(req, res) {

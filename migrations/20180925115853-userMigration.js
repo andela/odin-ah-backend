@@ -49,7 +49,8 @@ module.exports = {
         newArticleFromUserFollowing: true,
         articleComment: true,
         articleLike: true,
-        emailSubscribe: true
+        emailSubscribe: true,
+        newFollowerOnSeries: true
       }
     }
   }),

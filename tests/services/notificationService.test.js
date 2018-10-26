@@ -11,9 +11,12 @@ import Mail from '../../services/Mail';
 import Authorization from '../../middlewares/Authorization';
 import { defaultArticle } from '../testHelpers/articleUtil';
 import { deleteTable } from '../testHelpers';
+import { createDummySeries, seriesContent } from '../testHelpers/seriesUtil';
 
 
-const { User, Article, Comment } = db;
+const {
+  User, Article, Comment, FollowSeries, Series
+} = db;
 const { expect } = chai;
 chai.use(chaiHttp);
 
@@ -22,6 +25,12 @@ describe('Mail Notification service', () => {
   let follower1 = null;
   let follower2 = null;
   let article;
+  const fakeSendGridResponse = Promise.resolve([
+    { statusCode: 202 },
+    {
+      status: 'success',
+    }
+  ]);
   before(async () => {
     await Promise.all([
       deleteTable(User), deleteTable(Article), deleteTable(Comment),
@@ -45,10 +54,11 @@ describe('Mail Notification service', () => {
       Article.create({
         ...defaultArticle,
         slug: 'random-slug-that-does-not-make-sense'
-      })
+      },
+      createDummySeries(user))
     ]);
-    const userToken1 = Authorization.generateToken(follower1.id);
-    const userToken2 = Authorization.generateToken(follower2.id);
+    const userToken1 = Authorization.generateToken(follower1);
+    const userToken2 = Authorization.generateToken(follower2);
 
     const request1 = chai.request(server)
       .post(`/api/v1/profiles/${user.id}/follow`)
@@ -62,14 +72,9 @@ describe('Mail Notification service', () => {
   });
   describe('onFollowEvent', () => {
     it('should send email notification to userA when another userB follows userA,'
-            + ' only if newFollower settings is true', async () => {
+      + ' only if newFollower settings is true', async () => {
       const mockSGMailSend = sinon.stub(sgMail, 'send')
-        .returns(Promise.resolve([
-          { statusCode: 202 },
-          {
-            status: 'success',
-          }
-        ]));
+        .returns(fakeSendGridResponse);
       await user.update({
         settings: {
           newFollower: false,
@@ -80,8 +85,17 @@ describe('Mail Notification service', () => {
         toUser: user.id,
         fromUser: follower1.id
       });
-      expect(res).to.be.a('object');
-      expect(res).to.have.property('status').that.is.equal('success');
+      expect(res)
+        .to
+        .be
+        .a('object');
+      expect(res)
+        .to
+        .have
+        .property('status')
+        .that
+        .is
+        .equal('success');
       mockSGMailSend.restore();
     });
 
@@ -89,12 +103,7 @@ describe('Mail Notification service', () => {
     it(`should not send notification to userA when another userB follows userA,
         only if newFollower settings is false`, async () => {
       const mockSGMailSend = sinon.stub(sgMail, 'send')
-        .returns(Promise.resolve([
-          { statusCode: 202 },
-          {
-            status: 'success',
-          }
-        ]));
+        .returns(fakeSendGridResponse);
       await user.update({
         settings: {
           newFollower: false,
@@ -105,7 +114,10 @@ describe('Mail Notification service', () => {
         toUser: user.id,
         fromUser: follower1.id
       });
-      expect(res).to.be.equal(undefined);
+      expect(res)
+        .to
+        .be
+        .equal(undefined);
       mockSGMailSend.restore();
     });
     it('should throw an error', async () => {
@@ -120,14 +132,17 @@ describe('Mail Notification service', () => {
         toUser: user.id,
         fromUser: follower1.id
       });
-      expect(res).to.be.equal(undefined);
+      expect(res)
+        .to
+        .be
+        .equal(undefined);
       mockUserFindOne.restore();
     });
   });
-
   describe('onNewPostEvent', () => {
     it('should throw an error', async () => {
-      const mockUserFindOne = sinon.stub(User, 'findOne').rejects();
+      const mockUserFindOne = sinon.stub(User, 'findOne')
+        .rejects();
       await user.update({
         settings: {
           newArticleFromUserFollowing: false,
@@ -138,7 +153,10 @@ describe('Mail Notification service', () => {
         fromUser: follower2.id
       });
 
-      expect(res).to.be.equal(undefined);
+      expect(res)
+        .to
+        .be
+        .equal(undefined);
       mockUserFindOne.restore();
     });
   });
@@ -156,39 +174,41 @@ describe('Mail Notification service', () => {
         fromUser: follower1.id
       });
 
-      expect(res).to.be.equal(undefined);
+      expect(res)
+        .to
+        .be
+        .equal(undefined);
       mockUserFindOne.restore();
     });
   });
   describe('sendLikeNotification', () => {
     it('should send mail if article is liked', async () => {
       const mockSGMailSend = sinon.stub(sgMail, 'send')
-        .returns(Promise.resolve([
-          { statusCode: 202 },
-          {
-            status: 'success',
-          }
-        ]));
+        .returns(fakeSendGridResponse);
       const res = await Mail.sendLikeNotification({
         recipientEmail: 'victor@andela.com',
         fromUsername: 'victor',
         articleTitle: 'how I to move like the wind',
         articleSlug: 'how-I-to-move-like-the-wind-j3L8YdDE',
       });
-      expect(res).to.be.an('object');
-      expect(res).to.have.property('status').that.is.equal('success');
+      expect(res)
+        .to
+        .be
+        .an('object');
+      expect(res)
+        .to
+        .have
+        .property('status')
+        .that
+        .is
+        .equal('success');
       mockSGMailSend.restore();
     });
   });
   describe('followArticleNotification', () => {
     it('should send notification to all userA followers if userA publish an article', async () => {
       const mockSGMailSend = sinon.stub(sgMail, 'send')
-        .returns(Promise.resolve([
-          { statusCode: 202 },
-          {
-            status: 'success',
-          }
-        ]));
+        .returns(fakeSendGridResponse);
       const recipientsEmail = ['victor@gmail.com', 'victor2@gmail.com'];
       const res = await Mail.followArticleNotification({
         recipientsEmail,
@@ -196,9 +216,94 @@ describe('Mail Notification service', () => {
         articleTitle: 'how I to move like the wind',
         articleSlug: 'how-I-to-move-like-the-wind-j3L8YdDE',
       });
-      expect(res).to.be.an('Array');
-      expect(res[0]).to.have.property('status').that.is.equal('success');
+      expect(res)
+        .to
+        .be
+        .an('Array');
+      expect(res[0])
+        .to
+        .have
+        .property('status')
+        .that
+        .is
+        .equal('success');
       mockSGMailSend.restore();
+    });
+  });
+  describe('onFollowSeriesEvent', () => {
+    let series, eventInfo;
+    beforeEach(async () => {
+      series = await Series.create(seriesContent)
+        .then(result => result.setUser(user));
+      const status = 'FOLLOW';
+      await Promise.all([
+        FollowSeries.create({
+          userId: follower1.id,
+          status,
+          seriesId: series.id
+        }),
+      ]);
+      eventInfo = {
+        slug: series.slug,
+        fromUser: follower1.id,
+        event: 'follow'
+      };
+    });
+    it('should send email notification to the author when a user follows the author\'s series,'
+      + ' only if newFollowerOnSeries settings is true', async () => {
+      const mockSGMailSend = sinon.stub(sgMail, 'send')
+        .returns(fakeSendGridResponse);
+      await user.update({
+        settings: {
+          newFollowerOnSeries: false,
+          emailSubscribe: true,
+        }
+      });
+      const res = await MailNotificationService.onFollowSeriesEvent(eventInfo);
+      expect(res)
+        .to
+        .be
+        .a('object');
+      expect(res)
+        .to
+        .have
+        .property('status')
+        .that
+        .is
+        .equal('success');
+      mockSGMailSend.restore();
+    });
+    it('should not send notification to the author when a user follows the author\'s,'
+        + ' only if newFollowerOnSeries settings is false', async () => {
+      const mockSGMailSend = sinon.stub(sgMail, 'send')
+        .returns(fakeSendGridResponse);
+      await user.update({
+        settings: {
+          newFollowerOnSeries: true,
+          emailSubscribe: false,
+        }
+      });
+      const res = await MailNotificationService.onFollowSeriesEvent(eventInfo);
+      expect(res)
+        .to
+        .be
+        .equal(undefined);
+      mockSGMailSend.restore();
+    });
+    it('should throw an error', async () => {
+      const mockUserFindOne = sinon.stub(User, 'findOne')
+        .rejects();
+      await user.update({
+        settings: {
+          newFollowerOnSeries: false,
+        }
+      });
+      const res = await MailNotificationService.onFollowSeriesEvent(eventInfo);
+      expect(res)
+        .to
+        .be
+        .equal(undefined);
+      mockUserFindOne.restore();
     });
   });
 });
