@@ -32,7 +32,7 @@ export default class UserController {
       const { id, updatedAt } = user;
       const resetToken = Util.generateToken({ id, updatedAt },
         Util.dateToString(updatedAt));
-      const url = `${config.baseUrl}/users/reset-password/complete/${resetToken}`;
+      const url = `${config.baseUrl}/reset-password/complete/${resetToken}`;
       Mailer.sendPasswordReset(email, url)
         .then(({ status, message }) => {
           if (status !== 'success') {
