@@ -101,7 +101,7 @@ describe('Mail', () => {
       );
       const res = await Mail.sendPasswordReset(
         'testingurl@authorshavenand.com',
-        'http://localhost:3000/api/v1/users/reset-password/complete/{token_here}'
+        'http://localhost:3000/api/v1/reset-password/complete/{token_here}'
       );
       expect(res).to.be.a('object');
       expect(res)
@@ -120,7 +120,7 @@ describe('Mail', () => {
       );
       const res = await Mail.sendPasswordReset(
         'testingurl@authorshavenand.com',
-        'http://localhost:3000/api/v1/users/reset-password/complete/{token_here}'
+        'http://localhost:3000/api/v1/reset-password/complete/{token_here}'
       );
       expect(res).to.be.a('object');
       expect(res)
@@ -135,7 +135,7 @@ describe('Mail', () => {
         .returns(Promise.reject(new Error('mock reject')));
       const res = await Mail.sendPasswordReset(
         'testingurl@authorshavenand.com',
-        'http://localhost:3000/api/v1/users/reset-password/complete/{token_here}'
+        'http://localhost:3000/api/v1/reset-password/complete/{token_here}'
       );
       expect(res).to.be.a('object');
       expect(res)
