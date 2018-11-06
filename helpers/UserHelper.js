@@ -111,6 +111,7 @@ class UserHelper {
     lastName,
     bio,
     imageUrl,
+    settings,
     createdAt,
     updatedAt
   }) {
@@ -122,6 +123,7 @@ class UserHelper {
       lastName,
       bio,
       imageUrl,
+      settings,
       createdAt,
       updatedAt
     };
