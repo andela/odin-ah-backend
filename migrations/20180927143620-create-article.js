@@ -24,6 +24,9 @@ module.exports = {
       readingTime: {
         type: Sequelize.STRING
       },
+      imageUrl: {
+        type: Sequelize.STRING
+      },
       isPrivate: {
         type: Sequelize.BOOLEAN,
         allowNull: true,

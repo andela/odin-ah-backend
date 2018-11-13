@@ -174,6 +174,13 @@ export function assertArrayResponse(response, length) {
   response.body.data.should.have.property('articles');
   response.body.data.articles.should.be.a('Array');
   response.body.data.articles.length.should.be.eql(length);
+
+  if (length) {
+    response.body.data.articles[0].should.have.property('title');
+    response.body.data.articles[0].should.have.property('body');
+    response.body.data.articles[0].should.have.property('description');
+    response.body.data.articles[0].should.have.property('slug');
+  }
 }
 
 /**

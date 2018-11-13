@@ -102,4 +102,44 @@ export default class Util {
   static generateRandomString(length) {
     return randomstring.generate(length);
   }
+
+  /**
+   *
+   * @param {User} user
+   * @return {string} returns user fullname if the first and last name exist otherwise it returns
+   * the username
+   */
+  static getFullName(user) {
+    const {
+      username, firstName, lastName
+    } = user;
+    let name = username;
+    if (firstName && lastName) {
+      name = `${firstName} ${lastName}`;
+    }
+    return name;
+  }
+
+  /**
+   *
+   * @param {string} tag
+   * @return {string} return error message
+   */
+  static validateTag(tag) {
+    const tagPattern = /^[a-zA-Z0-9\-\s&]{1,25}$/;
+
+    if (tag) {
+      tag = tag.trim();
+    }
+
+    if (!tag || tag.match(tagPattern)) return null;
+
+    let message;
+    if (tag.length > 25) {
+      message = 'Tag must not exceed 25 characters';
+    } else {
+      message = 'Tag can only contain number, alphabets, space or dash [ - ]';
+    }
+    return message;
+  }
 }

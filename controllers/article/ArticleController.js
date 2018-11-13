@@ -6,7 +6,9 @@ import ArticleHelper from '../../helpers/ArticleHelper';
 import HttpError from '../../helpers/exceptionHandler/httpError';
 import eventBus from '../../helpers/eventBus';
 
-const { Article, User, Tag } = db;
+const {
+  Article, User, Tag, Sequelize, sequelize
+} = db;
 
 /**
  * Crud controller for Article entity
@@ -27,9 +29,9 @@ export default class ArticleController {
       let article = await ArticleHelper.findArticleBySlug(slug);
       HttpError.throwErrorIfNull(article, 'Article not found');
 
-      const { user, tags } = article;
       let userId = null;
-      article = ArticleHelper.getArticleResponseData(user, article, tags);
+      const { user } = article;
+      article = await ArticleHelper.getFullArticleData(article);
       if (req.authData) {
         ({ userId } = req.authData);
       }
@@ -62,25 +64,42 @@ export default class ArticleController {
    */
   static async getArticles(req, res, next) {
     try {
-      const total = await Article.count();
+      const { tag } = req.query;
+      let where;
+      if (tag) {
+        where = Sequelize.where(Sequelize.fn('lower', Sequelize.col('name')), sequelize.fn('lower', tag));
+      }
+
+      const include = [{
+        model: Tag,
+        as: 'tags',
+        where
+      }, {
+        model: User,
+        as: 'user'
+      }
+      ];
+      let total = 0;
+      if (tag) {
+        total = await Article.count({
+          include,
+        });
+      } else {
+        total = await Article.count();
+      }
       const pageInfo = Util.getPageInfo(req.query.page, req.query.size, total);
       const {
         page, limit, offset, totalPages
       } = pageInfo;
-
       const allArticle = await Article.findAll({
         limit,
         offset,
-        include: [{
-          model: Tag,
-          as: 'tags'
-        },
-        {
-          model: User,
-          as: 'user'
-        }]
+        include,
+        order: [
+          ['createdAt', 'DESC']
+        ]
       });
-      const articles = ArticleHelper.getArticlesResponseData(allArticle);
+      const articles = await ArticleHelper.getArticlesResponseData(allArticle);
       return res.status(200)
         .json({
           data: {

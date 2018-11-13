@@ -1,6 +1,8 @@
 import db from '../models';
 
-const { Tag } = db;
+const {
+  Tag, ArticleTag, Sequelize, sequelize
+} = db;
 
 /**
  * @exports TagHelper
@@ -35,6 +37,41 @@ class TagHelper {
       });
     }
     return result;
+  }
+
+  /**
+   * @param {{offset: number, limit: number}} query
+   * @return {Promise<Array<Model>>} returns most used tags
+   */
+  static async getPopularTags(query = { offset: 0, limit: 10 }) {
+    const { offset, limit } = query;
+    const popularTags = await ArticleTag.findAll({
+      offset,
+      limit,
+      attributes: [[Sequelize.fn('COUNT', Sequelize.col('tagId')), 'tags'], 'tagId'],
+      group: ['tagId'],
+      order: [
+        [sequelize.fn('COUNT', sequelize.col('tagId')), 'DESC'],
+      ]
+    });
+    const popularTagIds = popularTags.map(tags => tags.tagId);
+    const tags = await Tag.findAll({
+      where: {
+        id: popularTagIds
+      }
+    });
+
+    return tags.map(tag => tag.name);
+  }
+
+  /**
+   *
+   * @param {string} filter
+   * @return {Promise<void>} Get list of tags that matches the filter
+   */
+  static async getTags({ limit, offset, where }) {
+    const tags = Tag.findAll({ limit, offset, where });
+    return tags.map(tag => tag.name);
   }
 }
 

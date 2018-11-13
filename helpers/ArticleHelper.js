@@ -6,7 +6,7 @@ import eventBus from './eventBus';
 import SeriesHelper from './SeriesHelper';
 
 const {
-  Article, Tag, User, ArticleTag
+  Article, Tag, User, ArticleTag, Like
 } = db;
 
 /**
@@ -23,7 +23,7 @@ class ArticleHelper {
    * @return {object} returns article field to update
    */
   static getUpdateField(req) {
-    const field = Util.extractFieldsFromObject(['body', 'title', 'tags', 'description'],
+    const field = Util.extractFieldsFromObject(['body', 'title', 'tags', 'description', 'imageUrl'],
       req.body);
     if (field.title) {
       field.slug = Util.createSlug(field.title);
@@ -41,12 +41,13 @@ class ArticleHelper {
    */
   static async saveArticle(req, slug, user, series = null) {
     const {
-      body, title, tags, description, published: isPublished, private: isPrivate
+      body, title, tags, description, imageUrl, published: isPublished, private: isPrivate
     } = req.body;
     const createArticle = Article.create({
       body,
       title,
       slug,
+      imageUrl,
       description,
       isPublished,
       isPrivate,
@@ -121,17 +122,19 @@ class ArticleHelper {
    * @param {User} user
    * @param {Article} article
    * @param {Array} tagList
+   * @param {object} [reaction]
    * @return {object} returns response data.
    */
-  static getArticleResponseData(user, article, tagList) {
+  static getArticleResponseData(user, article, tagList, reaction) {
     const {
-      title, body, description, slug, readingTime, isPublished, isPrivate, createdAt
+      title, body, description, slug, readingTime, isPublished, isPrivate, createdAt, imageUrl: url
     } = article;
     const { username, bio, imageUrl } = user;
     const tags = tagList.map(tag => tag.name);
 
     const author = {
       username,
+      name: Util.getFullName(user),
       bio,
       imageUrl
     };
@@ -140,12 +143,14 @@ class ArticleHelper {
       title,
       body,
       description,
+      imageUrl: url,
       readingTime,
       isPublished,
       isPrivate,
       createdAt,
       tags,
       author,
+      reaction
     };
   }
 
@@ -154,14 +159,26 @@ class ArticleHelper {
    * @param {Array}allArticle
    * @return {object} returns response data.
    */
-  static getArticlesResponseData(allArticle) {
-    const articles = [];
-    allArticle.forEach((article) => {
-      const { user, tags } = article;
-      articles.push(ArticleHelper.getArticleResponseData(user,
-        article, tags));
-    });
-    return articles;
+  static async getArticlesResponseData(allArticle) {
+    return Promise.all(allArticle.map(async article => ArticleHelper.getFullArticleData(article)));
+  }
+
+  /**
+   *
+   * @param {Article} article
+   * @return {Promise<object>} return article with it reaction details
+   */
+  static async getFullArticleData(article) {
+    const { user, tags } = article;
+    const [likeCount, dislikeCount] = await Promise.all([
+      ArticleHelper.getLikeCount(article.id, 'like'),
+      ArticleHelper.getLikeCount(article.id, 'dislike')]);
+    const reaction = {
+      likeCount,
+      dislikeCount
+    };
+    return (ArticleHelper.getArticleResponseData(user,
+      article, tags, reaction));
   }
 
   /**
@@ -172,19 +189,38 @@ class ArticleHelper {
    */
   static async findArticleBySlug(slug, include = null) {
     if (!include) {
-      include = [{
-        model: User,
-        as: 'user',
-      },
-      {
-        model: Tag,
-        as: 'tags'
-      }];
+      include = [
+        {
+          model: User,
+          as: 'user',
+        },
+        {
+          model: Tag,
+          as: 'tags'
+        }];
     }
+
+    // attributes: { include: [[sequelize.fn('COUNT', sequelize.col('Articles.id')), 'like']] },
 
     return Article.findOne({
       where: { slug },
       include
+    });
+  }
+
+  /**
+   *
+   * @param {number}articleId
+   * @param {'like' | 'dislike' }  status
+   * @return {Promise<number>} Returns the number of like or dislike of an article
+   *
+   */
+  static async getLikeCount(articleId, status) {
+    return Like.count({
+      where: {
+        articleId,
+        status,
+      }
     });
   }
 }

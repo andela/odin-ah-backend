@@ -12,6 +12,7 @@ import sentiment from './sentiment';
 import series from './series';
 import me from './me';
 import report from './report';
+import tags from './tag';
 
 const router = Router();
 
@@ -30,6 +31,7 @@ router.use(
   series,
   me,
   report,
+  tags,
   errorHandler
 );
 

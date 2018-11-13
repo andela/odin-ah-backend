@@ -135,6 +135,7 @@ class Authorization {
       url.startsWith('/auth')
       || (url.startsWith('/articles') && method.toUpperCase() === 'GET')
       || (url.startsWith('/series') && method.toUpperCase() === 'GET')
+      || (url.startsWith('/tags') && method.toUpperCase() === 'GET')
       || url.startsWith('/users/reset-password/')
       || url.startsWith('/search')
     );
