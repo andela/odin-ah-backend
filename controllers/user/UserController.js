@@ -5,7 +5,6 @@ import db from '../../models/index';
 import UserHelper from '../../helpers/UserHelper';
 import Util from '../../helpers/Util';
 import Mailer from '../../services/Mail';
-import config from '../../config';
 import HttpError from '../../helpers/exceptionHandler/httpError';
 
 const { User } = db;
@@ -32,8 +31,7 @@ export default class UserController {
       const { id, updatedAt } = user;
       const resetToken = Util.generateToken({ id, updatedAt },
         Util.dateToString(updatedAt));
-      const url = `${config.baseUrl}/reset-password/complete/${resetToken}`;
-      Mailer.sendPasswordReset(email, url)
+      Mailer.sendPasswordReset(email, resetToken)
         .then(({ status, message }) => {
           if (status !== 'success') {
             logger.error(message);

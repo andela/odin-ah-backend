@@ -36,12 +36,13 @@ class Mail {
    *
    * @static
    * @param {string} email
-   * @param {string} url
+   * @param {string} resetToken
    * @memberof Mail
    * @returns {res} response
    */
-  static async sendPasswordReset(email, url) {
+  static async sendPasswordReset(email, resetToken) {
     const subject = 'Password Reset Email';
+    const url = `${baseUrl}/reset-password/complete/${resetToken}`;
     const { message } = mailMessages.passwordReset(url);
     const messageInfo = MailHelper.buildMessage(email, subject, message);
     return Mail.sendMail(messageInfo);

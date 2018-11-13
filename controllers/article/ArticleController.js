@@ -26,22 +26,31 @@ export default class ArticleController {
   static async getArticle(req, res, next) {
     const { slug } = req.params;
     try {
-      let article = await ArticleHelper.findArticleBySlug(slug);
-      HttpError.throwErrorIfNull(article, 'Article not found');
-
+      const include = [
+        {
+          model: User,
+          as: 'user',
+        },
+        {
+          model: Tag,
+          as: 'tags'
+        }];
       let userId = null;
-      const { user } = article;
-      article = await ArticleHelper.getFullArticleData(article);
       if (req.authData) {
         ({ userId } = req.authData);
       }
+
+      let article = await ArticleHelper.findArticleBySlug(slug, include);
+      HttpError.throwErrorIfNull(article, 'Article not found');
+
+      const { user } = article;
+      article = await ArticleHelper.getFullArticleData(article, userId);
+
       eventBus.emit('onNewArticleView', {
         authorId: user.dataValues.id,
         readerId: userId,
         articleSlug: article.slug
       });
-
-
       return res.status(200)
         .json({
           article,
@@ -70,15 +79,22 @@ export default class ArticleController {
         where = Sequelize.where(Sequelize.fn('lower', Sequelize.col('name')), sequelize.fn('lower', tag));
       }
 
-      const include = [{
-        model: Tag,
-        as: 'tags',
-        where
-      }, {
-        model: User,
-        as: 'user'
-      }
+      const include = [
+        {
+          model: Tag,
+          as: 'tags',
+          where
+        },
+        {
+          model: User,
+          as: 'user'
+        }
       ];
+
+      let userId = null;
+      if (req.authData) {
+        ({ userId } = req.authData);
+      }
       let total = 0;
       if (tag) {
         total = await Article.count({
@@ -99,7 +115,7 @@ export default class ArticleController {
           ['createdAt', 'DESC']
         ]
       });
-      const articles = await ArticleHelper.getArticlesResponseData(allArticle);
+      const articles = await ArticleHelper.getArticlesResponseData(allArticle, userId);
       return res.status(200)
         .json({
           data: {

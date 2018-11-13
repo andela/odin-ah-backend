@@ -5,7 +5,6 @@ import ArticleController from '../../controllers/article/ArticleController';
 import PageValidator from '../../middlewares/validators/PageValidator';
 import Guard from '../../middlewares/Guard';
 import Roles from '../../config/role/index';
-import Authorization from '../../middlewares/Authorization';
 import HttpError from '../../helpers/exceptionHandler/httpError';
 import Util from '../../helpers/Util';
 
@@ -15,7 +14,7 @@ router.put('/:slug/disable', Guard.allow(Roles.admin), ArticleController.disable
 
 router.put('/:slug', ArticleValidator.updateArticleValidator, ArticleController.updateArticles);
 
-router.get('/:slug', Authorization.passAuthUser, ArticleController.getArticle);
+router.get('/:slug', ArticleController.getArticle);
 
 router.delete('/:slug', ArticleController.deleteArticle);
 
