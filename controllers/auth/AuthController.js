@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import validator from 'validator';
+import dotenv from 'dotenv';
 import Authorization from '../../middlewares/Authorization';
 import UserHelper from '../../helpers/UserHelper';
 import db from '../../models/index';
@@ -7,6 +8,8 @@ import Mail from '../../services/Mail';
 import eventBus from '../../helpers/eventBus';
 import HttpError from '../../helpers/exceptionHandler/httpError';
 import Util from '../../helpers/Util';
+
+dotenv.config();
 
 const { User } = db;
 
@@ -146,22 +149,12 @@ class AuthController {
       });
     }
     const {
-      id,
-      email,
-      username,
-      bio,
-      imageUrl
+      id
     } = req.user;
     const token = Authorization.generateToken({ id, role: 'user' });
-    res.status(200).json({
-      user: {
-        email,
-        token,
-        username,
-        bio,
-        imageUrl
-      }
-    });
+    const { NODE_ENV } = process.env;
+    const baseUrl = NODE_ENV === 'development' ? process.env.BASE_FRONTEND_DEV_URL : process.env.BASE_FRONTEND_API_URL;
+    res.redirect(`${baseUrl}/auth/social?token=${token}`);
   }
 
   /**

@@ -13,14 +13,7 @@ describe('GET /auth/facebook', () => {
       .request(server)
       .get('/api/v1/auth/facebook/callback')
       .end((err, res) => {
-        expect(res).to.have.status(200);
-        expect(res.body.user).to.have.property('token');
-        expect(res.body.user.token).to.not.be.null;
-        expect(res.body.user).to.have.property('imageUrl');
-        expect(res.body.user).to.have.property('bio');
-        expect(res.body.user)
-          .to.have.property('email')
-          .that.is.equal('johndoe@gmail.com');
+        expect(res).to.redirect;
         done();
       });
   });

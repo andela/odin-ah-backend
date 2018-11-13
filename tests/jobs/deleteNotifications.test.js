@@ -73,6 +73,6 @@ describe('deleteReadNotification', () => {
   });
   it('should delete all notifications 1 week after they have been read', async () => {
     const { deleted } = await deleteNotifications();
-    expect(deleted).to.equal(3);
+    expect(deleted).to.equal(4);
   });
 });

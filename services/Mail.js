@@ -6,6 +6,7 @@ import logger from '../helpers/logger';
 
 dotenv.config();
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const baseUrl = process.env.BASE_FRONTEND_URL;
 
 /**
  * @exports Mail
@@ -22,7 +23,7 @@ class Mail {
    */
   static async sendVerification(user) {
     const { email, token } = user;
-    const baseUrl = process.env.BASE_URL;
+
     const url = `${baseUrl}/auth/confirmation/${token}`;
     const subject = 'Confirmation Email';
     const { message } = mailMessages.signupVerification(email, url);
@@ -57,7 +58,6 @@ class Mail {
     const {
       recipientEmail, fromUsername, articleTitle, articleSlug
     } = eventInfo;
-    const baseUrl = process.env.BASE_URL;
     const url = `${baseUrl}/articles/${articleSlug}`;
     const subject = 'New Comment Notification';
     const { message } = mailMessages.sendCommentNotification(
@@ -81,7 +81,6 @@ class Mail {
     const {
       recipientEmail, fromUsername, articleTitle, articleSlug
     } = eventInfo;
-    const baseUrl = process.env.BASE_URL;
     const url = `${baseUrl}/articles/${articleSlug}`;
     const subject = 'New Like Notification';
     const { message } = mailMessages.sendLikeNotification(
@@ -139,7 +138,6 @@ class Mail {
     const {
       recipientsEmail, fromUsername, articleTitle, articleSlug
     } = eventInfo;
-    const baseUrl = process.env.BASE_URL;
     const url = `${baseUrl}/articles/${articleSlug}`;
     const subject = 'New Post Notification';
     const messagesInfo = recipientsEmail.map(async (email) => {
@@ -169,7 +167,6 @@ class Mail {
         recipient,
         sender: { username }
       } = articleShareData;
-      const baseUrl = process.env.BASE_URL;
       const url = `${baseUrl}/articles/${slug}`;
       const subject = title;
       const { message } = mailMessages.newArticleShare(username, url, title);
