@@ -15,7 +15,7 @@ class CommentHelper {
    */
   static getCommentResponseData(user, comment) {
     const {
-      id, body, type, createdAt
+      id, body, type, parentId, createdAt
     } = comment;
     const { username, bio, imageUrl } = user;
     const author = {
@@ -28,6 +28,7 @@ class CommentHelper {
       id,
       body,
       type,
+      parentId,
       createdAt,
       author
     };

@@ -1,5 +1,6 @@
 import Validator from '../../helpers/ValidatorHelper';
 import HttpError from '../../helpers/exceptionHandler/httpError';
+import Util from '../../helpers/Util';
 
 /**
  * @exports ArticleValidator
@@ -17,11 +18,14 @@ class ArticleValidator {
    */
   static createArticleValidator(req, res, next) {
     const {
-      body, title, description, tags,
+      body, title, description, tags, imageUrl
     } = req.body;
     let message = null;
     if (Validator.isEmpty(body) || Validator.isEmpty(title) || Validator.isEmpty(description)) {
       message = 'description, title or body field cannot be empty';
+    }
+    if (imageUrl && Validator.isEmpty(imageUrl)) {
+      message = 'imageUrl cannot be empty';
     }
 
     message = message || ArticleValidator.validateTitleLength(title)
@@ -65,7 +69,7 @@ class ArticleValidator {
    */
   static updateArticleValidator(req, res, next) {
     const {
-      body, title, description, tags, seriesId
+      body, title, description, tags, seriesId, imageUrl
     } = req.body;
     let message = null;
 
@@ -77,6 +81,10 @@ class ArticleValidator {
     }
     if (title && Validator.isEmpty(title)) {
       message = 'title field cannot be empty';
+    }
+
+    if (imageUrl && Validator.isEmpty(imageUrl)) {
+      message = 'imageUrl cannot be empty';
     }
     const seriesID = Number(seriesId);
     if (seriesId && Number.isNaN(seriesID)) {
@@ -174,10 +182,15 @@ class ArticleValidator {
    * @return {string} return a message if the array of tags contain an invalid tag.
    */
   static containsValidStrings(tags) {
-    const invalidStrings = tags.filter(tag => Validator.isEmpty(tag));
-    if (invalidStrings.length) {
+    const hasEmptyString = tags.filter(tag => Validator.isEmpty(tag));
+    const invalidStrings = tags.filter(tag => Util.validateTag(tag) !== null);
+    if (hasEmptyString.length) {
       return 'tags array contains an invalid tag';
     }
+    if (invalidStrings.length) {
+      return Util.validateTag(invalidStrings[0]);
+    }
+
     return null;
   }
 

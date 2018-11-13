@@ -6,6 +6,8 @@ import PageValidator from '../../middlewares/validators/PageValidator';
 import Guard from '../../middlewares/Guard';
 import Roles from '../../config/role/index';
 import Authorization from '../../middlewares/Authorization';
+import HttpError from '../../helpers/exceptionHandler/httpError';
+import Util from '../../helpers/Util';
 
 const router = Router();
 
@@ -19,7 +21,14 @@ router.delete('/:slug', ArticleController.deleteArticle);
 
 router.post('/', ArticleValidator.createArticleValidator, ArticleController.createArticle);
 
-router.get('/', PageValidator.validate, ArticleController.getArticles);
+router.get('/', PageValidator.validate, (req, res, next) => {
+  const { tag } = req.query;
+  const message = Util.validateTag(tag);
+  if (message) {
+    return next(new HttpError(message, 400));
+  }
+  next();
+}, ArticleController.getArticles);
 
 
 export default router;

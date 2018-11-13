@@ -24,9 +24,7 @@ describe('GET /auth/twitter', () => {
       .request(server)
       .get('/api/v1/auth/twitter/callback')
       .end((err, res) => {
-        expect(res.status).to.equal(422);
-        expect(res.body).to.have.property('errors');
-        expect(res.body.errors).to.have.property('message');
+        expect(res).to.redirect;
         done();
       });
   });

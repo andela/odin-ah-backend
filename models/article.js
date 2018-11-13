@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
       title: DataTypes.STRING,
       description: DataTypes.STRING,
       readingTime: DataTypes.STRING,
+      imageUrl: DataTypes.STRING,
       isPrivate: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
