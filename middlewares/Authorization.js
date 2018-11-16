@@ -117,7 +117,7 @@ class Authorization {
    * @static
    */
   static secureRoutes(req, res, next) {
-    if (Authorization.isAuthNotRequired(req)) {
+    if (!Authorization.hasToken(req) && Authorization.isAuthNotRequired(req)) {
       return next();
     }
 
@@ -139,6 +139,15 @@ class Authorization {
       || url.startsWith('/users/reset-password/')
       || url.startsWith('/search')
     );
+  }
+
+  /**
+   *
+   * @param {request} req
+   * @return {boolean} check if token is presence
+   */
+  static hasToken(req) {
+    return !ValidatorHelper.isEmpty(req.headers.authorization);
   }
 }
 

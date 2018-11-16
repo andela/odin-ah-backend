@@ -6,7 +6,7 @@ import eventBus from './eventBus';
 import SeriesHelper from './SeriesHelper';
 
 const {
-  Article, Tag, User, ArticleTag, Like
+  Article, Tag, User, Like, Bookmark, ArticleTag,
 } = db;
 
 /**
@@ -123,9 +123,10 @@ class ArticleHelper {
    * @param {Article} article
    * @param {Array} tagList
    * @param {object} [reaction]
+   * @param {boolean} [hasBookmarked]
    * @return {object} returns response data.
    */
-  static getArticleResponseData(user, article, tagList, reaction) {
+  static getArticleResponseData(user, article, tagList, reaction, hasBookmarked) {
     const {
       title, body, description, slug, readingTime, isPublished, isPrivate, createdAt, imageUrl: url
     } = article;
@@ -150,35 +151,81 @@ class ArticleHelper {
       createdAt,
       tags,
       author,
-      reaction
+      reaction,
+      hasBookmarked
     };
   }
 
   /**
    *
    * @param {Array}allArticle
+   * @param {number} [userId]
    * @return {object} returns response data.
    */
-  static async getArticlesResponseData(allArticle) {
-    return Promise.all(allArticle.map(async article => ArticleHelper.getFullArticleData(article)));
+  static async getArticlesResponseData(allArticle, userId) {
+    return Promise.all(allArticle
+      .map(async article => ArticleHelper.getFullArticleData(article, userId)));
   }
 
   /**
    *
    * @param {Article} article
+   * @param {number} [userId]
    * @return {Promise<object>} return article with it reaction details
    */
-  static async getFullArticleData(article) {
-    const { user, tags } = article;
-    const [likeCount, dislikeCount] = await Promise.all([
+  static async getFullArticleData(article, userId = null) {
+    const {
+      user, tags
+    } = article;
+    const values = [
       ArticleHelper.getLikeCount(article.id, 'like'),
-      ArticleHelper.getLikeCount(article.id, 'dislike')]);
+      ArticleHelper.getLikeCount(article.id, 'dislike')];
+    if (userId) {
+      const where = { userId, articleId: article.id };
+      values.push(Like.findOne({ where }));
+      values.push(Bookmark.findOne({ where }));
+    }
+    const [likeCount, dislikeCount, like, bookmark] = await Promise.all(values);
+    const {
+      hasReacted, hasBookmarked, status
+    } = ArticleHelper.extractReactionData(userId, like, bookmark);
     const reaction = {
       likeCount,
-      dislikeCount
+      dislikeCount,
+      hasReacted,
+      status,
     };
     return (ArticleHelper.getArticleResponseData(user,
-      article, tags, reaction));
+      article, tags, reaction, hasBookmarked));
+  }
+
+  /**
+   *
+   * @param {number} userId
+   * @param {Like} like
+   * @param {Bookmark} bookmark
+   * @return {{hasReacted: boolean, hasBookmarked: boolean, status: string}}
+   * returns bookmark and reaction status
+   */
+  static extractReactionData(userId, like, bookmark) {
+    let status, hasReacted, hasBookmarked;
+    if (userId) {
+      hasReacted = false;
+      hasBookmarked = false;
+      status = 'neutral';
+      if (like) {
+        ({ status } = like);
+        hasReacted = true;
+      }
+      if (bookmark) {
+        hasBookmarked = true;
+      }
+    }
+    return {
+      hasReacted,
+      hasBookmarked,
+      status
+    };
   }
 
   /**
@@ -199,8 +246,6 @@ class ArticleHelper {
           as: 'tags'
         }];
     }
-
-    // attributes: { include: [[sequelize.fn('COUNT', sequelize.col('Articles.id')), 'like']] },
 
     return Article.findOne({
       where: { slug },
