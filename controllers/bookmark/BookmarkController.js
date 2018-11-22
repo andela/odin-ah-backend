@@ -73,10 +73,21 @@ export default class BookmarkController {
 
     const article = allBookmarks.map((bookmark) => {
       const {
-        slug, description, body, readingTime
+        id, slug, title, description, imageUrl, body,
+        readingTime, hasBookmarked, createdAt, isPublished, isPrivate
       } = bookmark.article;
       return {
-        slug, description, body, readingTime
+        id,
+        slug,
+        title,
+        description,
+        imageUrl,
+        body,
+        readingTime,
+        hasBookmarked,
+        createdAt,
+        isPublished,
+        isPrivate
       };
     });
 
