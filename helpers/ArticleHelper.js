@@ -130,10 +130,13 @@ class ArticleHelper {
     const {
       title, body, description, slug, readingTime, isPublished, isPrivate, createdAt, imageUrl: url
     } = article;
-    const { username, bio, imageUrl } = user;
+    const {
+      username, bio, imageUrl, id
+    } = user;
     const tags = tagList.map(tag => tag.name);
 
     const author = {
+      id,
       username,
       name: Util.getFullName(user),
       bio,
