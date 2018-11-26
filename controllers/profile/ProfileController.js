@@ -4,7 +4,6 @@ import Util from '../../helpers/Util';
 import HttpError from '../../helpers/exceptionHandler/httpError';
 import eventBus from '../../helpers/eventBus';
 
-
 const { Follows, User } = db;
 
 /**
@@ -25,13 +24,15 @@ class ProfileController {
     const { email } = request.body;
 
     const [userResultById, userResultByEmail] = await Promise.all([
-      UserHelper.findById(userId), UserHelper.findByEmail(email)
+      UserHelper.findById(userId),
+      UserHelper.findByEmail(email)
     ]);
 
     HttpError.throwErrorIfNull(userResultById, 'User not found!');
 
     if (UserHelper.notSameUser(userResultById, userResultByEmail)) {
-      return response.status(409)
+      return response
+        .status(409)
         .json({ message: 'This Email already exists, choose another email' });
     }
     const updateFields = UserHelper.getUpdateFields(request);
@@ -44,11 +45,10 @@ class ProfileController {
       where: { id: userId }
     });
     const data = UserHelper.getUserProfileData(updatedUser);
-    return response.status(200)
-      .json({
-        message: 'Profile Updated Successfully!',
-        data
-      });
+    return response.status(200).json({
+      message: 'Profile Updated Successfully!',
+      data
+    });
   }
 
   /**
@@ -67,12 +67,11 @@ class ProfileController {
       const user = await User.findById(id);
       HttpError.throwErrorIfNull(user, 'User not found');
       const profile = UserHelper.profileListResponse(user);
-      res.status(200)
-        .json({
-          status: 'success',
-          message: 'Successfully retrieved user profile!',
-          profile
-        });
+      res.status(200).json({
+        status: 'success',
+        message: 'Successfully retrieved user profile!',
+        profile
+      });
     } catch (error) {
       next(error);
     }
@@ -95,26 +94,24 @@ class ProfileController {
       }
     });
     if (count) {
-      return res.status(409)
-        .json({
-          status: 'error',
-          message: `You are already following ${follower.username}`
-        });
+      return res.status(409).json({
+        status: 'error',
+        message: `You are already following ${follower.username}`
+      });
     }
     const response = await Follows.create({
       follower: id,
-      following: follower.id,
+      following: follower.id
     });
     eventBus.emit('onFollowEvent', {
       toUser: response.dataValues.following,
       fromUser: response.dataValues.follower,
       type: 'follow'
     });
-    return res.status(200)
-      .json({
-        status: 'success',
-        message: `You are now following ${follower.username}`
-      });
+    return res.status(200).json({
+      status: 'success',
+      message: `You are now following ${follower.username}`
+    });
   }
 
   /**
@@ -135,11 +132,10 @@ class ProfileController {
     });
     HttpError.throwErrorIfNull(follow, `You were not following ${follower.username}`);
     await follow.destroy({ force: true });
-    return res.status(200)
-      .json({
-        status: 'success',
-        message: `You have successfully unfollowed   ${follower.username}`
-      });
+    return res.status(200).json({
+      status: 'success',
+      message: `You have successfully unfollowed ${follower.username}`
+    });
   }
 
   /**
@@ -152,14 +148,10 @@ class ProfileController {
    */
   static async getUsersIFollow(req, res) {
     const { userId } = req.authData;
-    let users = await Follows.findAll({ where: { follower: userId } });
-    if (users.length === 0) {
-      return res.status(200)
-        .json({
-          status: 'error',
-          message: 'You are not following anyone yet'
-        });
-    }
+    const { id: otherUserId } = req.query;
+    let whereClause = { follower: userId };
+    if (otherUserId) whereClause = { follower: userId, following: otherUserId };
+    let users = await Follows.findAll({ where: whereClause });
     const id = users.map(user => user.following);
     const total = id.length;
     const pageInfo = Util.getPageInfo(req.query.page, req.query.size, total);
@@ -175,18 +167,19 @@ class ProfileController {
     });
     const usersIFollow = users.map(user => ({
       userId: user.id,
-      username: user.username
+      username: user.username,
+      bio: user.bio,
+      imageUrl: user.imageUrl
     }));
-    return res.status(200)
-      .json({
-        data: {
-          usersIFollow,
-          page,
-          totalPages,
-          size: usersIFollow.length,
-          total,
-        }
-      });
+    return res.status(200).json({
+      data: {
+        usersIFollow,
+        page,
+        totalPages,
+        size: usersIFollow.length,
+        total
+      }
+    });
   }
 
   /**
@@ -201,11 +194,10 @@ class ProfileController {
     const { userId } = req.authData;
     let users = await Follows.findAll({ where: { following: userId } });
     if (users.length === 0) {
-      return res.status(200)
-        .json({
-          status: 'error',
-          message: 'You do not have followers yet'
-        });
+      return res.status(200).json({
+        status: 'error',
+        message: 'You do not have followers yet'
+      });
     }
     const id = users.map(user => user.follower);
     const total = id.length;
@@ -222,18 +214,19 @@ class ProfileController {
     });
     const myFollowers = users.map(user => ({
       userId: user.id,
-      username: user.username
+      username: user.username,
+      bio: user.bio,
+      imageUrl: user.imageUrl
     }));
-    return res.status(200)
-      .json({
-        data: {
-          myFollowers,
-          page,
-          totalPages,
-          size: myFollowers.length,
-          total,
-        }
-      });
+    return res.status(200).json({
+      data: {
+        myFollowers,
+        page,
+        totalPages,
+        size: myFollowers.length,
+        total
+      }
+    });
   }
 
   /**
@@ -258,7 +251,11 @@ class ProfileController {
       });
       const {
         page, limit, offset, totalPages
-      } = Util.getPageInfo(req.query.page, req.query.size, profilesCount);
+      } = Util.getPageInfo(
+        req.query.page,
+        req.query.size,
+        profilesCount
+      );
       const authorsData = await User.findAll({
         where: {
           id: {
@@ -269,18 +266,17 @@ class ProfileController {
         offset
       });
       const authors = UserHelper.profileListArrayResponse(authorsData);
-      return res.status(200)
-        .json({
-          status: 'success',
-          message: 'Successfully retrieved list of authors.',
-          data: {
-            authors,
-            page,
-            totalPages,
-            size: authors.length,
-            total: profilesCount,
-          }
-        });
+      return res.status(200).json({
+        status: 'success',
+        message: 'Successfully retrieved list of authors.',
+        data: {
+          authors,
+          page,
+          totalPages,
+          size: authors.length,
+          total: profilesCount
+        }
+      });
     } catch (error) {
       next(error);
     }
@@ -301,16 +297,18 @@ class ProfileController {
 
     HttpError.throwErrorIfNull(user, 'User not found!');
 
-    const updatedUser = await user.update({ role }, {
-      where: { id }
-    });
+    const updatedUser = await user.update(
+      { role },
+      {
+        where: { id }
+      }
+    );
     const data = UserHelper.getUserProfileData(updatedUser);
-    return response.status(200)
-      .json({
-        status: 'success',
-        message: 'User role updated successfully!',
-        data
-      });
+    return response.status(200).json({
+      status: 'success',
+      message: 'User role updated successfully!',
+      data
+    });
   }
 }
 
