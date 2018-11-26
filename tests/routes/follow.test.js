@@ -4,10 +4,7 @@ import sgMail from '@sendgrid/mail';
 import server from '../..';
 import db from '../../models';
 import {
-  sampleUser,
-  sampleUser2,
-  sampleUser3,
-  sampleUser4
+  sampleUser, sampleUser2, sampleUser3, sampleUser4
 } from '../testHelpers/testLoginData';
 
 const { User } = db;
@@ -20,13 +17,14 @@ let userId4 = null;
 describe('POST /profiles/:userId/follow', () => {
   let mockSGMailSend;
   before(() => {
-    mockSGMailSend = sinon.stub(sgMail, 'send')
-      .returns(Promise.resolve([
+    mockSGMailSend = sinon.stub(sgMail, 'send').returns(
+      Promise.resolve([
         { statusCode: 202 },
         {
-          status: 'success',
+          status: 'success'
         }
-      ]));
+      ])
+    );
   });
   after(() => {
     mockSGMailSend.restore();
@@ -47,15 +45,16 @@ describe('POST /profiles/:userId/follow', () => {
     userId4 = response.dataValues.id;
   });
   before('login a user and get the token', async () => {
-    const { body } = await chai.request(server)
+    const { body } = await chai
+      .request(server)
       .post('/api/v1/auth/login')
       .send(sampleUser);
     userToken = body.user.token;
   });
 
-
   it('should return a 200 status code when users successfully follow another user', async () => {
-    const response = await chai.request(server)
+    const response = await chai
+      .request(server)
       .post(`/api/v1/profiles/${userId}/follow`)
       .set('Authorization', `Bearer ${userToken}`);
     expect(response).to.have.status(200);
@@ -63,7 +62,8 @@ describe('POST /profiles/:userId/follow', () => {
   });
 
   it('should return a 409 status code and a message when you follow a user that does not exit', async () => {
-    const response = await chai.request(server)
+    const response = await chai
+      .request(server)
       .post(`/api/v1/profiles/${userId}/follow`)
       .set('Authorization', `Bearer ${userToken}`);
     expect(response).to.have.status(409);
@@ -72,7 +72,8 @@ describe('POST /profiles/:userId/follow', () => {
   });
 
   it('should return a 404 when you try to follow a user you already following', async () => {
-    const response = await chai.request(server)
+    const response = await chai
+      .request(server)
       .post('/api/v1/profiles/000/follow')
       .set('Authorization', `Bearer ${userToken}`);
     expect(response).to.have.status(404);
@@ -80,7 +81,8 @@ describe('POST /profiles/:userId/follow', () => {
   });
 
   it('should return a 400 status code and a message when you enter an invalid ID', async () => {
-    const response = await chai.request(server)
+    const response = await chai
+      .request(server)
       .post('/api/v1/profiles/----236&Y*(Y&*U/follow')
       .set('Authorization', `Bearer ${userToken}`);
     expect(response).to.have.status(400);
@@ -90,7 +92,8 @@ describe('POST /profiles/:userId/follow', () => {
 
 describe('DELETE /profiles/:userId/follow', () => {
   it('should return a 200 status code when users successfully unfollow another user', async () => {
-    const response = await chai.request(server)
+    const response = await chai
+      .request(server)
       .delete(`/api/v1/profiles/${userId}/follow`)
       .set('Authorization', `Bearer ${userToken}`);
     expect(response).to.have.status(200);
@@ -98,7 +101,8 @@ describe('DELETE /profiles/:userId/follow', () => {
   });
 
   it('should return a 401 status code and a message when visitor try to unfollow a user', async () => {
-    const response = await chai.request(server)
+    const response = await chai
+      .request(server)
       .post('/api/v1/profiles/000/follow')
       .set('Authorization', `Bearer ${userToken}`);
     expect(response).to.have.status(404);
@@ -108,31 +112,46 @@ describe('DELETE /profiles/:userId/follow', () => {
 
 describe('GET /profiles/following', () => {
   before('login a user and get the new token', async () => {
-    const { body } = await chai.request(server)
+    const { body } = await chai
+      .request(server)
       .post('/api/v1/auth/login')
       .send(sampleUser3);
     userToken2 = body.user.token;
   });
   before('follow other users', async () => {
-    await chai.request(server)
+    await chai
+      .request(server)
       .post(`/api/v1/profiles/${userId3}/follow`)
       .set('Authorization', `Bearer ${userToken}`);
   });
   before('follow other users', async () => {
-    await chai.request(server)
+    await chai
+      .request(server)
       .post(`/api/v1/profiles/${userId4}/follow`)
       .set('Authorization', `Bearer ${userToken}`);
   });
   it('should return a 200 status code and a list of users I am following ', async () => {
-    const response = await chai.request(server)
+    const response = await chai
+      .request(server)
       .get('/api/v1/profiles/following')
       .set('Authorization', `Bearer ${userToken}`);
     expect(response).to.have.status(200);
-    expect(response.body.data).to.have.property('usersIFollow')
-      .that.is.not.empty;
+    expect(response.body.data).to.have.property('usersIFollow').that.is.not.empty;
+  });
+  it('should return a 200 status code and a list containing a single user specified in the query params', async () => {
+    const response = await chai
+      .request(server)
+      .get(`/api/v1/profiles/following?id=${userId4}`)
+      .set('Authorization', `Bearer ${userToken}`);
+    expect(response).to.have.status(200);
+    expect(response.body.data)
+      .to.have.property('usersIFollow')
+      .that.has.length(1);
+    expect(response.body.data.usersIFollow[0].userId).to.equal(userId4);
   });
   it('should return a 200 status code when user is not following anyone yet', async () => {
-    const response = await chai.request(server)
+    const response = await chai
+      .request(server)
       .get('/api/v1/profiles/following')
       .set('Authorization', `Bearer ${userToken2}`);
     expect(response).to.have.status(200);
@@ -141,29 +160,34 @@ describe('GET /profiles/following', () => {
 
 describe('GET /profiles/follower', () => {
   before('login a user and get the new token', async () => {
-    const { body } = await chai.request(server)
+    const { body } = await chai
+      .request(server)
       .post('/api/v1/auth/login')
       .send(sampleUser3);
     userToken2 = body.user.token;
   });
   before('follow other users', async () => {
-    await chai.request(server)
+    await chai
+      .request(server)
       .post(`/api/v1/profiles/${userId3}/follow`)
       .set('Authorization', `Bearer ${userToken}`);
   });
   before('follow other users', async () => {
-    await chai.request(server)
+    await chai
+      .request(server)
       .post(`/api/v1/profiles/${userId4}/follow`)
       .set('Authorization', `Bearer ${userToken}`);
   });
   it('should return a 200 status code and a list of users following me ', async () => {
-    const response = await chai.request(server)
+    const response = await chai
+      .request(server)
       .get('/api/v1/profiles/follower')
       .set('Authorization', `Bearer ${userToken}`);
     expect(response).to.have.status(200);
   });
   it('should return a 200 status code when user is not following anyone yet', async () => {
-    const response = await chai.request(server)
+    const response = await chai
+      .request(server)
       .get('/api/v1/profiles/follower')
       .set('Authorization', `Bearer ${userToken2}`);
     expect(response).to.have.status(200);
