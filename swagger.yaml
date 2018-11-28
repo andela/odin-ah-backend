@@ -2057,6 +2057,59 @@ definitions:
             type: string
             format: "date-time"
             example: "2018-11-18T09:44:37.777Z"
+          payload:
+            type: object
+            properties:
+              type:
+                type: string
+                example: like
+                enum:
+                - like
+                - comment
+                - newArticle
+                - follow
+
+              article:
+                type: object
+                description: This field is optional. It is only appears when the payload type is either 'newArticle', 'like', or 'comment'
+                properties:
+                  title:
+                    type: string
+                    example: sample-slug
+                  description:
+                    type: string
+                    example: a description
+                  imageUrl:
+                    type: string
+                    example: http://url-to-article-image
+                  author:
+                    type: object
+                    description: This field only appears when the payload type is 'newArticle'
+                    properties:
+                      id:
+                        type: number
+                        example: 1
+                      username:
+                        type: string
+                        example: dummy-user-1
+                      imageUrl:
+                        type: string
+                        example: http://url-to-profile-image
+
+              follower:
+                type: object
+                description: This field only appears when the payload type is  'follow', 'like', or 'comment'
+                properties:
+                  id:
+                    type: number
+                    example: 1
+                  username:
+                    type: string
+                    example: dummy-user-1
+                  imageUrl:
+                    type: string
+                    example: http://url-to-profile-image
+
 
   ProfileRequest:
     properties:

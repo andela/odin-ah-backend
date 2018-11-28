@@ -43,12 +43,14 @@ class Notification {
         id,
         isRead,
         message,
+        payload,
         createdAt,
       } = notification;
       return {
         id,
         isRead,
         message,
+        payload,
         createdAt
       };
     });
@@ -94,11 +96,12 @@ class Notification {
    * @return {object} returns response data.
    */
   async create(info) {
-    const { userId, message, type, isRead } = info;
+    const { userId, message, type, isRead, payload } = info;
     await Notifications.create({
       userId,
       message,
-      isRead
+      isRead,
+      payload,
     });
     if (this.io) {
       this.io.emit(`notification-${userId}`, {
