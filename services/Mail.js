@@ -3,6 +3,11 @@ import sgMail from '@sendgrid/mail';
 import MailHelper from '../helpers/MailHelper';
 import mailMessages from './mailMessage';
 import logger from '../helpers/logger';
+import resetPassword from './templates/resetPassword';
+import emailConfirmation from './templates/emailComfirmation';
+import interaction from './templates/interaction';
+import followTemplate from './templates/follow';
+import articleTemplate from './templates/article';
 
 dotenv.config();
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -22,12 +27,20 @@ class Mail {
    * @memberof Mail
    */
   static async sendVerification(user) {
-    const { email, token } = user;
+    const {
+      email: recipientEmail, firstName, lastName, username, token
+    } = user;
 
-    const url = `${baseUrl}/auth/confirmation/${token}`;
+    const recipientName = firstName || lastName || username;
+
+    const confirmationLink = `${baseUrl}/auth/confirmation/${token}`;
     const subject = 'Confirmation Email';
-    const { message } = mailMessages.signupVerification(email, url);
-    const messageInfo = MailHelper.buildMessage(email, subject, message);
+    const message = emailConfirmation({
+      recipientEmail,
+      recipientName,
+      confirmationLink
+    });
+    const messageInfo = MailHelper.buildMessage(recipientEmail, subject, message);
     return Mail.sendMail(messageInfo);
   }
 
@@ -35,16 +48,21 @@ class Mail {
    *
    *
    * @static
-   * @param {string} email
+   * @param {string} recipientEmail
+   * @param {string} recipientName
    * @param {string} resetToken
    * @memberof Mail
    * @returns {res} response
    */
-  static async sendPasswordReset(email, resetToken) {
+  static async sendPasswordReset(recipientEmail, recipientName, resetToken) {
     const subject = 'Password Reset Email';
-    const url = `${baseUrl}/reset-password/complete/${resetToken}`;
-    const { message } = mailMessages.passwordReset(url);
-    const messageInfo = MailHelper.buildMessage(email, subject, message);
+    const resetLink = `${baseUrl}/reset-password/complete/${resetToken}`;
+    const message = resetPassword({
+      recipientName,
+      resetLink,
+      recipientEmail,
+    });
+    const messageInfo = MailHelper.buildMessage(recipientEmail, subject, message);
     return Mail.sendMail(messageInfo);
   }
 
@@ -57,16 +75,18 @@ class Mail {
    */
   static async sendCommentNotification(eventInfo) {
     const {
-      recipientEmail, fromUsername, articleTitle, articleSlug
+      recipientEmail, recipientName, fromUsername, articleTitle, articleSlug
     } = eventInfo;
     const url = `${baseUrl}/articles/${articleSlug}`;
     const subject = 'New Comment Notification';
-    const { message } = mailMessages.sendCommentNotification(
+    const message = interaction({
       recipientEmail,
-      fromUsername,
-      articleTitle,
-      url
-    );
+      recipientName,
+      follower: fromUsername,
+      title: articleTitle,
+      link: url,
+      action: 'commented'
+    });
     const messageInfo = MailHelper.buildMessage(recipientEmail, subject, message);
     return Mail.sendMail(messageInfo);
   }
@@ -80,16 +100,18 @@ class Mail {
    */
   static async sendLikeNotification(eventInfo) {
     const {
-      recipientEmail, fromUsername, articleTitle, articleSlug
+      recipientEmail, recipientName, fromUsername, articleTitle, articleSlug
     } = eventInfo;
     const url = `${baseUrl}/articles/${articleSlug}`;
     const subject = 'New Like Notification';
-    const { message } = mailMessages.sendLikeNotification(
+    const message = interaction({
       recipientEmail,
-      fromUsername,
-      articleTitle,
-      url
-    );
+      follower: fromUsername,
+      title: articleTitle,
+      link: url,
+      action: 'liked',
+      recipientName
+    });
     const messageInfo = MailHelper.buildMessage(recipientEmail, subject, message);
     return Mail.sendMail(messageInfo);
   }
@@ -102,20 +124,26 @@ class Mail {
    * @memberof Mail
    */
   static async newFollowNotification(eventInfo) {
-    const { recipientEmail, fromUsername } = eventInfo;
+    const { recipientEmail, recipientName, fromUsername } = eventInfo;
     const subject = 'New Follow Notification';
-    const { message } = mailMessages.newFollowNotification(recipientEmail, fromUsername);
+    const link = `${baseUrl}/profile/${fromUsername}`;
+    const message = followTemplate({
+      recipientEmail,
+      recipientName,
+      follower: fromUsername,
+      link
+    });
     const messageInfo = MailHelper.buildMessage(recipientEmail, subject, message);
     return Mail.sendMail(messageInfo);
   }
 
   /**
-     * Method to send notification when user has a new follower
-     * @static
-     * @param {object} eventInfo
-     * @return {json} Returns json object
-     * @memberof Mail
-     */
+   * Method to send notification when user has a new follower
+   * @static
+   * @param {object} eventInfo
+   * @return {json} Returns json object
+   * @memberof Mail
+   */
   static async newFollowSeriesNotification(eventInfo) {
     const {
       recipientEmail,
@@ -137,18 +165,22 @@ class Mail {
    */
   static async followArticleNotification(eventInfo) {
     const {
-      recipientsEmail, fromUsername, articleTitle, articleSlug
+      recipients, author, articleTitle, articleSlug
     } = eventInfo;
-    const url = `${baseUrl}/articles/${articleSlug}`;
+    const link = `${baseUrl}/article/${articleSlug}`;
     const subject = 'New Post Notification';
-    const messagesInfo = recipientsEmail.map(async (email) => {
-      const { message } = mailMessages.followArticleNotification(
-        email,
-        fromUsername,
-        articleTitle,
-        url
+    const messagesInfo = recipients.map(async (user) => {
+      const { recipientEmail, recipientName } = user;
+      const message = articleTemplate(
+        {
+          recipientEmail,
+          recipientName,
+          author,
+          articleTitle,
+          link
+        }
       );
-      const messageInfo = MailHelper.buildMessage(email, subject, message);
+      const messageInfo = MailHelper.buildMessage(recipientEmail, subject, message);
       return Mail.sendMail(messageInfo);
     });
     return Promise.all(messagesInfo);

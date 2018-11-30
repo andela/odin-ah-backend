@@ -28,10 +28,13 @@ export default class UserController {
       const user = await UserHelper.findByEmail(email);
       HttpError.throwErrorIfNull(user, 'Oops! user not found');
 
-      const { id, updatedAt } = user;
+      const {
+        id, updatedAt, firstName, lastName, username
+      } = user;
+      const name = firstName || lastName || username;
       const resetToken = Util.generateToken({ id, updatedAt },
         Util.dateToString(updatedAt));
-      Mailer.sendPasswordReset(email, resetToken)
+      Mailer.sendPasswordReset(email, name, resetToken)
         .then(({ status, message }) => {
           if (status !== 'success') {
             logger.error(message);

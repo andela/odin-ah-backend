@@ -209,10 +209,18 @@ describe('Mail Notification service', () => {
     it('should send notification to all userA followers if userA publish an article', async () => {
       const mockSGMailSend = sinon.stub(sgMail, 'send')
         .returns(fakeSendGridResponse);
-      const recipientsEmail = ['victor@gmail.com', 'victor2@gmail.com'];
+      const recipients = [
+        {
+          recipientEmail: 'victor@gmail.com',
+          recipientName: 'dummy-1'
+        },
+        {
+          recipientEmail: 'victor@gmail.com',
+          recipientName: 'dummy-1'
+        }];
       const res = await Mail.followArticleNotification({
-        recipientsEmail,
-        fromUsername: 'victor',
+        recipients,
+        author: 'victor',
         articleTitle: 'how I to move like the wind',
         articleSlug: 'how-I-to-move-like-the-wind-j3L8YdDE',
       });
@@ -274,7 +282,7 @@ describe('Mail Notification service', () => {
       mockSGMailSend.restore();
     });
     it('should not send notification to the author when a user follows the author\'s,'
-        + ' only if newFollowerOnSeries settings is false', async () => {
+      + ' only if newFollowerOnSeries settings is false', async () => {
       const mockSGMailSend = sinon.stub(sgMail, 'send')
         .returns(fakeSendGridResponse);
       await user.update({

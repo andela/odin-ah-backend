@@ -6,6 +6,7 @@ export default (sequelize, DataTypes) => {
       defaultValue: false
     },
     message: DataTypes.STRING,
+    payload: DataTypes.JSONB,
   }, {});
   Notifications.associate = (models) => {
     Notifications.belongsTo(models.User, {

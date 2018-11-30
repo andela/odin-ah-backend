@@ -1,11 +1,29 @@
+import { emailTemplate, footerTemplate } from './templates';
+import { formatter } from './templates/util';
+import resetPasswordContent from './templates/resetPassword';
+
 const mailMessages = {
   signupVerification: (email, url) => ({
     message: `<b>This is a confirmation mail for ${email} from </b>  <h1> Authors Haven </h1> <br>
 Please follow this link <a href="${url}"> ${url} </a> to confirm your registration`
   }),
-  passwordReset: url => ({
-    message: `You requested requested a password reset, follow this link to continue <a href='${url}'>${url}</a>`
-  }),
+  passwordReset: ({ name, resetLink, recipientEmail }) => {
+    const context = {
+      name,
+      resetLink,
+      recipientEmail
+    };
+    const content = formatter(resetPasswordContent, context);
+    const footer = formatter(footerTemplate, context);
+    const email = formatter(emailTemplate, {
+      ...context,
+      footer,
+      content
+    });
+    return ({
+      message: `${email}`
+    });
+  },
 
   sendCommentNotification: (recipientEmail, fromUsername, articleTitle, articleSlug) => ({
     message: `<b>To ${recipientEmail}, <br><b>${fromUsername} </b>commented on your Article: ${articleTitle}. <br>Click <a href="${articleSlug}">HERE</a> to view their comment.`
